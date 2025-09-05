@@ -1,0 +1,14 @@
+.footer-container {
+    background-color: #1A1A1A;
+    height: 250px;
+    padding-left: 40px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.footer-social-icon {
+    transition: 0.3s;
+}
+.footer-social-icon:hover {
+    fill: #2e2e2e;
+}

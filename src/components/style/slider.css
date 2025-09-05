@@ -1,0 +1,76 @@
+.slider-container {
+  height: 100px;
+  width: 100%;
+  position: relative;
+}
+body {
+  padding: 0px;
+  margin: 0px;
+}
+html, body {
+  overflow-x: hidden;
+}
+.slider-view-box {
+  /* background-color: green; */
+  height: 150px;
+  width: 100%;
+  position: absolute;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30pt;
+}
+.slider-scroll-box {
+  /* background-color: blue; */
+  height: 150px;
+  width: 100%;
+  overflow: hidden;
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-size: 30pt;
+}
+.slider-scroll-box.center {
+  right: -100%;
+}
+.slider-scroll-box.right {
+  right: 0%;
+  transition: 0.5s;
+}
+.slider-view-box.left {
+  transform: translateX(100%);
+  transition: 0.5s;
+}
+.slider-view-box.right {
+  transform: translateX(-100%);
+  transition: 0.5s;
+}
+
+.slider-scroll-box.view {
+  display: flex;
+  transition: 0.5s;
+}
+.slider-scroll-box.view.left {
+  transform: translateX(-100%);
+}
+.slider-scroll-box.view.right {
+  transform: translateX(100%);
+}
+
+.slider-scroll-box.view.center {
+  right: 0%;
+  left: 0%;
+}
+
+.slider-button {
+  height: 60px;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  /* background-color: rgba(0, 0, 0, 0); */
+  border: none;
+}
