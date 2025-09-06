@@ -10,8 +10,10 @@ lerna-debug.log*
 node_modules
 nginx.conf
 sites-enabled
-server/files/eventImages/*
+uploads/*
 
+temp
+cache
 dist
 dist-ssr
 *.local
