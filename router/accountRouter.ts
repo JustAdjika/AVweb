@@ -84,13 +84,13 @@ router.post('/register', async(req, res) => {
             expiresAt: new Date(now.getTime() + 15*60*1000)
         })
 
-        const mailStatus = await sendMail(data.email, 'Подтверждение почты', `С вашей почты пытаются зарегистрироваться на сайте Alliance of Volunteers Kazakhstan. Никому не сообщайте код следующий код, если же это вы, введите его в поле на сайте. Ваш код подтверждения: ${confirmCode}`)
+        const mailStatus = await sendMail(data.email, 'Подтверждение почты', `С вашей почты пытаются зарегистрироваться на сайте Alliance of Volunteers Kazakhstan. Никому не сообщайте следующий код, если же это вы, введите его в поле на сайте. Ваш код подтверждения: ${confirmCode}`)
 
         if(!mailStatus.status) {
             return sendResponse(res, mailStatus.code, mailStatus.code === 500 ? mailStatus.message : undefined, undefined, 'module emailSend.ts')
         } 
 
-        return sendResponse(res, 200, `Попытка регистрации. Код подтверждения успешно отправлен на почту ${data.email}`, { recoveryToken: token })
+        return sendResponse(res, 200, `Попытка регистрации. Код подтверждения успешно отправлен на почту ${data.email}`, { confirmToken: token })
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, '/account/register')
     }
@@ -232,7 +232,8 @@ router.post('/emailconfirm/:token', async(req, res) => {
             const generateStatus = await generateQr(`${config.urlHost}/api/developer/account/qr/person/${accountObject.id}`, personalQrName, 'personal')
 
             if(generateStatus.status) {
-                return sendResponse(res, 200, `Попытка регистрации. Успешная регистрация пользователя ${accountObject.id}`, { userData: accountObject, sessionData: newSession } ) 
+                const newSessionModel = await SESSIONS_TAB.create(newSession as any) as any
+                return sendResponse(res, 200, `Попытка регистрации. Успешная регистрация пользователя ${accountObject.id}`, { userData: accountObject, sessionData: { key: key, id: newSessionModel.id } } ) 
             } else {
                 await accountObject.destroy()
                 return sendResponse(res, generateStatus.code, `Попытка регистрации. Регистрация прервана, ошибка генерации QR кода: ${generateStatus.message}`, undefined, 'module generateQr.ts') 
@@ -245,7 +246,7 @@ router.post('/emailconfirm/:token', async(req, res) => {
                     if(dataCheck([
                         [obj.code, 'string'], 
                         [obj.sessionKey, 'string'],
-                        [obj.sessionId, 'string'],
+                        [obj.sessionId, 'number'],
                     ])) {
                         return true
                     } else {
@@ -261,7 +262,7 @@ router.post('/emailconfirm/:token', async(req, res) => {
 
             const foundSessionModel: Types.Session = foundSession.get({ plain: true })
 
-            if(foundSessionModel.key !== data.sessionKey) return sendResponse(res, 403, 'Попытка подтверждения почты при смене. Ключ сессии неверный')
+            if(!await bcrypt.compare(data.sessionKey, foundSessionModel.key)) return sendResponse(res, 403, 'Попытка подтверждения почты при смене. Ключ сессии неверный')
 
             const foundAccount = await ACCOUNTS_TAB.findOne({ where: { id: foundSessionModel.userId }})
             if(!foundAccount) return sendResponse(res, 404, 'Попытка подтверждения почты при смене. Сессия не связана с пользователем')
@@ -313,6 +314,77 @@ router.post('/emailconfirm/:token', async(req, res) => {
     }
 })
 
+router.post('/emailChange', async(req, res) => {
+    try {
+        interface dataType {
+            sessionKey: string,
+            sessionId: number,
+            userId: number,
+            newEmail: string
+        }
+
+        const data = req.body
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.userId, 'number'], 
+                    [obj.sessionId, 'number'],
+                    [obj.sessionKey, 'string'],
+                    [obj.newEmail, 'string'],
+                ])) {
+                    return true
+                } else {
+                    return false
+                }
+            } else return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка смены почты. Данные указаны неверно')
+            
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: data.userId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка смены почты. ID целевого пользователя не найден') 
+
+        const foundSession = await SESSIONS_TAB.findOne({ where: { id: data.sessionId }})
+        if(!foundSession) return sendResponse(res, 404, 'Попытка смены почты. Сессия не найдена')
+            
+        const foundSessionModel: Types.Session = foundSession.get({ plain: true })
+        if(!await bcrypt.compare(data.sessionKey, foundSessionModel.key)) return sendResponse(res, 403, 'Попытка смены почты. Ключ сессии неверный')
+
+        if(foundSessionModel.userId !== data.userId) return sendResponse(res, 403, 'Попытка смены почты. Пользователь сессии и целевой пользователь не совпадают')
+
+
+
+        const token = crypto.randomBytes(32).toString('hex')
+        const confirmCode = crypto.randomBytes(3).toString('hex').toUpperCase()
+
+        const now = new Date()
+
+        const loadData = {
+            email: data.newEmail
+        }
+
+        EMAILCONFIRMS_TAB.create({
+            token: token,
+            code: confirmCode,
+            isRegister: false,
+            enteredData: loadData, 
+            expiresAt: new Date(now.getTime() + 15*60*1000)
+        })
+
+        const mailStatus = await sendMail(data.newEmail, 'Подтверждение почты', `Вашу почту пытаются привязать к аккаунту Alliance of Volunteers Kazakhstan. Никому не сообщайте следующий код, если же это вы, введите его в поле на сайте. Ваш код подтверждения: ${confirmCode}`)
+
+        if(!mailStatus.status) {
+            return sendResponse(res, mailStatus.code, mailStatus.code === 500 ? mailStatus.message : undefined, undefined, 'module emailSend.ts')
+        } 
+
+        return sendResponse(res, 200, `Попытка смены почты. Код подтверждения успешно отправлен на почту ${data.newEmail}`, { confirmToken: token })
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/emailChange')
+    }
+})
 
 
 export default router
