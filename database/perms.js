@@ -8,7 +8,7 @@ const PERMS_TAB = sequelize.define('perms', {
         primaryKey: true,
     },
     userId: { // ID пользователя
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
     },
     permission: { // Роль доступа (COORDINATOR / ADMIN)
         type: DataTypes.STRING,

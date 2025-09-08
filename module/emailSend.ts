@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 import { dataCheck } from './dataCheck.ts'
-import * as Types from './types.ts'
+import * as Types from './types/types.ts'
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',

@@ -1,4 +1,4 @@
-import * as Types from './types.ts'
+import * as Types from './types/types.ts'
 
 export function dataCheck(arr: Types.checkDataArr[]): boolean {
   let i = 0

@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid'
 
 // MODULES
-import * as Types from '../module/types.ts'
+import * as Types from '../module/types/types.ts'
 import { dataCheck } from '../module/dataCheck.ts'
 import { GetDateInfo } from '../module/formattingDate.ts'
 import { sendResponse } from '../module/response.ts'
@@ -17,6 +17,10 @@ import { Config } from '../config.ts'
 import ACCOUNTS_TAB from '../database/accounts.js'
 import EMAILCONFIRMS_TAB from '../database/emailConfirms.js'
 import SESSIONS_TAB from '../database/sessions.js'
+
+// MIDDLEWARES
+import sessionCheck from '../middleware/sessionCheck.ts'
+import permsCheck from '../middleware/permsCheck.ts'
 
 const router = express.Router()
 const config = new Config()
@@ -90,7 +94,7 @@ router.post('/register', async(req, res) => {
             return sendResponse(res, mailStatus.code, mailStatus.code === 500 ? mailStatus.message : undefined, undefined, 'module emailSend.ts')
         } 
 
-        return sendResponse(res, 200, `Попытка регистрации. Код подтверждения успешно отправлен на почту ${data.email}`, { confirmToken: token })
+        return sendResponse(res, 200, `Попытка регистрации. Успешная операция. Код подтверждения отправлен на почту ${data.email}`, { confirmToken: token })
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, '/account/register')
     }
@@ -233,7 +237,7 @@ router.post('/emailconfirm/:token', async(req, res) => {
 
             if(generateStatus.status) {
                 const newSessionModel = await SESSIONS_TAB.create(newSession as any) as any
-                return sendResponse(res, 200, `Попытка регистрации. Успешная регистрация пользователя ${accountObject.id}`, { userData: accountObject, sessionData: { key: key, id: newSessionModel.id } } ) 
+                return sendResponse(res, 200, `Попытка регистрации. Успешная операция. Регистрация пользователя ${accountObject.id}`, { userData: accountObject, sessionData: { key: key, id: newSessionModel.id } } ) 
             } else {
                 await accountObject.destroy()
                 return sendResponse(res, generateStatus.code, `Попытка регистрации. Регистрация прервана, ошибка генерации QR кода: ${generateStatus.message}`, undefined, 'module generateQr.ts') 
@@ -314,16 +318,15 @@ router.post('/emailconfirm/:token', async(req, res) => {
     }
 })
 
-router.post('/emailChange', async(req, res) => {
+router.post('/emailChange', sessionCheck, async(req, res) => {
     try {
         interface dataType {
-            sessionKey: string,
-            sessionId: number,
             userId: number,
             newEmail: string
         }
 
         const data = req.body
+        const userSession = res.locals.sessionCheck?.account as Types.Account
 
         function isValidData(data: unknown): data is dataType {
             if(typeof data === 'object' && data !== null) {
@@ -331,8 +334,6 @@ router.post('/emailChange', async(req, res) => {
 
                 if(dataCheck([
                     [obj.userId, 'number'], 
-                    [obj.sessionId, 'number'],
-                    [obj.sessionKey, 'string'],
                     [obj.newEmail, 'string'],
                 ])) {
                     return true
@@ -347,13 +348,7 @@ router.post('/emailChange', async(req, res) => {
         const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: data.userId } })
         if(!foundTargetUser) return sendResponse(res, 404, 'Попытка смены почты. ID целевого пользователя не найден') 
 
-        const foundSession = await SESSIONS_TAB.findOne({ where: { id: data.sessionId }})
-        if(!foundSession) return sendResponse(res, 404, 'Попытка смены почты. Сессия не найдена')
-            
-        const foundSessionModel: Types.Session = foundSession.get({ plain: true })
-        if(!await bcrypt.compare(data.sessionKey, foundSessionModel.key)) return sendResponse(res, 403, 'Попытка смены почты. Ключ сессии неверный')
-
-        if(foundSessionModel.userId !== data.userId) return sendResponse(res, 403, 'Попытка смены почты. Пользователь сессии и целевой пользователь не совпадают')
+        if(userSession.id !== data.userId) return sendResponse(res, 403, 'Попытка смены почты. Пользователь сессии и целевой пользователь не совпадают')
 
 
 
@@ -380,11 +375,83 @@ router.post('/emailChange', async(req, res) => {
             return sendResponse(res, mailStatus.code, mailStatus.code === 500 ? mailStatus.message : undefined, undefined, 'module emailSend.ts')
         } 
 
-        return sendResponse(res, 200, `Попытка смены почты. Код подтверждения успешно отправлен на почту ${data.newEmail}`, { confirmToken: token })
+        return sendResponse(res, 200, `Попытка смены почты. Успешная операция. Код подтверждения отправлен на почту ${data.newEmail}`, { confirmToken: token })
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, '/account/emailChange')
     }
 })
 
+router.post('/login', async(req, res) => {
+    try {
+        interface dataType {
+            email: string,
+            password: string
+        }
+
+        const data = req.body
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.email, 'string'], 
+                    [obj.password, 'string']
+                ])) {
+                    return true
+                } else {
+                    return false
+                }
+            } else return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка входа. Данные указаны неверно')
+
+        const foundAccount = await ACCOUNTS_TAB.findOne({ where: { email: data.email } })
+        if(!foundAccount) return sendResponse(res, 404, 'Попытка входа. Почта не найдена')
+
+        const foundAccountModel: Types.Account = foundAccount.get({ plain: true })
+        if(!await bcrypt.compare(data.password, foundAccountModel.password)) return sendResponse(res, 403, 'Попытка входа. Пароль неверный')
+    
+        const key = crypto.randomBytes(64).toString('hex')
+
+        const newSession: Types.Session = {
+            key: await bcrypt.hash(key, 10),
+            userId: foundAccountModel.id as number
+        }
+
+        const newSessionModel = await SESSIONS_TAB.create(newSession as any) as any
+        return sendResponse(res, 200, `Попытка входа. Успешная операция. Вход в ${foundAccountModel.id}`, { userData: foundAccountModel, sessionData: { key: key, id: newSessionModel.id } } ) 
+
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/login')
+    }
+})
+
+router.post('/data/search', permsCheck, sessionCheck, async(req, res) => {
+    try {
+        const id = req.query.id
+
+        if(!id || typeof id !== 'number') return sendResponse(res, 400, 'Попытка получения акканта. Данные указаны неверно')
+
+        const hunterSession = res.locals.sessionCheck?.account as Types.Account
+        const hunterPerms = res.locals.permsCheck?.perms as 'USER' | 'ADMIN' | 'COORDINATOR'
+
+        if(hunterPerms === 'USER') return sendResponse(res, 403, 'Попытка получения аккаунта. Недостаточно прав')
+
+        const foundData = await ACCOUNTS_TAB.findOne({ where: { id } })
+        if(!foundData) return sendResponse(res, 404, 'Попытка получения аккаунта. Пользователь не найден')
+        
+        const foundDataModel: Types.Account = foundData.get({ plain: true })
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка получения аккаунта. Успешная операция. Выдан пользователь ${foundDataModel.id} ${ hunterPerms === 'ADMIN' ? 'Администратору' : 'Координатору' } ${hunterSession.id}`, 
+            { data: foundDataModel } 
+        )
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/data/search')
+    }
+})
 
 export default router
