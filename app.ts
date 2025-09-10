@@ -29,6 +29,7 @@ import SESSIONS_TAB from './database/sessions.js'
 
 // ROUTERS
 import accountRouter from './router/accountRouter.ts'
+import formsRouter from './router/formsRouter.ts'
 
 // CONFIG
 
@@ -79,6 +80,7 @@ async function showMenu() {
 
                         server = app.listen(config.serverPort, '0.0.0.0', () => {
                             app.use('/api/developer/account', accountRouter)
+                            app.use('/api/developer/forms', formsRouter)
 
                             console.log('\x1b[37m |!-------- СЕРВЕР: \x1b[32mРАБОТА \x1b[37m-------!| \x1b[0m');
                             showMenu();

@@ -5,6 +5,7 @@ export class Config {
     host: string = 'localhost'
     backupPath: `/${string}` = '/backup'
     cachePath: `/${string}` = '/temp'
+    staffEmail: string = 'fenixxfns@gmail.com'
 
     get serverDomain() {
         return `${this.protocol}://${this.host}:${this.serverPort}` 
