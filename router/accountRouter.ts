@@ -7,9 +7,8 @@ import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 import { writeFile, unlink } from "fs/promises";
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, existsSync } from "fs";
 import { fileURLToPath } from 'url'
-import { createCanvas } from 'canvas'
 
 
 // MODULES
@@ -25,6 +24,8 @@ import { Config } from '../config.ts'
 import ACCOUNTS_TAB from '../database/accounts.js'
 import EMAILCONFIRMS_TAB from '../database/emailConfirms.js'
 import SESSIONS_TAB from '../database/sessions.js'
+import PASSWORDRECOVERS_TAB from '../database/passwordRecovers.js'
+import EQUIPMENTS_TAB from '../database/equipments.js'
 
 // MIDDLEWARES
 import sessionCheck from '../middleware/sessionCheck.ts'
@@ -247,13 +248,15 @@ router.post('/emailconfirm/:token', async(req, res) => {
             }
 
             // Генерация qr и проверка успеха
-            const generateStatus = await generateQr(`${config.urlHost}/api/developer/account/qr/person/${accountObject.id}`, personalQrName, 'personal')
+            const generateStatus = await generateQr(`${config.serverDomain}/api/developer/account/qr/person/${accountObject.id}`, personalQrName, 'personal')
 
             if(generateStatus.status) {
                 const newSessionModel = await SESSIONS_TAB.create(newSession as any) as any
+                await foundConfirm.destroy()
                 return sendResponse(res, 200, `Попытка регистрации. Успешная операция. Регистрация пользователя ${accountObject.id}`, { userData: accountObject, sessionData: { key: key, id: newSessionModel.id } } ) 
             } else {
                 await accountObject.destroy()
+                await foundConfirm.destroy()
                 return sendResponse(res, generateStatus.code, `Попытка регистрации. Регистрация прервана, ошибка генерации QR кода: ${generateStatus.message}`, undefined, 'module generateQr.ts') 
             }
         } else { // При смене почты
@@ -324,6 +327,8 @@ router.post('/emailconfirm/:token', async(req, res) => {
             }
 
             const updatedUser = await foundAccount.update({ email: parsedData.email })
+
+            await foundConfirm.destroy()
 
             return sendResponse(res, 200, `Попытка подтверждения почты при смене. Успешная операция на ${parsedData.email}`, { updateData: updatedUser })
         }
@@ -468,7 +473,7 @@ router.post('/data/search', sessionCheck, permsCheck, async(req, res) => {
     }
 })
 
-router.post('/qr/scan/personal/:id', sessionCheck, permsCheck, async(req, res) => {
+router.post('/qr/person/:id', sessionCheck, permsCheck, async(req, res) => {
     try {
         const id = Number(req.params.id)
 
@@ -586,7 +591,7 @@ router.post('/idCard/upload', sessionCheck, async(req, res) => {
         const idCard = files[0]
         const ext = path.extname(idCard.name)
         const generatedId = uuidv4()
-        const fileName = `tempIdCard_${generatedId}.png`
+        const fileName = `idCard_${generatedId}.png`
 
         const idCardPath = __dirname + `/../uploads/idCard/`
 
@@ -603,6 +608,354 @@ router.post('/idCard/upload', sessionCheck, async(req, res) => {
         return sendResponse(res, 200, `Попытка загрузки удостоверения. Успешная операция. Удостоверение ${ sessionAccount.account.id } загружено и ждет подтверждения`)
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, '/account/idCard/upload')
+    }
+})
+
+router.post('/idCard/download/:id', sessionCheck, permsCheck, async(req, res) => {
+    try {
+        const sessionAccount = res.locals.sessionCheck as Types.localSessionCheck
+        const perms = res.locals.permsCheck as Types.localPermsCheck
+        const userCardId = Number(req.params.id)
+
+        if(!sessionAccount) return sendResponse(res, 500, 'Попытка скачивания удостоверения. MW не вернул необходимые данные')
+        if(!userCardId || isNaN(userCardId)) return sendResponse(res, 400, 'Попытка скачивания удостоверения. Данные указаны неверно')
+
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: userCardId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка скачивания удостоверения. Целевой пользователь не найден')
+
+        const foundTargetUserModel: Types.Account = foundTargetUser.get({ plain: true })
+        const filePath = __dirname + `/../uploads/idCard/${foundTargetUserModel.idCardId}`
+
+        res.status(200).download(filePath, async (err) => {
+            if (err) {
+                sendResponse(res, 500, err.message, undefined, '/account/idCard/download (res.download)')
+            } else {
+                console.log(`[${GetDateInfo().all}] Попытка скачивания удостоверения. Успешная операция. Удостоверение ${ userCardId } скачано ${ perms.perms === 'ADMIN' ? 'Администратором' : 'Координатором' } ${ sessionAccount.account.id }`)
+            }
+        });
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/idCard/download')
+    }
+})
+
+router.put('/info/personal/edit', masterKeyCheck, async(req, res) => {
+    try {
+        interface dataType {
+            userId: number,
+            personalInfo: Types.personalData
+        }
+
+        const data = req.body
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.userId, 'number'], 
+                    [obj.personalInfo, 'object']
+                ])) {
+                    const innerObj = obj.personalInfo as Record<string, unknown>
+                    
+                    if(dataCheck([
+                        [innerObj.name, 'string'],
+                        [innerObj.birthday, 'string'],
+                        [innerObj.iin, 'string']
+                    ]) && (innerObj.region === 'almaty' || innerObj.region === 'astana') ) {
+                        return true
+                    }
+                } 
+            }
+            return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка изменения лич инфо. Данные указаны неверно')
+        
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: data.userId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка изменения лич инфо. Целевой пользователь не найден')
+
+        await foundTargetUser.update({ 
+            name: data.personalInfo.name,
+            birthday: data.personalInfo.birthday,
+            iin: data.personalInfo.iin,
+            region: data.personalInfo.region
+        })
+
+        return sendResponse(res, 200, `Попытка изменения лич инфо. Успешная операция. ЛИ Пользователя ${ data.userId } изменена MASTERKEY`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/info/personal/edit')
+    }
+})
+
+router.put('/info/contact/edit', sessionCheck, async(req, res) => {
+    try {
+        interface dataType {
+            userId: number,
+            contactInfo: Types.contactData
+        }
+
+        const data = req.body
+        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'Попытка изменения контакт инфо. MW не вернул необходимые данные')
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.userId, 'number'], 
+                    [obj.contactInfo, 'object']
+                ])) {
+                    const innerObj = obj.contactInfo as Record<string, unknown>
+                    
+                    if((typeof innerObj.contactKaspi === 'string' || innerObj.contactKaspi === null) && (typeof innerObj.contactWhatsapp === 'string' || innerObj.contactWhatsapp === null) ) {
+                        return true
+                    }
+                } 
+            }
+            return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка изменения контакт инфо. Данные указаны неверно')
+
+        if(session.account.id !== data.userId) return sendResponse(res, 403, 'Попытка изменения контакт инфо. Сессия не связана с целевым пользователем')
+        
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: data.userId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка изменения контакт инфо. Целевой пользователь не найден')
+
+        await foundTargetUser.update({ 
+            contactKaspi: data.contactInfo.contactKaspi,
+            contactWhatsapp: data.contactInfo.contactWhatsapp
+        })
+
+        return sendResponse(res, 200, `Попытка изменения контакт инфо. Успешная операция. Пользователь ${ data.userId } сменил свою КИ`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/info/contact/edit')
+    }
+})
+
+router.patch('/password/change', sessionCheck, async(req, res) => {
+    try {
+        interface dataType {
+            userId: number,
+            oldPassword: string,
+            newPassword: string
+        }
+
+        const data = req.body
+        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'Попытка изменения пароля. MW не вернул необходимые данные')
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.userId, 'number'], 
+                    [obj.oldPassword, 'string'],
+                    [obj.newPassword, 'string'],
+                ])) {
+                    return true
+                } 
+            }
+            return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка изменения пароля. Данные указаны неверно')
+
+        if(session.account.id !== data.userId) return sendResponse(res, 403, 'Попытка изменения пароля. Сессия не связана с целевым пользователем')
+        
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: data.userId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка изменения пароля. Целевой пользователь не найден')
+
+        const foundTargetUserModel: Types.Account = foundTargetUser.get({ plain: true })
+        if( !await bcrypt.compare( data.oldPassword, foundTargetUserModel.password ) ) return sendResponse(res, 403, 'Попытка изменения пароля. Пароль неверный')
+
+        const newHashPass = await bcrypt.hash(data.newPassword, 10)
+
+        await foundTargetUser.update({ password: newHashPass })
+
+        return sendResponse(res, 200, `Попытка изменения пароля. Успешная операция. Пользователь ${ data.userId } сменил свой пароль`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/password/change')
+    }
+})
+
+router.post('/password/recovery/sendlink', async(req, res) => {
+    try {
+        interface dataType {
+            email: string,
+        }
+
+        const data = req.body
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.email, 'string'], 
+                ])) {
+                    return true
+                } 
+            }
+            return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка восстановления пароля (1 stage). Данные указаны неверно')
+        
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { email: data.email } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка восстановления пароля (1 stage). Целевой пользователь не найден')
+
+        const foundTargetUserModel: Types.Account = foundTargetUser.get({ plain: true })
+        const newToken = crypto.randomBytes(32).toString('hex')
+        const now = new Date()
+
+        const newRecovery = await PASSWORDRECOVERS_TAB.create({
+            token: newToken,
+            userId: foundTargetUserModel.id,
+            expiresAt: new Date(now.getTime() + 15*60*1000),
+        })
+
+        sendMail(
+            data.email, 
+            `Восстановление пароля`, 
+            `Пароль вашего аккаунта на сайте Alliance of Volunteers пытаются сменить. Если это вы, перейдите по ссылке и введите новый пароль. Ссылка: ${config.clientDomain}/passwordRecovery?token=${newToken}`
+        )
+
+        return sendResponse(res, 200, `Попытка восстановления пароля (1 stage). Успешная операция. Сообщение с ссылкой отправлено на почту ${ data.email }`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/password/recovery/sendlink')
+    }
+})
+
+router.post('/password/recovery/end', async(req, res) => {
+    try {
+        interface dataType {
+            newPassword: string
+        }
+
+        const data = req.body
+        const token = req.query.token
+
+        function isValidData(data: unknown): data is dataType {
+            if(typeof data === 'object' && data !== null) {
+                const obj = data as Record<string, unknown>
+
+                if(dataCheck([
+                    [obj.newPassword, 'string'], 
+                ])) {
+                    return true
+                } 
+            }
+            return false
+        }
+
+        if(!isValidData(data)) return sendResponse(res, 400, 'Попытка восстановления пароля (2 stage). Данные указаны неверно')
+
+        const foundRecovery = await PASSWORDRECOVERS_TAB.findOne({ where: { token } })
+        if(!foundRecovery) return sendResponse(res, 404, 'Попытка восстановления пароля (2 stage). Токен не найден')
+        
+        const foundRecoveryModel: Types.PasswordRecovery = foundRecovery.get({ plain: true })
+        
+        const foundTargetUser = await ACCOUNTS_TAB.findOne({ where: { id: foundRecoveryModel.userId } })
+        if(!foundTargetUser) return sendResponse(res, 404, 'Попытка восстановления пароля (2 stage). Целевой пользователь не найден')
+
+        const foundTargetUserModel: Types.Account = foundTargetUser.get({ plain: true })
+        const newPassword = await bcrypt.hash(data.newPassword, 10)
+
+        const now = new Date()
+        if(now > foundRecoveryModel.expiresAt) return sendResponse(res, 498, 'Попытка восстановления пароля (2 stage). Токен просрочен')
+
+        await foundTargetUser.update({ password: newPassword })
+
+        await foundRecovery.destroy()
+
+        return sendResponse(res, 200, `Попытка восстановления пароля (2 stage). Успешная операция. Пароль пользователя ${ foundTargetUserModel.id } изменен`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/password/recovery/end')
+    }
+})
+
+router.post('/logout', sessionCheck, async(req, res) => {
+    try {
+        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'Попытка выхода. MW не вернул необходимые данные')
+
+        const foundSession = await SESSIONS_TAB.findOne({ where: { id: session.session.id } })
+        if(!foundSession) return sendResponse(res, 500, 'Попытка выхода. Сессии не существует')
+
+        await foundSession.destroy()
+
+        return sendResponse(res, 200, `Попытка выхода. Успешная операция. Удаление сессии ${ session.session.id } связанный с аккаунтом ${ session.account.id }`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/logout')
+    }
+})
+
+router.post('/equipment/get', sessionCheck, async(req, res) => {
+    try {
+        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'Попытка получения экипа. MW не вернул необходимые данные')
+
+        
+        const newToken = crypto.randomBytes(32).toString('hex')
+        const hashToken = await bcrypt.hash(newToken, 10)
+        const qrId = uuidv4()
+        const now = new Date()
+
+        const lastUserEquip = await EQUIPMENTS_TAB.findOne({
+            where: { userId: session.account.id },
+            order: [['createdAt', 'DESC']]
+        }) 
+
+        if(lastUserEquip) {
+            const lastUserEquipModel: Types.Equipment = lastUserEquip.get({ plain: true })
+
+            if(lastUserEquipModel.expiresAt > now) {
+                return sendResponse(res, 200, `Попытка получения экипа. Успешная операция. Выдан старый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId: lastUserEquipModel.qrId })
+            } 
+        }
+
+        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/account/qr/equipment/get?token=${newToken}`, `getEquip_${qrId}.png`, 'getEquip')
+
+        if(!qr.status) return sendResponse(res, qr.code, qr.message)
+
+        const newEquip = await EQUIPMENTS_TAB.create({
+            token: hashToken,
+            userId: session.account.id,
+            providerId: null,
+            eventId: null,
+            day: null,
+            expiresAt: new Date(now.getTime() + 15*60*1000),
+            status: 'REQUEST',
+            qrId: `getEquip_${qrId}.png`,
+        })
+
+        return sendResponse(res, 200, `Попытка получения экипа. Успешная операция. Сгенерирован новый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId: `getEquip_${qrId}.png` })
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/equipment/get')
+    }
+})
+
+router.post('/equipment/return', sessionCheck, async(req, res) => {
+    try {
+        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'Попытка сдачи экипа. MW не вернул необходимые данные')
+
+        const qrId = uuidv4()
+        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/account/qr/equipment/return?userId=${ session.account.id }`, `returnEquip_${qrId}.png`, 'returnEquip')
+        
+        if(!qr.status) return sendResponse(res, qr.code, qr.message)
+
+        return sendResponse(res, 200, `Попытка сдачи экипа. Успешная операция. Сгенерирован новый QR код для сдачи экипа пользователя ${ session.account.id }`, { qrId: `returnEquip_${qrId}.png` })
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/equipment/return')
     }
 })
 

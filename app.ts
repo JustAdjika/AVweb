@@ -77,7 +77,7 @@ async function showMenu() {
                         console.log('\x1b[33mТаблицы успешно созданы!\x1b[0m')
                         dotenv.config()
 
-                        server = app.listen(config.port, '0.0.0.0', () => {
+                        server = app.listen(config.serverPort, '0.0.0.0', () => {
                             app.use('/api/developer/account', accountRouter)
 
                             console.log('\x1b[37m |!-------- СЕРВЕР: \x1b[32mРАБОТА \x1b[37m-------!| \x1b[0m');

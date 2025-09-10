@@ -47,6 +47,25 @@ export interface MasterKey {
     expiresAt: Date
 }
 
+export interface PasswordRecovery {
+    id?: number,
+    token: string,
+    userId: number,
+    expiresAt: Date
+}
+
+export interface Equipment {
+    id?: number, 
+    token: string,
+    userId: number,
+    providerId: number | null,
+    eventId: number | null,
+    day: string | null,
+    expiresAt: Date,
+    status: 'REQUEST' | 'GET' | 'RETURN',
+    qrId: string
+}
+
 
 
 
@@ -77,6 +96,18 @@ export interface publicAccount {
     supervisorId: number | null
 }
 
+export interface personalData {
+    name: string,
+    birthday: string,
+    iin: string,
+    region: region
+}
+
+export interface contactData {
+    contactKaspi: string | null,
+    contactWhatsapp: string | null
+}
+
 
 
 
@@ -105,7 +136,11 @@ export interface MasterKeyData {
 }
 
 export interface localSessionCheck {
-    account: Account
+    account: Account,
+    session: {
+        key: string,
+        id: number
+    }
 }
 
 export interface localPermsCheck {

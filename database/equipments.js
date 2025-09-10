@@ -10,6 +10,9 @@ const EQUIPMENTS_TAB = sequelize.define('equipments', {
     token: { // Токен QR кода пользователя
         type: DataTypes.STRING,
     },
+    qrId: {
+        type: DataTypes.STRING,
+    },
     userId: { // ID получившего экип
         type: DataTypes.INTEGER,
     },
@@ -25,7 +28,7 @@ const EQUIPMENTS_TAB = sequelize.define('equipments', {
     expiresAt: { // Дата истечения действия QR кода пользователя 
         type: DataTypes.DATE,
     },
-    status: { // Статус экипировки (REQUEST - Активный QR код/ GET - Выдана экип / RETURN - Возвращена экип / EXPIRE - Срок QR прошел)
+    status: { // Статус экипировки (REQUEST - Активный QR код/ GET - Выдана экип / RETURN - Возвращена экип)
         type: DataTypes.STRING,
     }
 });

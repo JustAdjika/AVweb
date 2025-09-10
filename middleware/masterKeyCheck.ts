@@ -16,9 +16,6 @@ const masterKeyCheck = async(req, res, next) => {
         const foundKeyModel: Types.MasterKey = foundKey.get({ plain: true })
         if(foundKeyModel.expiresAt < now) return sendResponse(res, 498, 'MW masterKeyCheck. Мастер ключ просрочен')
 
-        console.log(foundKeyModel.expiresAt)
-        console.log(now)
-
         next()
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, 'Middleware masterKeyCheck.ts')

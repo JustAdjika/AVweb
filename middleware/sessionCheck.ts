@@ -45,7 +45,11 @@ const sessionCheck = async(req, res, next) => {
         const foundAccountModel: Types.Account = foundAccount.get({ plain: true })
         
         res.locals.sessionCheck = {
-            account: foundAccountModel
+            account: foundAccountModel,
+            session: {
+                key: data.sessionKey,
+                id: data.sessionId
+            }
         }
 
         next()
