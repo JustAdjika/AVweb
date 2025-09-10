@@ -1,8 +1,16 @@
 // DEPENDENCIES
 import express from 'express'
+import fileUpload from 'express-fileupload'
+import type { UploadedFile } from 'express-fileupload'
 import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid'
+import path from 'path'
+import { writeFile, unlink } from "fs/promises";
+import { mkdirSync, existsSync, readFileSync, writeFileSync } from "fs";
+import { fileURLToPath } from 'url'
+import { createCanvas } from 'canvas'
+
 
 // MODULES
 import * as Types from '../module/types/types.ts'
@@ -21,9 +29,15 @@ import SESSIONS_TAB from '../database/sessions.js'
 // MIDDLEWARES
 import sessionCheck from '../middleware/sessionCheck.ts'
 import permsCheck from '../middleware/permsCheck.ts'
+import masterKeyCheck from '../middleware/masterKeyCheck.ts'
 
 const router = express.Router()
 const config = new Config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+router.use(fileUpload())
 
 router.post('/register', async(req, res) => {
     try {
@@ -428,11 +442,11 @@ router.post('/login', async(req, res) => {
     }
 })
 
-router.post('/data/search', permsCheck, sessionCheck, async(req, res) => {
+router.post('/data/search', sessionCheck, permsCheck, async(req, res) => {
     try {
-        const id = req.query.id
+        const id = Number(req.query.id)
 
-        if(!id || typeof id !== 'number') return sendResponse(res, 400, 'Попытка получения акканта. Данные указаны неверно')
+        if(!id || isNaN(id)) return sendResponse(res, 400, 'Попытка получения акканта. Данные указаны неверно')
 
         const hunterSession = res.locals.sessionCheck?.account as Types.Account
         const hunterPerms = res.locals.permsCheck?.perms as 'USER' | 'ADMIN' | 'COORDINATOR'
@@ -451,6 +465,144 @@ router.post('/data/search', permsCheck, sessionCheck, async(req, res) => {
         )
     } catch (e) {
         return sendResponse(res, 500, e.message, undefined, '/account/data/search')
+    }
+})
+
+router.post('/qr/scan/personal/:id', sessionCheck, permsCheck, async(req, res) => {
+    try {
+        const id = Number(req.params.id)
+
+        if(!id || isNaN(id)) return sendResponse(res, 400, 'Попытка сканирования лич QR. Данные указаны неверно')
+
+        const hunterSession = res.locals.sessionCheck?.account as Types.Account
+        const hunterPerms = res.locals.permsCheck?.perms as 'USER' | 'ADMIN' | 'COORDINATOR'
+
+        if(hunterPerms === 'USER') return sendResponse(res, 403, 'Попытка сканирования лич QR. Недостаточно прав')
+
+        const foundData = await ACCOUNTS_TAB.findOne({ where: { id } })
+        if(!foundData) return sendResponse(res, 404, 'Попытка сканирования лич QR. Пользователь не найден')
+        
+        const foundDataModel: Types.Account = foundData.get({ plain: true })
+
+        const { password, ...publicData } = foundDataModel // publicData без пароля
+
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка сканирования лич QR. Успешная операция. Сканирован пользователь ${foundDataModel.id} ${ hunterPerms === 'ADMIN' ? 'Администратором' : 'Координатором' } ${hunterSession.id}`, 
+            { data: publicData } 
+        )
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/data/qr/scan/personal')
+    }
+})
+
+router.delete('/:id', masterKeyCheck, async(req, res) => {
+    try {
+        const id = Number(req.params.id)
+
+        if(!id || isNaN(id)) return sendResponse(res, 400, 'Попытка удаления аккаунта. Данные указаны неверно')
+
+        const foundAccount = await ACCOUNTS_TAB.findOne({ where: { id } })
+        if(!foundAccount) return sendResponse(res, 404, 'Попытка удаления аккаунта. Пользователь не найден')
+
+        const foundAccountModel: Types.Account = foundAccount.get({ plain: true })
+        
+        const backupData = foundAccount.get({ plain: true })
+        const backupName = `accountBackup_${backupData.id}.json`
+        
+        const backupPath = __dirname + `/..${config.backupPath}/` + backupName
+
+        await writeFile(backupPath, JSON.stringify(backupData, null, 2))
+
+        await foundAccount.destroy()
+
+        await SESSIONS_TAB.destroy({ where: { userId: foundAccountModel.id } })
+
+        return sendResponse(res, 200, `Попытка удаления аккаунта. Успешная операция. Удален пользователь ${backupData.id} при использовании МАСТЕР КЛЮЧА. Резервная копия сохранена`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account (delete)')
+    }
+})
+
+router.patch('/idCard/setStatus/:status/:id', sessionCheck, permsCheck, async(req, res) => {
+    try {
+        const id = Number(req.params.id)
+        const status = req.params.status.toUpperCase() ?? undefined
+        
+
+        const preceptorAccount = res.locals.sessionCheck as Types.localSessionCheck
+        const preceptorPerms = res.locals.permsCheck as Types.localPermsCheck
+
+        if(!preceptorPerms || !preceptorAccount) return sendResponse(res, 500, 'Попытка изменения статуса удостоверения. MW не вернул необходимые данные')
+
+        if(!id || isNaN(id)) return sendResponse(res, 400, 'Попытка изменения статуса удостоверения. Данные указаны неверно')
+        if(!status || status !== 'CONFIRM' && status !== 'UNCERTAIN') return sendResponse(res, 400, 'Попытка изменения статуса удостоверения. Данные указаны неверно')
+
+        if(preceptorPerms.perms === 'USER') return sendResponse(res, 403, 'Попытка изменения статуса удостоверения. Недостаточно прав')
+        
+        
+        const foundAccount = await ACCOUNTS_TAB.findOne({ where: { id } })
+        if(!foundAccount) return sendResponse(res, 404, 'Попытка изменения статуса удостоверения. Пользователь не найден')
+
+        const foundAccountModel: Types.Account = foundAccount.get({ plain: true })
+
+        await foundAccount.update({ idCardConfirm: status, supervisorId: status === 'CONFIRM' ? preceptorAccount.account.id : null }) 
+
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка изменения статуса удостоверения. Успешная операция. Удостоверение ${ foundAccountModel.id } ${ status === 'CONFIRM' ? 'ПОДТВЕРЖДЕНО' : 'ОТКЛОНЕНО' } ${ preceptorPerms.perms === 'COORDINATOR' ? 'Координатором' : 'Администратором' } ${ preceptorAccount.account.id }`
+        )
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/idCard/setStatus')
+    }
+})
+
+router.post('/idCard/upload', sessionCheck, async(req, res) => {
+    try {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg']
+
+        const sessionAccount = res.locals.sessionCheck as Types.localSessionCheck
+        if(!req.files || !req.files.idcard) return sendResponse(res, 400, 'Попытка загрузки удостоверения. Файл не загружен')
+
+        if(!sessionAccount) return sendResponse(res, 500, 'Попытка загрузки удостоверения. MW не вернул необходимые данные')
+
+        let files: UploadedFile[] = []
+
+        if(Array.isArray(req.files.idcard)) files = req.files.idcard
+        else files = [req.files.idcard]
+
+        if(files.length > 1) return sendResponse(res, 400, 'Попытка загрузки удостоверения. Загружено больше 1 файла')
+
+        for(const file of files) {
+            if(!allowedTypes.includes(file.mimetype)) {
+                return sendResponse(res, 400, 'Попытка загрузки удостоверения. Неверный формат файла')
+            }
+        }
+        
+        const tempPath = __dirname + `/..${config.cachePath}/`
+
+        const idCard = files[0]
+        const ext = path.extname(idCard.name)
+        const generatedId = uuidv4()
+        const fileName = `tempIdCard_${generatedId}.png`
+
+        const idCardPath = __dirname + `/../uploads/idCard/`
+
+        if (!existsSync(tempPath)) mkdirSync(tempPath, { recursive: true });
+        if (!existsSync(idCardPath)) mkdirSync(idCardPath, { recursive: true });
+
+        await idCard.mv(path.join(idCardPath, fileName))
+
+        const foundAccount = await ACCOUNTS_TAB.findOne({ where: { id: sessionAccount.account.id } })
+        if(!foundAccount) return sendResponse(res, 500, 'Попытка загрузки удостоверения. Сессия не привязана к аккаунту')
+
+        foundAccount.update({ idCardId: fileName })
+
+        return sendResponse(res, 200, `Попытка загрузки удостоверения. Успешная операция. Удостоверение ${ sessionAccount.account.id } загружено и ждет подтверждения`)
+    } catch (e) {
+        return sendResponse(res, 500, e.message, undefined, '/account/idCard/upload')
     }
 })
 

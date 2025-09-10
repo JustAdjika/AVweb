@@ -41,6 +41,12 @@ export interface Session {
     userId: number
 }
 
+export interface MasterKey {
+    id?: number,
+    key: string,
+    expiresAt: Date
+}
+
 
 
 
@@ -53,6 +59,22 @@ export interface emailConfirms {
     expiresAt: Date,
     isRegister: boolean,
     enteredData: JSON
+}
+
+export interface publicAccount {
+    id?: number,
+    name: string,
+    birthday: string,
+    iin: string,
+    region: region,
+    email: string,
+    contactKaspi: string | null,
+    contactWhatspapp: string | null,
+    idCardId: string | null,
+    personalQrId: string,
+    registerAt: Date,
+    idCardConfirm: 'CONFIRM' | 'AWAITING' | 'UNCERTAIN',
+    supervisorId: number | null
 }
 
 
@@ -78,6 +100,10 @@ export interface SessionData {
     sessionKey: string
 }
 
+export interface MasterKeyData {
+    masterKey: string
+}
+
 export interface localSessionCheck {
     account: Account
 }
@@ -85,4 +111,3 @@ export interface localSessionCheck {
 export interface localPermsCheck {
     perms: 'COORDINATOR' | 'ADMIN' | 'USER'
 }
-

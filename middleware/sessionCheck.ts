@@ -1,4 +1,4 @@
-import SESSIONS_TAB from '../database/sessions'
+import SESSIONS_TAB from '../database/sessions.js'
 import ACCOUNTS_TAB from '../database/accounts.js'
 
 import * as Types from '../module/types/types.ts'
@@ -9,7 +9,12 @@ import bcrypt from 'bcrypt'
 
 const sessionCheck = async(req, res, next) => {
     try {
-        const data = req.body
+        const data = {
+            sessionId: Number(req.body.sessionId),
+            sessionKey: req.body.sessionKey
+        }
+
+        if(isNaN(data.sessionId)) return sendResponse(res, 400, 'MW sessionCheck. Данные указаны неверно')
 
         function isValidData(data: unknown): data is Types.SessionData {
             if(typeof data === 'object' && data !== null) {

@@ -11,10 +11,11 @@ node_modules
 nginx.conf
 sites-enabled
 uploads/*
+backup/*
 
-temp
-cache
-dist
+temp/*
+cache/*
+dist/*
 dist-ssr
 *.local
 

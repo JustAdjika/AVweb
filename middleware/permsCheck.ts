@@ -26,7 +26,7 @@ const permsCheck = async(req, res, next) => {
         res.locals.permsCheck = returnData
         next()
     } catch (e) {
-        return sendResponse(res, 500, e.message, undefined, 'Middleware sessionCheck.ts')
+        return sendResponse(res, 500, e.message, undefined, 'Middleware permsCheck.ts')
     }
 } 
 
