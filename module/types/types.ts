@@ -104,6 +104,34 @@ export interface Volunteer {
     inStaffRoom: boolean,
 }
 
+export interface VolunteerData {
+    id?: number,
+    userId: number,
+    guild: string,
+    visit: boolean,
+    late: boolean,
+    eventId: number,
+    day: string,
+    warning: boolean,
+    inStaffRoom: boolean,
+    account: {
+        id: number,
+        name: string,
+        birthday: string,
+        region: 'almaty' | 'astana',
+        iin: string,
+        email: string,
+        contactKaspi: string | null,
+        contactWhatsapp: string | null
+    }
+}
+
+export interface Blacklist {
+    id?: number,
+    userId: number,
+    executerId: number
+}
+
 
 
 

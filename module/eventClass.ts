@@ -13,6 +13,12 @@ import { sendMail } from '../module/emailSend.ts'
 import ACCOUNTS_TAB from '../database/accounts.js'
 import EVENTS_TAB from '../database/events.js'
 import GROUPLINKS_TAB from '../database/groupLinks.js'
+import VOLUNTEERS_TAB from '../database/volunteers.js'
+import EVENTPERMS_TAB from '../database/eventPerms.js'
+import BLACKLISTS_TAB from '../database/blacklists.js'
+import EQUIPMENTS_TAB from '../database/equipments.js'
+
+import * as Associations from '../database/associations.js'
 
 // MIDDLEWARES
 
@@ -211,5 +217,162 @@ export class Event {
         if(!foundLink) throw new Error('Module eventClass.ts error: getLink() undefined link by day')
         const foundLinkModel: Types.GroupLink = await foundLink.get({ plain: true })
         return foundLinkModel.link
+    }
+
+    async getVolunteers(day: string) {
+        const foundVolunteers = await VOLUNTEERS_TAB.findAll({ where: { eventId: this.id, day } })
+        const foundVolsModel: (Types.Volunteer)[] = foundVolunteers.map(vol => vol.get({ plain: true }))
+        return foundVolsModel
+    }
+
+    async getVolunteersData(day: string) {
+        // Поиск данных и личной информации волонтера 
+        const foundVolunteers = await Associations.VOLUNTEERS_TAB.findAll({ 
+            where: { 
+                eventId: this.id, 
+                day 
+            }, 
+            include: [{ 
+                model: Associations.ACCOUNTS_TAB,
+                attributes: ["id", "name", "birthday", "region", "iin", "email", "contactKaspi", "contactWhatsapp"]
+             }] })
+        const foundVolsModel: (Types.VolunteerData)[] = foundVolunteers.map(vol => vol.get({ plain: true }))
+
+        const ids = foundVolsModel.map(vol => vol.account.id)
+
+
+        // Поиск прав волонтера
+        const foundEventPerms = await EVENTPERMS_TAB.findAll({
+            where: {
+                userId: {
+                    [Op.in]: ids
+                },
+                eventId: this.id,
+                day
+            }
+        })
+
+        const foundEventPermsModel: (Types.EventPerms)[] = foundEventPerms.map(perms => perms.get({ plain: true }))
+        
+
+        // Поиск информации об экипировке волонтера
+        const foundEquipments = await EQUIPMENTS_TAB.findAll({
+            where: {
+                userId: {
+                    [Op.in]: ids
+                },
+                eventId: this.id,
+                day,
+                [Op.or]: [
+                    { status: 'GET' },
+                    { status: 'RETURN' }
+                ]
+            }
+        })
+
+        const foundEquipmentsModel: (Types.Equipment)[] = foundEquipments.map(equip => equip.get({ plain: true }))
+
+
+        // Поиск информации о занесении в ЧС
+        const foundBlacklists = await BLACKLISTS_TAB.findAll({
+            where: {
+                userId: {
+                    [Op.in]: ids
+                }
+            }
+        })
+
+        const foundBlacklistsModel: (Types.Blacklist)[] = foundBlacklists.map(item => item.get({ plain: true }))
+
+        const formattedData = foundVolsModel.map(vol => {
+            if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'CRD')) {
+                let equip: 'GET' | 'RETURN' | null = null
+                
+                if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'                
+                
+                return {
+                    ...vol,
+                    role: 'CRD',
+                    equip,
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                }
+            } else if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'HCRD')) {
+                let equip: 'GET' | 'RETURN' | null = null
+                
+                if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'          
+                
+                return {
+                    ...vol,
+                    role: 'HCRD',
+                    equip,
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                }
+            } else {
+                let equip: 'GET' | 'RETURN' | null = null
+                
+                if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'          
+
+                return {
+                    ...vol,
+                    role: 'VOL',
+                    equip,
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                }
+            }
+        })
+
+
+        return formattedData as (Types.VolunteerData & { 
+            role: 'HCRD' | 'CRD' | 'VOL', 
+            equip: 'GET' | 'RETURN' | null,
+            blacklist: boolean
+        })[];
+    }
+
+    async getEquip(day: string) {
+        // Поиск данных и личной информации волонтера 
+        const foundVolunteers = await Associations.VOLUNTEERS_TAB.findAll({ 
+            where: { 
+                eventId: this.id, 
+                day 
+            }, 
+            include: [{ 
+                model: Associations.ACCOUNTS_TAB,
+                attributes: ["id", "name", "birthday", "region", "iin", "email", "contactKaspi", "contactWhatsapp"]
+             }] })
+        const foundVolsModel: (Types.VolunteerData)[] = foundVolunteers.map(vol => vol.get({ plain: true }))
+
+        const ids = foundVolsModel.map(vol => vol.account.id)
+
+
+        // Поиск информации об экипировке волонтера
+        const foundEquipments = await EQUIPMENTS_TAB.findAll({
+            where: {
+                userId: {
+                    [Op.in]: ids
+                },
+                eventId: this.id,
+                day,
+                [Op.or]: [
+                    { status: 'GET' },
+                    { status: 'RETURN' }
+                ]
+            }
+        })
+
+        const foundEquipmentsModel: (Types.Equipment)[] = foundEquipments.map(equip => equip.get({ plain: true }))
+
+        const formattedData = foundEquipmentsModel.map(equip => {
+            return {
+                provider: foundVolsModel.filter(item => item.account.id === equip.providerId)[0].account.name,
+                volunteer: foundVolsModel.filter(item => item.account.id === equip.userId)[0].account.name,
+                status: equip.status
+            }
+        })
+
+        return formattedData as ({ provider: string, volunteer: string, status: 'GET' | 'RETURN' })[]
     }
 }

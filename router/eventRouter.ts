@@ -1,6 +1,11 @@
 // DEPENDENCIES
 import express from 'express'
 import { Op } from 'sequelize'
+import ExcelJS from 'exceljs'
+import { fileURLToPath } from 'url'
+import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
+import { unlink } from "fs/promises";
 
 // MODULES
 import * as Types from '../module/types/types.ts'
@@ -10,6 +15,7 @@ import { dataCheck } from '../module/dataCheck.ts'
 import { sendMail } from '../module/emailSend.ts'
 import { Event } from '../module/eventClass.ts'
 import * as arrayCheck from '../module/arrayCheck.ts'
+import { GetDateInfo } from '../module/formattingDate.ts'
 
 // DATABASE
 import ACCOUNTS_TAB from '../database/accounts.js'
@@ -22,6 +28,9 @@ import eventPermsCheck from '../middleware/eventPermsCheck.ts'
 
 const router = express.Router()
 const config = new Config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 router.post('/create', masterKeyCheck, async(req,res) => {
     try {
@@ -197,6 +206,196 @@ router.patch('/register/change', sessionCheck, eventPermsCheck, async(req,res) =
         return sendResponse(res, 200, `Попытка изменения статуса регистрации. Успешная операция. Регистрация успешно ${ event.getModel.isRegisterOpen ? 'открыта' : 'закрыта' } HCRD ${ session.account.id }`)
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, 'event/register/change')
+    }
+})
+
+router.post('/export/:for', sessionCheck, eventPermsCheck, async(req,res) => {
+    try {
+        // Входные данные
+        const session = res.locals.sessionCheck
+        const eventPermsData = req.body.eventPerms as Types.eventPermsData
+        const perms = res.locals.eventPermsCheck 
+
+        const _for = req.params.for
+        const _type = req.query.type
+
+        const { eventId, day } = eventPermsData
+
+
+        if(!perms || !session) return sendResponse(res, 500, 'Попытка экспорта таблиц. MW eventPermsCheck/sessionCheck не передал необходимые данные')
+
+        if(perms.perms !== 'HCRD' && perms.perms !== 'CRD') return sendResponse(res, 403, 'Попытка экспорта таблиц. Недостаточно прав')
+
+        if(_for !== 'coordinator' && _for !== 'staff') return sendResponse(res, 400, 'Попытка экспорта таблиц. Данные указаны неверно')
+        if(_type !== 'vols' && _type !== 'equip') return sendResponse(res, 400, 'Попытка экспорта таблиц. Данные указаны неверно')
+
+
+        // Сбор данных
+        const event = await Event.define()
+        await event.update(eventId)
+
+        const allVolsData = await event.getVolunteersData(day)
+        const formattedData = allVolsData.map(vol => ( { 
+            iin: vol.account.iin, 
+            name: vol.account.name, 
+            role: vol.role, 
+            measures: vol.blacklist ? 'bl' : vol.warning ? 'warn' : 'none',
+            contactWhatsapp: vol.account.contactWhatsapp,
+            contactKaspi: vol.account.contactKaspi,
+            guild: vol.guild,
+            equip: vol.equip,
+            visit: vol.visit
+        } ))
+
+        const allEquipData: ({ provider: string, volunteer: string, status: 'GET' | 'RETURN' })[] = await event.getEquip(day)
+
+        if(_for === 'coordinator' && _type === 'vols') { // Экспорт волонтеров для координаторов
+
+            // Создание таблиц
+            const workbook = new ExcelJS.Workbook()
+            const worksheet = workbook.addWorksheet("Volunteers")
+
+            worksheet.columns = [
+                { header: 'Num', key: 'id', width: 5},
+                { header: 'ИИН', key: 'iin', width: 18},
+                { header: 'ФИО', key: 'name', width: 30},
+                { header: 'Роль', key: 'role', width: 20},
+                { header: 'Пред/ЧС', key: 'measures', width: 10},
+                { header: 'Whatsapp', key: 'whatsapp', width: 18},
+                { header: 'Организация', key: 'guild', width: 15},
+                { header: 'Экипировка', key: 'equip', width: 15},
+                { header: 'Посещение', key: 'visit', width: 15},
+            ]
+
+            formattedData.forEach((vol, i) => {
+                const newRow = worksheet.addRow({
+                    id: i+1,
+                    iin: vol.iin,
+                    name: vol.name,
+                    role: vol.role === 'VOL' ? 'Волонтёр' : vol.role === 'CRD' ? 'Координатор' : vol.role === 'HCRD' ? 'Гл. Координатор' : '???',
+                    measures: vol.measures === 'none' ? 'Нет' : vol.measures === 'warn' ? 'Пред' : vol.measures === 'bl' ? 'ЧС' : '???',
+                    whatsapp: vol.contactWhatsapp,
+                    guild: vol.guild,
+                    equip: vol.equip === 'RETURN' ? 'Сдал' : vol.equip === 'GET' ? 'Не сдал' : '???',
+                    visit: vol.visit ? 'Пришел' : 'Не пришел'
+                })
+            })
+
+            worksheet.eachRow(row => {
+                row.alignment = { vertical: "middle", horizontal: "left" }
+            })
+
+            
+            // Экспорт
+            const fileName = `${uuidv4()}.xlsx`
+
+            const filePath = __dirname + `/../${config.cachePath}/${fileName}`
+
+            await workbook.xlsx.writeFile(filePath)
+
+            res.status(200).download(filePath, async (err) => {
+                if (err) {
+                    await unlink(filePath)
+                    sendResponse(res, 500, err.message, undefined, '/event/export (res.download)')
+                } else {
+                    await unlink(filePath)
+                    console.log(`[${GetDateInfo().all}] Попытка экспорта таблицы. Успешная операция. Таблица экспортирована для ${ session.account.id } по конфигурации coordinator/vols`)
+                }
+            });
+
+        } else if(_for === 'staff' && _type === 'vols') { // Экспорт волонтеров для организаторов
+
+            // Создание таблиц
+            const workbook = new ExcelJS.Workbook()
+            const worksheet = workbook.addWorksheet("Volunteers")
+
+            worksheet.columns = [
+                { header: 'Num', key: 'id', width: 5},
+                { header: 'ИИН', key: 'iin', width: 18},
+                { header: 'ФИО', key: 'name', width: 30},
+                { header: 'Whatsapp', key: 'whatsapp', width: 18},
+                { header: 'Kaspi', key: 'kaspi', width: 18},
+            ]
+
+            formattedData.forEach((vol, i) => {
+                const newRow = worksheet.addRow({
+                    id: i+1,
+                    iin: vol.iin,
+                    name: vol.name,
+                    whatsapp: vol.contactWhatsapp,
+                    kaspi: vol.contactKaspi,
+                })
+            })
+
+            worksheet.eachRow(row => {
+                row.alignment = { vertical: "middle", horizontal: "left" }
+            })
+
+            
+            // Экспорт
+            const fileName = `${uuidv4()}.xlsx`
+
+            const filePath = __dirname + `/../${config.cachePath}/${fileName}`
+
+            await workbook.xlsx.writeFile(filePath)
+
+            res.status(200).download(filePath, async (err) => {
+                if (err) {
+                    await unlink(filePath)
+                    sendResponse(res, 500, err.message, undefined, '/event/export (res.download)')
+                } else {
+                    await unlink(filePath)
+                    console.log(`[${GetDateInfo().all}] Попытка экспорта таблицы. Успешная операция. Таблица экспортирована для ${ session.account.id } по конфигурации staff/vols`)
+                }
+            });
+
+        } else { // Экспорт экипа
+            
+            // Создание таблиц
+            const workbook = new ExcelJS.Workbook()
+            const worksheet = workbook.addWorksheet("Equipments")
+
+            worksheet.columns = [
+                { header: 'Num', key: 'id', width: 5},
+                { header: 'Координатор', key: 'provider', width: 30},
+                { header: 'Получатель', key: 'volunteer', width: 30},
+                { header: 'Статус', key: 'status', width: 15},
+            ]
+
+            allEquipData.forEach((item, i) => {
+                const newRow = worksheet.addRow({
+                    id: i+1,
+                    provider: item.provider,
+                    volunteer: item.volunteer,
+                    status: item.status === 'GET' ? 'Не сдал' : item.status === 'RETURN' ? 'Сдал' : '???'
+                })
+            })
+
+            worksheet.eachRow(row => {
+                row.alignment = { vertical: "middle", horizontal: "left" }
+            })
+
+            
+            // Экспорт
+            const fileName = `${uuidv4()}.xlsx`
+
+            const filePath = __dirname + `/../${config.cachePath}/${fileName}`
+
+            await workbook.xlsx.writeFile(filePath)
+
+            res.status(200).download(filePath, async (err) => {
+                if (err) {
+                    await unlink(filePath)
+                    sendResponse(res, 500, err.message, undefined, '/event/export (res.download)')
+                } else {
+                    await unlink(filePath)
+                    console.log(`[${GetDateInfo().all}] Попытка экспорта таблицы. Успешная операция. Таблица экспортирована для ${ session.account.id } по конфигурации coordinator/equipments`)
+                }
+            });
+
+        }
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, 'event/export')
     }
 })
 
