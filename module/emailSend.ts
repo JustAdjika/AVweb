@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import * as nodemailer from 'nodemailer'
 import { dataCheck } from './dataCheck.ts'
 import * as Types from './types/types.ts'
 
@@ -47,7 +47,7 @@ export async function sendMail(to: unknown, subject: unknown, text: unknown, htm
         
         const info = await transporter.sendMail(data)
         return { status: true, code: 200 }
-    } catch (e) {
+    } catch (e: any) {
         return { status: false, code: 500, message: e.message }
     }
 }

@@ -3,7 +3,7 @@ import { GetDateInfo } from './formattingDate.ts'
 
 export function sendResponse(
     res: Response,
-    status: 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 500 | 500 = 200,
+    status: 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 500 = 200,
     message?: string,
     container?: object,
     routerPath?: string

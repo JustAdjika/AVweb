@@ -4,5 +4,6 @@ declare module "express-serve-static-core" {
   interface Locals {
     sessionCheck?: Types.localSessionCheck;
     permsCheck?: Types.localPermsCheck;
+    eventPermsCheck: Types.localEventPermsCheck;
   }
 }

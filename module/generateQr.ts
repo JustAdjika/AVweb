@@ -24,7 +24,7 @@ export async function generateQr(link: string, name: string, type: 'personal' | 
         })
 
         return { status: true, code: 200 }
-    } catch (e) {
+    } catch (e:any) {
         return { status: false, code: 500, message: e.message }
     }
 }

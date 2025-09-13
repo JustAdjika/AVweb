@@ -2,8 +2,9 @@ import MASTERKEYS_TAB from '../database/masterKeys.js'
 
 import { sendResponse } from '../module/response.ts'
 import * as Types from '../module/types/types.ts' 
+import type { Request, Response, NextFunction } from 'express'
 
-const masterKeyCheck = async(req, res, next) => {
+const masterKeyCheck = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const data = req.body
 
@@ -17,7 +18,7 @@ const masterKeyCheck = async(req, res, next) => {
         if(foundKeyModel.expiresAt < now) return sendResponse(res, 498, 'MW masterKeyCheck. Мастер ключ просрочен')
 
         next()
-    } catch (e) {
+    } catch (e: any) {
         return sendResponse(res, 500, e.message, undefined, 'Middleware masterKeyCheck.ts')
     }
 } 

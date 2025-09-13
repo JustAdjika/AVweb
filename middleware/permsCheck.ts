@@ -2,12 +2,13 @@ import PERMS_TAB from '../database/perms.js'
 
 import { sendResponse } from '../module/response.ts'
 import * as Types from '../module/types/types.ts' 
+import type { Request, Response, NextFunction } from 'express'
 
-const permsCheck = async(req, res, next) => {
+const permsCheck = async(req: Request, res: Response, next: NextFunction) => {
     try {
-        const data = res.locals.sessionCheck.account as Types.Account
+        const data = res.locals.sessionCheck?.account as Types.Account
 
-        if(!res.locals.sessionCheck.account.id) return sendResponse(res, 500, 'MW permsCheck. MW sessionCheck не передал пользователя')
+        if(!res.locals.sessionCheck?.account.id) return sendResponse(res, 500, 'MW permsCheck. MW sessionCheck не передал пользователя')
 
         const foundPerms = await PERMS_TAB.findOne({ where: { userId: data.id } })
 
@@ -25,7 +26,7 @@ const permsCheck = async(req, res, next) => {
 
         res.locals.permsCheck = returnData
         next()
-    } catch (e) {
+    } catch (e: any) {
         return sendResponse(res, 500, e.message, undefined, 'Middleware permsCheck.ts')
     }
 } 

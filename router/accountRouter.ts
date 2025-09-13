@@ -110,7 +110,7 @@ router.post('/register', async(req, res) => {
         } 
 
         return sendResponse(res, 200, `Попытка регистрации. Успешная операция. Код подтверждения отправлен на почту ${data.email}`, { confirmToken: token })
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/register')
     }
 })
@@ -332,7 +332,7 @@ router.post('/emailconfirm/:token', async(req, res) => {
 
             return sendResponse(res, 200, `Попытка подтверждения почты при смене. Успешная операция на ${parsedData.email}`, { updateData: updatedUser })
         }
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/emailconfirm')
     }
 })
@@ -395,7 +395,7 @@ router.post('/emailChange', sessionCheck, async(req, res) => {
         } 
 
         return sendResponse(res, 200, `Попытка смены почты. Успешная операция. Код подтверждения отправлен на почту ${data.newEmail}`, { confirmToken: token })
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/emailChange')
     }
 })
@@ -442,7 +442,7 @@ router.post('/login', async(req, res) => {
         const newSessionModel = await SESSIONS_TAB.create(newSession as any) as any
         return sendResponse(res, 200, `Попытка входа. Успешная операция. Вход в ${foundAccountModel.id}`, { userData: foundAccountModel, sessionData: { key: key, id: newSessionModel.id } } ) 
 
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/login')
     }
 })
@@ -468,7 +468,7 @@ router.post('/data/search', sessionCheck, permsCheck, async(req, res) => {
             `Попытка получения аккаунта. Успешная операция. Выдан пользователь ${foundDataModel.id} ${ hunterPerms === 'ADMIN' ? 'Администратору' : 'Координатору' } ${hunterSession.id}`, 
             { data: foundDataModel } 
         )
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/data/search')
     }
 })
@@ -497,7 +497,7 @@ router.post('/qr/person/:id', sessionCheck, permsCheck, async(req, res) => {
             `Попытка сканирования лич QR. Успешная операция. Сканирован пользователь ${foundDataModel.id} ${ hunterPerms === 'ADMIN' ? 'Администратором' : 'Координатором' } ${hunterSession.id}`, 
             { data: publicData } 
         )
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/data/qr/scan/personal')
     }
 })
@@ -525,7 +525,7 @@ router.delete('/:id', masterKeyCheck, async(req, res) => {
         await SESSIONS_TAB.destroy({ where: { userId: foundAccountModel.id } })
 
         return sendResponse(res, 200, `Попытка удаления аккаунта. Успешная операция. Удален пользователь ${backupData.id} при использовании МАСТЕР КЛЮЧА. Резервная копия сохранена`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account (delete)')
     }
 })
@@ -559,7 +559,7 @@ router.patch('/idCard/setStatus/:status/:id', sessionCheck, permsCheck, async(re
             200, 
             `Попытка изменения статуса удостоверения. Успешная операция. Удостоверение ${ foundAccountModel.id } ${ status === 'CONFIRM' ? 'ПОДТВЕРЖДЕНО' : 'ОТКЛОНЕНО' } ${ preceptorPerms.perms === 'COORDINATOR' ? 'Координатором' : 'Администратором' } ${ preceptorAccount.account.id }`
         )
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/idCard/setStatus')
     }
 })
@@ -606,7 +606,7 @@ router.post('/idCard/upload', sessionCheck, async(req, res) => {
         foundAccount.update({ idCardId: fileName })
 
         return sendResponse(res, 200, `Попытка загрузки удостоверения. Успешная операция. Удостоверение ${ sessionAccount.account.id } загружено и ждет подтверждения`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/idCard/upload')
     }
 })
@@ -633,7 +633,7 @@ router.post('/idCard/download/:id', sessionCheck, permsCheck, async(req, res) =>
                 console.log(`[${GetDateInfo().all}] Попытка скачивания удостоверения. Успешная операция. Удостоверение ${ userCardId } скачано ${ perms.perms === 'ADMIN' ? 'Администратором' : 'Координатором' } ${ sessionAccount.account.id }`)
             }
         });
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/idCard/download')
     }
 })
@@ -682,7 +682,7 @@ router.put('/info/personal/edit', masterKeyCheck, async(req, res) => {
         })
 
         return sendResponse(res, 200, `Попытка изменения лич инфо. Успешная операция. ЛИ Пользователя ${ data.userId } изменена MASTERKEY`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/info/personal/edit')
     }
 })
@@ -730,7 +730,7 @@ router.put('/info/contact/edit', sessionCheck, async(req, res) => {
         })
 
         return sendResponse(res, 200, `Попытка изменения контакт инфо. Успешная операция. Пользователь ${ data.userId } сменил свою КИ`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/info/contact/edit')
     }
 })
@@ -778,7 +778,7 @@ router.patch('/password/change', sessionCheck, async(req, res) => {
         await foundTargetUser.update({ password: newHashPass })
 
         return sendResponse(res, 200, `Попытка изменения пароля. Успешная операция. Пользователь ${ data.userId } сменил свой пароль`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/password/change')
     }
 })
@@ -826,7 +826,7 @@ router.post('/password/recovery/sendlink', async(req, res) => {
         )
 
         return sendResponse(res, 200, `Попытка восстановления пароля (1 stage). Успешная операция. Сообщение с ссылкой отправлено на почту ${ data.email }`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/password/recovery/sendlink')
     }
 })
@@ -874,7 +874,7 @@ router.post('/password/recovery/end', async(req, res) => {
         await foundRecovery.destroy()
 
         return sendResponse(res, 200, `Попытка восстановления пароля (2 stage). Успешная операция. Пароль пользователя ${ foundTargetUserModel.id } изменен`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/password/recovery/end')
     }
 })
@@ -891,7 +891,7 @@ router.post('/logout', sessionCheck, async(req, res) => {
         await foundSession.destroy()
 
         return sendResponse(res, 200, `Попытка выхода. Успешная операция. Удаление сессии ${ session.session.id } связанный с аккаунтом ${ session.account.id }`)
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/logout')
     }
 })
@@ -937,7 +937,7 @@ router.post('/equipment/get', sessionCheck, async(req, res) => {
         })
 
         return sendResponse(res, 200, `Попытка получения экипа. Успешная операция. Сгенерирован новый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId: `getEquip_${qrId}.png` })
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/equipment/get')
     }
 })
@@ -954,7 +954,7 @@ router.post('/equipment/return', sessionCheck, async(req, res) => {
         if(!qr.status) return sendResponse(res, qr.code, qr.message)
 
         return sendResponse(res, 200, `Попытка сдачи экипа. Успешная операция. Сгенерирован новый QR код для сдачи экипа пользователя ${ session.account.id }`, { qrId: `returnEquip_${qrId}.png` })
-    } catch (e) {
+    } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/account/equipment/return')
     }
 })

@@ -66,6 +66,48 @@ export interface Equipment {
     qrId: string
 }
 
+export interface Event {
+    id?: number,
+    name: string,
+    info: object,
+    uniqueInfo: object,
+    guilds: string[],
+    days: string[],
+    isRegisterOpen: boolean
+}
+
+export interface GroupLink {
+    id?: number,
+    link: string,
+    eventId: number,
+    day: string
+}
+
+export interface EventPerms {
+    id?: number,
+    userId: number,
+    eventId: number,
+    preceptorId: number,
+    day: string,
+    permission: 'CRD' | 'HCRD'
+}
+
+export interface Volunteer {
+    id?: number,
+    userId: number,
+    guild: string,
+    visit: boolean,
+    late: boolean,
+    eventId: number,
+    day: string,
+    warning: boolean,
+    inStaffRoom: boolean,
+}
+
+
+
+
+
 
 
 
@@ -108,7 +150,14 @@ export interface contactData {
     contactWhatsapp: string | null
 }
 
-
+export interface eventInfoObject {
+    dressCode: {
+        accept: string[],
+        deny: string[]
+    },
+    behavior: (string[])[],
+    rules: (string[])[]
+}
 
 
 
@@ -135,6 +184,12 @@ export interface MasterKeyData {
     masterKey: string
 }
 
+export interface eventPermsData {
+    day: string,
+    eventId: number,
+    
+}
+
 export interface localSessionCheck {
     account: Account,
     session: {
@@ -145,4 +200,8 @@ export interface localSessionCheck {
 
 export interface localPermsCheck {
     perms: 'COORDINATOR' | 'ADMIN' | 'USER'
+}
+
+export interface localEventPermsCheck {
+    perms: 'CRD' | 'HCRD' | 'VOL' | 'Unexpected'
 }

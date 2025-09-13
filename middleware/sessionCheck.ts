@@ -6,8 +6,9 @@ import { sendResponse } from '../module/response.ts'
 import { dataCheck } from '../module/dataCheck.ts'
 
 import bcrypt from 'bcrypt'
+import type { Request, Response, NextFunction } from 'express'
 
-const sessionCheck = async(req, res, next) => {
+const sessionCheck = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const data = {
             sessionId: Number(req.body.sessionId),
@@ -53,7 +54,7 @@ const sessionCheck = async(req, res, next) => {
         }
 
         next()
-    } catch (e) {
+    } catch (e: any) {
         return sendResponse(res, 500, e.message, undefined, 'Middleware sessionCheck.ts')
     }
 } 
