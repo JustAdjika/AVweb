@@ -4,6 +4,19 @@ export type region = 'almaty' | 'astana'
 
 export type checkDataArr = [any, 'string' | 'object' | 'number' | 'boolean' | 'function' | 'undefined']
 
+export type requestStatus = 'AWAITING' | 'ACCEPT' | 'DENIED'
+
+export type idCardConfirm = 'CONFIRM' | 'AWAITING' | 'UNCERTAIN'
+
+export type permission = 'COORDINATOR' | 'ADMIN'
+
+export type equipmentStatus = 'GET' | 'RETURN' | 'REQUEST'
+
+export type eventPermission = 'CRD' | 'HCRD' 
+
+
+
+
 
 
 
@@ -24,14 +37,14 @@ export interface Account {
     idCardId: string | null,
     personalQrId: string,
     registerAt: Date,
-    idCardConfirm: 'CONFIRM' | 'AWAITING' | 'UNCERTAIN',
+    idCardConfirm: idCardConfirm,
     supervisorId: number | null
 }
 
 export interface Perms {
     id?: number,
     userId: number,
-    permission: 'COORDINATOR' | 'ADMIN',
+    permission: permission,
     preceptorId: number | 'MASTERKEY'
 }
 
@@ -62,7 +75,7 @@ export interface Equipment {
     eventId: number | null,
     day: string | null,
     expiresAt: Date,
-    status: 'REQUEST' | 'GET' | 'RETURN',
+    status: equipmentStatus,
     qrId: string
 }
 
@@ -89,7 +102,7 @@ export interface EventPerms {
     eventId: number,
     preceptorId: number,
     day: string,
-    permission: 'CRD' | 'HCRD'
+    permission: eventPermission
 }
 
 export interface Volunteer {
@@ -118,7 +131,7 @@ export interface VolunteerData {
         id: number,
         name: string,
         birthday: string,
-        region: 'almaty' | 'astana',
+        region: region,
         iin: string,
         email: string,
         contactKaspi: string | null,
@@ -130,6 +143,29 @@ export interface Blacklist {
     id?: number,
     userId: number,
     executerId: number
+}
+
+export interface Request {
+    id?: number,
+    userId: number,
+    guild: string,
+    eventId: number,
+    days: string[],
+    status: requestStatus
+}
+
+export interface RequestData {
+    id?: number,
+    userId: number,
+    guild: string,
+    eventId: number,
+    days: string[],
+    status: requestStatus,
+    account: {
+        id: number,
+        name: string,
+        contactWhatsapp: string
+    }
 }
 
 
@@ -162,7 +198,7 @@ export interface publicAccount {
     idCardId: string | null,
     personalQrId: string,
     registerAt: Date,
-    idCardConfirm: 'CONFIRM' | 'AWAITING' | 'UNCERTAIN',
+    idCardConfirm: idCardConfirm,
     supervisorId: number | null
 }
 
@@ -190,6 +226,11 @@ export interface eventInfoObject {
 
 
 
+
+
+
+
+
 // MODULE RETURN DATA
 
 export type moduleReturn = {
@@ -197,6 +238,12 @@ export type moduleReturn = {
     code: 200 | 400 | 500,
     message?: string
 } 
+
+
+
+
+
+
 
 
 
@@ -227,9 +274,9 @@ export interface localSessionCheck {
 }
 
 export interface localPermsCheck {
-    perms: 'COORDINATOR' | 'ADMIN' | 'USER'
+    perms: permission | 'USER'
 }
 
 export interface localEventPermsCheck {
-    perms: 'CRD' | 'HCRD' | 'VOL' | 'Unexpected'
+    perms: eventPermission | 'VOL' | 'Unexpected'
 }

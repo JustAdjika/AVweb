@@ -32,6 +32,7 @@ import GROUPLINKS_TAB from './database/groupLinks.js'
 import accountRouter from './router/accountRouter.ts'
 import formsRouter from './router/formsRouter.ts'
 import eventRouter from './router/eventRouter.ts'
+import eventRequestRouter from './router/eventRequestRouter.ts'
 
 // CONFIG
 
@@ -84,6 +85,7 @@ async function showMenu() {
                             app.use('/api/developer/account', accountRouter)
                             app.use('/api/developer/forms', formsRouter)
                             app.use('/api/developer/event', eventRouter)
+                            app.use('/api/developer/event/request', eventRequestRouter)
 
                             console.log('\x1b[37m |!-------- СЕРВЕР: \x1b[32mРАБОТА \x1b[37m-------!| \x1b[0m');
                             showMenu();

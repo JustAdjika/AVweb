@@ -6,7 +6,7 @@ import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
-import { writeFile, unlink } from "fs/promises";
+import { writeFile } from "fs/promises";
 import { mkdirSync, existsSync } from "fs";
 import { fileURLToPath } from 'url'
 

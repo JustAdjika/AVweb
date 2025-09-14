@@ -1,6 +1,5 @@
 // DEPENDENCIES
 import express from 'express'
-import { Op } from 'sequelize'
 import ExcelJS from 'exceljs'
 import { fileURLToPath } from 'url'
 import path from 'path'
@@ -12,13 +11,11 @@ import * as Types from '../module/types/types.ts'
 import { Config } from '../config.ts'
 import { sendResponse } from '../module/response.ts'
 import { dataCheck } from '../module/dataCheck.ts'
-import { sendMail } from '../module/emailSend.ts'
-import { Event } from '../module/eventClass.ts'
+import { Event } from '../module/class/eventClass.ts'
 import * as arrayCheck from '../module/arrayCheck.ts'
 import { GetDateInfo } from '../module/formattingDate.ts'
 
 // DATABASE
-import ACCOUNTS_TAB from '../database/accounts.js'
 import EVENTS_TAB from '../database/events.js'
 
 // MIDDLEWARES

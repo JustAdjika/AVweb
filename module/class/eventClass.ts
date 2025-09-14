@@ -3,22 +3,18 @@ import express from 'express'
 import { Op } from 'sequelize'
 
 // MODULES
-import * as Types from '../module/types/types.ts'
-import { Config } from '../config.ts'
-import { sendResponse } from '../module/response.ts'
-import { dataCheck } from '../module/dataCheck.ts'
-import { sendMail } from '../module/emailSend.ts'
+import * as Types from '../types/types.ts'
 
 // DATABASE
-import ACCOUNTS_TAB from '../database/accounts.js'
-import EVENTS_TAB from '../database/events.js'
-import GROUPLINKS_TAB from '../database/groupLinks.js'
-import VOLUNTEERS_TAB from '../database/volunteers.js'
-import EVENTPERMS_TAB from '../database/eventPerms.js'
-import BLACKLISTS_TAB from '../database/blacklists.js'
-import EQUIPMENTS_TAB from '../database/equipments.js'
+import EVENTS_TAB from '../../database/events.js'
+import GROUPLINKS_TAB from '../../database/groupLinks.js'
+import VOLUNTEERS_TAB from '../../database/volunteers.js'
+import EVENTPERMS_TAB from '../../database/eventPerms.js'
+import BLACKLISTS_TAB from '../../database/blacklists.js'
+import EQUIPMENTS_TAB from '../../database/equipments.js'
+import PERMS_TAB from '../../database/perms.js'
 
-import * as Associations from '../database/associations.js'
+import * as Associations from '../../database/associations.js'
 
 // MIDDLEWARES
 
@@ -157,27 +153,27 @@ export class Event {
         if(id) {
             const currentEvent = await EVENTS_TAB.findOne({ where: { id: id } })
             if(!currentEvent) throw new Error('Module eventClass.ts error: update() undefined currentEvent by id')
-            const currentEventModule: Types.Event = await currentEvent.get({ plain: true })
+            const currentEventModel: Types.Event = await currentEvent.get({ plain: true })
             
-            this.id = currentEventModule.id as number,
-            this.name = currentEventModule.name,
-            this.guilds = currentEventModule.guilds,
-            this.days = currentEventModule.days
-            this.isRegisterOpen = currentEventModule.isRegisterOpen
-            this.info = currentEventModule.info as Types.eventInfoObject
-            this.uniqueInfo = currentEventModule.uniqueInfo
+            this.id = currentEventModel.id as number,
+            this.name = currentEventModel.name,
+            this.guilds = currentEventModel.guilds,
+            this.days = currentEventModel.days
+            this.isRegisterOpen = currentEventModel.isRegisterOpen
+            this.info = currentEventModel.info as Types.eventInfoObject
+            this.uniqueInfo = currentEventModel.uniqueInfo
         } else {
             const currentEvent = await EVENTS_TAB.findOne({ where: { id: this.id } })
             if(!currentEvent) throw new Error('Module eventClass.ts error: update() undefined currentEvent by id')
-            const currentEventModule: Types.Event = await currentEvent.get({ plain: true })
+            const currentEventModel: Types.Event = await currentEvent.get({ plain: true })
             
-            this.id = currentEventModule.id as number,
-            this.name = currentEventModule.name,
-            this.guilds = currentEventModule.guilds,
-            this.days = currentEventModule.days
-            this.isRegisterOpen = currentEventModule.isRegisterOpen
-            this.info = currentEventModule.info as Types.eventInfoObject
-            this.uniqueInfo = currentEventModule.uniqueInfo
+            this.id = currentEventModel.id as number,
+            this.name = currentEventModel.name,
+            this.guilds = currentEventModel.guilds,
+            this.days = currentEventModel.days
+            this.isRegisterOpen = currentEventModel.isRegisterOpen
+            this.info = currentEventModel.info as Types.eventInfoObject
+            this.uniqueInfo = currentEventModel.uniqueInfo
         }
     }
 
@@ -374,5 +370,56 @@ export class Event {
         })
 
         return formattedData as ({ provider: string, volunteer: string, status: 'GET' | 'RETURN' })[]
+    }
+
+    async checkDays(days: string[]) {
+        for(const item of days) {
+            if(!JSON.parse(this.days as unknown as string).includes(item)) return false
+            else return true
+        }
+    }
+
+    async checkGuilds(guild: string) {
+        if(!JSON.parse(this.guilds as unknown as string).includes(guild)) return false
+        else return true
+    }
+
+    async getRequestData(isActual = false) {
+        const foundRequests = await Associations.REQUESTS_TAB.findAll({ 
+            where: isActual ? { eventId: this.id, status: 'AWAITING' } : { eventId: this.id },
+            include: [{ 
+                model: Associations.ACCOUNTS_TAB,
+                attributes: ["id", "name", "contactWhatsapp"]
+             }]
+        })
+
+        const foundRequestsModel: (Types.RequestData)[] = foundRequests.map(item => item.get({ plain: true }))
+
+        const ids = foundRequestsModel.map(item => item.account.id)
+
+        const foundPerms = await PERMS_TAB.findAll({ 
+            where: {
+                userId: {
+                    [Op.in]: ids
+                },
+            }
+        })
+
+        const foundPermsModel: (Types.Perms)[] = foundPerms.map(item => item.get({ plain: true }))
+
+        const formattedData = foundRequestsModel.map(item => {
+            let perms: 'VOL' | 'CRD' | 'ADMIN' = 'VOL'
+
+            if(foundPermsModel.some(perms => perms.userId === item.account.id && perms.permission === 'ADMIN')) perms = 'ADMIN'
+            else if(foundPermsModel.some(perms => perms.userId === item.account.id && perms.permission === 'COORDINATOR')) perms = 'CRD'
+            else perms = 'VOL'
+
+            return {
+                ...item,
+                perms
+            }
+        })
+
+        return formattedData
     }
 }
