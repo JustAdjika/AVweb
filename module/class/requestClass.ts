@@ -1,21 +1,11 @@
 // DEPENDENCIES
-import express from 'express'
-import { Op } from 'sequelize'
 
 // MODULES
 import * as Types from '../types/types.ts'
+import { Volunteer } from './volunteerClass.ts'
 
 // DATABASE
-import ACCOUNTS_TAB from '../../database/accounts.js'
-import EVENTS_TAB from '../../database/events.js'
-import GROUPLINKS_TAB from '../../database/groupLinks.js'
-import VOLUNTEERS_TAB from '../../database/volunteers.js'
-import EVENTPERMS_TAB from '../../database/eventPerms.js'
-import BLACKLISTS_TAB from '../../database/blacklists.js'
-import EQUIPMENTS_TAB from '../../database/equipments.js'
 import REQUESTS_TAB from '../../database/requests.js'
-
-import * as Associations from '../../database/associations.js'
 
 // MIDDLEWARES
 
@@ -95,32 +85,27 @@ export class Request {
     // Set data
 
     async update(id: number | undefined) {
-        if(id) {
-            const currentRequest = await REQUESTS_TAB.findOne({ where: { id } })
-            if(!currentRequest) throw new Error('Module requestClass.ts error: update() undefined currentRequest by id')
-            const currentRequestModel: Types.Request = await currentRequest.get({ plain: true })
-            
-            this.id = currentRequestModel.id as number
-            this.userId = currentRequestModel.userId
-            this.guild = currentRequestModel.guild
-            this.days = currentRequestModel.days
-            this.eventId = currentRequestModel.eventId,
-            this.status = currentRequestModel.status
-        } else {
-            const CurrentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
-            if(!CurrentRequest) throw new Error('Module requestClass.ts error: update() undefined currentRequest by id')
-            const currentRequestModel: Types.Request = await CurrentRequest.get({ plain: true })
-            
-            this.id = currentRequestModel.id as number
-            this.userId = currentRequestModel.userId
-            this.guild = currentRequestModel.guild
-            this.days = currentRequestModel.days
-            this.eventId = currentRequestModel.eventId,
-            this.status = currentRequestModel.status
-        }
+
+        if(!this.id && !id) throw new Error('Module requestClass.ts error: Impossible to use accept() before define it or select id')
+
+        const currentRequest = await REQUESTS_TAB.findOne({ where: id ? { id } : { id: this.id } })
+        if(!currentRequest) throw new Error('Module requestClass.ts error: update() undefined currentRequest by id')
+        const currentRequestModel: Types.Request = await currentRequest.get({ plain: true })
+        
+        this.id = currentRequestModel.id as number
+        this.userId = currentRequestModel.userId
+        this.guild = currentRequestModel.guild
+        this.days = currentRequestModel.days
+        this.eventId = currentRequestModel.eventId,
+        this.status = currentRequestModel.status
+
     }
 
-    async accept() {
+    async accept(days: string[]) {
+
+        if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use accept() before define it')
+
+        if(days.length === 0) throw new Error('Module requestClass.ts error: Impossible to accept the request without days')
 
         // Процесс принятия
         this.status = 'ACCEPT'
@@ -130,15 +115,26 @@ export class Request {
 
 
         // Процесс внесения в волонтеры
-        
+
+        for(const item of days) {
+            if(!JSON.parse(this.days as unknown as string).includes(item)) throw new Error('Module requestClass.ts error: Impossible to accept the days, that the user has not selected')
+        } 
+
+        const parsedDays = JSON.parse(this.days as unknown as string) as string[]
+
+        parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day))
         
     }
 
     async denied() {
+
+        if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use deny() before define it')
+
         this.status = 'DENIED'
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: denied() undefined currentRequest by id')
         await currentRequest.update({ status: 'DENIED' })
+
     }
 
 
@@ -159,12 +155,16 @@ export class Request {
     }
 
     async getInstance() {
+        if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use getInstance() before define it')
+
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: getInstance() undefined instance of object by id')
         return currentRequest
     }
 
     async getActual() {
+        if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use getActual() before define it')
+
         const foundRequests = await REQUESTS_TAB.findAll({ where: { eventId: this.eventId, status: 'AWAITING' } })
         const foundRequestsModel: (Types.Request)[] = foundRequests.map(request => request.get({ plain: true }))
 

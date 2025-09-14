@@ -122,6 +122,9 @@ export class Event {
 
     // Set data
     set newInfo(object: Types.eventInfoObject) {
+
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use newInfo before define it')
+
         this.info = object
 
         EVENTS_TAB.findOne({ where: { id: this.id } }).then(currentEvent => {
@@ -132,6 +135,9 @@ export class Event {
     }
 
     set newUniqueInfo(object: object) {
+
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use newUniqueInfo before define it')
+
         this.uniqueInfo = object
 
         EVENTS_TAB.findOne({ where: { id: this.id } }).then(currentEvent => {
@@ -142,6 +148,9 @@ export class Event {
     }
 
     async changeRegister() {
+
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use changeRegister() before define it')
+
         this.isRegisterOpen = !this.isRegisterOpen
 
         const currentEvent = await EVENTS_TAB.findOne({ where: { id: this.id } })
@@ -150,34 +159,25 @@ export class Event {
     }
 
     async update(id: number | undefined) {
-        if(id) {
-            const currentEvent = await EVENTS_TAB.findOne({ where: { id: id } })
-            if(!currentEvent) throw new Error('Module eventClass.ts error: update() undefined currentEvent by id')
-            const currentEventModel: Types.Event = await currentEvent.get({ plain: true })
-            
-            this.id = currentEventModel.id as number,
-            this.name = currentEventModel.name,
-            this.guilds = currentEventModel.guilds,
-            this.days = currentEventModel.days
-            this.isRegisterOpen = currentEventModel.isRegisterOpen
-            this.info = currentEventModel.info as Types.eventInfoObject
-            this.uniqueInfo = currentEventModel.uniqueInfo
-        } else {
-            const currentEvent = await EVENTS_TAB.findOne({ where: { id: this.id } })
-            if(!currentEvent) throw new Error('Module eventClass.ts error: update() undefined currentEvent by id')
-            const currentEventModel: Types.Event = await currentEvent.get({ plain: true })
-            
-            this.id = currentEventModel.id as number,
-            this.name = currentEventModel.name,
-            this.guilds = currentEventModel.guilds,
-            this.days = currentEventModel.days
-            this.isRegisterOpen = currentEventModel.isRegisterOpen
-            this.info = currentEventModel.info as Types.eventInfoObject
-            this.uniqueInfo = currentEventModel.uniqueInfo
-        }
+
+        if(!this.id && !id) throw new Error('Module eventClass.ts error: Impossible to use update() before define it or select id')
+
+        const currentEvent = await EVENTS_TAB.findOne({ where: id ? { id } : { id: this.id } })
+        if(!currentEvent) throw new Error('Module eventClass.ts error: update() undefined currentEvent by id')
+        const currentEventModel: Types.Event = await currentEvent.get({ plain: true })
+        
+        this.id = currentEventModel.id as number,
+        this.name = currentEventModel.name,
+        this.guilds = currentEventModel.guilds,
+        this.days = currentEventModel.days
+        this.isRegisterOpen = currentEventModel.isRegisterOpen
+        this.info = currentEventModel.info as Types.eventInfoObject
+        this.uniqueInfo = currentEventModel.uniqueInfo
     }
 
     setLink(day: string, link: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use setLink() before define it')
+
         GROUPLINKS_TAB.findOne({ where: { eventId: this.id, day } }).then(currentLink => {
             if(!currentLink) throw new Error('Module eventClass.ts error: setLink undefined link by day')
             
@@ -203,12 +203,16 @@ export class Event {
     }
 
     async getInstance() {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getInstance() before define it')
+
         const currentEvent = await EVENTS_TAB.findOne({ where: { id: this.id } })
         if(!currentEvent) throw new Error('Module eventClass.ts error: getInstance() undefined instance of object by id')
         return currentEvent
     }
 
     async getLink(day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getLink() before define it')
+
         const foundLink = await GROUPLINKS_TAB.findOne({ where: { eventId: this.id, day } })
         if(!foundLink) throw new Error('Module eventClass.ts error: getLink() undefined link by day')
         const foundLinkModel: Types.GroupLink = await foundLink.get({ plain: true })
@@ -216,12 +220,17 @@ export class Event {
     }
 
     async getVolunteers(day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getVolunteers() before define it')
+
         const foundVolunteers = await VOLUNTEERS_TAB.findAll({ where: { eventId: this.id, day } })
         const foundVolsModel: (Types.Volunteer)[] = foundVolunteers.map(vol => vol.get({ plain: true }))
         return foundVolsModel
     }
 
     async getVolunteersData(day: string) {
+
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getVolunteersData() before define it')
+
         // Поиск данных и личной информации волонтера 
         const foundVolunteers = await Associations.VOLUNTEERS_TAB.findAll({ 
             where: { 
@@ -329,6 +338,9 @@ export class Event {
     }
 
     async getEquip(day: string) {
+
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getEquip() before define it')
+
         // Поиск данных и личной информации волонтера 
         const foundVolunteers = await Associations.VOLUNTEERS_TAB.findAll({ 
             where: { 
@@ -373,6 +385,8 @@ export class Event {
     }
 
     async checkDays(days: string[]) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use checkDays() before define it')
+
         for(const item of days) {
             if(!JSON.parse(this.days as unknown as string).includes(item)) return false
             else return true
@@ -380,11 +394,15 @@ export class Event {
     }
 
     async checkGuilds(guild: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use checkGuilds() before define it')
+
         if(!JSON.parse(this.guilds as unknown as string).includes(guild)) return false
         else return true
     }
 
     async getRequestData(isActual = false) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getRequestData() before define it')
+
         const foundRequests = await Associations.REQUESTS_TAB.findAll({ 
             where: isActual ? { eventId: this.id, status: 'AWAITING' } : { eventId: this.id },
             include: [{ 
@@ -421,5 +439,14 @@ export class Event {
         })
 
         return formattedData
+    }
+
+    async isCRD(userId: number) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use isCRD() before define it')
+
+        const foundPerms = await EVENTPERMS_TAB.findOne({ where: { userId, eventId: this.id } })
+
+        if(foundPerms) return true
+        else return false
     }
 }

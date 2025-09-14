@@ -64,6 +64,8 @@ router.post('/add', sessionCheck, async(req,res) => {
         }
 
         if(!isValidData(data)) return sendResponse(res, 400, 'Попытка отправки заявки. Данные указаны неверно')
+
+        if(data.days.length === 0) return sendResponse(res, 400, 'Попытка отправки заявки. Нужно выбрать хотя бы один день')
         
         const event = await Event.define()
         await event.update(eventId)
@@ -78,7 +80,7 @@ router.post('/add', sessionCheck, async(req,res) => {
     }
 })
 
-router.get('/data', async(req,res) => {
+router.get('/data/actual', async(req,res) => {
     try {
         const eventId = Number(req.query.eventId)
 
@@ -92,8 +94,57 @@ router.get('/data', async(req,res) => {
 
         return sendResponse(res, 200, `Попытка получения заявок. Успешная операция. Заявки на событие ${eventId} выданы`, { requestData })
     } catch (e:any) {
-        return sendResponse(res, 500, e.message, undefined, '/event/request/add')
+        return sendResponse(res, 500, e.message, undefined, '/event/request/data/actual')
     }
 })
+
+router.get('/data/:requestId', async(req,res) => {
+    try {
+        const requestId = Number(req.params.requestId)
+
+        if(isNaN(requestId)) return sendResponse(res, 400, 'Попытка получения информации о заявке. Данные указаны неверно')
+        
+        const request = await Request.define()
+        await request.update(requestId)
+
+        const requestData = request.getModel
+
+        return sendResponse(res, 200, `Попытка получения информации о заявке. Успешная операция. Заявка ${requestId} выдана`, { requestData })
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/event/request/data')
+    }
+})
+
+router.post('/solution/:option/:requestId', sessionCheck, async(req,res) => {
+    try {
+        const requestId = Number(req.params.requestId)
+        const option = req.params.option
+        const days = req.body.days
+
+        const session = res.locals.sessionCheck as Types.localSessionCheck
+
+        if(isNaN(requestId) || ( option !== 'accept' && option !== 'denied' ) || !arrayCheck.isStringArray(days)) return sendResponse(res, 400, 'Попытка решения заявки. Данные указаны неверно')
+
+        if(!session) return sendResponse(res, 500, 'Попытка решения заявки. MW eventPermsCheck/sessionCheck не передал необходимые данные')
+        
+        if(days.length === 0 ) return sendResponse(res, 400, 'Попытка решения заявки. Нужно выбрать хотя бы один день')
+
+        const request = await Request.define()
+        await request.update(requestId)
+
+        const event = await Event.define()
+        await event.update(request.getModel.eventId as number)
+
+        if(!await event.isCRD(session.account.id as number)) return sendResponse(res, 403, 'Попытка решения заявки. Недостаточно прав')
+
+        if(option === 'accept') await request.accept(days)
+        else await request.denied()
+
+        return sendResponse(res, 200, `Попытка решения заявки. Успешная операция. Заявка ${requestId} ${option === 'accept' ? 'Одобрена' : 'Отклонена'} координатором ${session.account.id}`)
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/event/request/solution')
+    }
+})
+
 
 export default router
