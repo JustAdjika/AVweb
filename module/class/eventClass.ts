@@ -80,6 +80,8 @@ export class Event {
         const foundConflict = await EVENTS_TAB.findOne({ where: { name } })
         if(foundConflict) throw new Error('Module eventClass.ts error: cant create new event, name conflict')
 
+        if(days.length === 0) throw new Error('Module eventClass.ts error: cant create new event, need more than 0 days')
+
         const newEvent = await EVENTS_TAB.create({
             name,
             guilds,
@@ -184,6 +186,35 @@ export class Event {
             currentLink.update({ link })
         })
     }
+
+    async addHCRD(userId: number) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use addHCRD() before define it')
+
+        const foundAccount = await Associations.ACCOUNTS_TAB.findOne({ where: { id: userId } })
+        if(!foundAccount) throw new Error('Module eventClass.ts error: Impossible to use addHCRD(), account undefined')
+
+        JSON.parse(this.days as unknown as string).map(async(day: string) => {
+            await VOLUNTEERS_TAB.create({
+                userId,
+                guild: 'AV',
+                eventId: this.id,
+                day,
+                visit: true,
+                late: false,
+                warning: false,
+                inStaffRoom: true
+            })
+            await EVENTPERMS_TAB.create({
+                userId,
+                eventId: this.id,
+                day,
+                permission: 'HCRD',
+                preceptorId: 'MASTERKEY'
+            })
+        })
+    }
+
+
 
 
 

@@ -1,21 +1,12 @@
 // DEPENDENCIES
-import express from 'express'
-import { Op } from 'sequelize'
 
 // MODULES
 import * as Types from '../types/types.ts'
 
 // DATABASE
-import ACCOUNTS_TAB from '../../database/accounts.js'
-import EVENTS_TAB from '../../database/events.js'
-import GROUPLINKS_TAB from '../../database/groupLinks.js'
 import VOLUNTEERS_TAB from '../../database/volunteers.js'
 import EVENTPERMS_TAB from '../../database/eventPerms.js'
 import BLACKLISTS_TAB from '../../database/blacklists.js'
-import EQUIPMENTS_TAB from '../../database/equipments.js'
-import REQUESTS_TAB from '../../database/requests.js'
-
-import * as Associations from '../../database/associations.js'
 
 // MIDDLEWARES
 
@@ -79,7 +70,7 @@ export class Volunteer {
         const foundConflict = await VOLUNTEERS_TAB.findOne({ where: { userId, eventId } })
         if(foundConflict) await foundConflict.destroy()
 
-        const newRequest = await VOLUNTEERS_TAB.create({
+        const newVolunteer = await VOLUNTEERS_TAB.create({
             userId,
             guild,
             eventId,
@@ -90,16 +81,16 @@ export class Volunteer {
             inStaffRoom: false
         })
 
-        const newRequestModel: Types.Volunteer = await newRequest.get({ plain: true })
+        const newVolunteerModel: Types.Volunteer = await newVolunteer.get({ plain: true })
 
         return new Volunteer(
-            newRequestModel.id,
-            newRequestModel.userId,
-            newRequestModel.guild,
+            newVolunteerModel.id,
+            newVolunteerModel.userId,
+            newVolunteerModel.guild,
             false,
             false,
-            newRequestModel.eventId,
-            newRequestModel.day,
+            newVolunteerModel.eventId,
+            newVolunteerModel.day,
             false,
             false
         )
@@ -129,6 +120,78 @@ export class Volunteer {
         this.warning = currentVolunteerModel.warning
         this.inStaffRoom = currentVolunteerModel.inStaffRoom
     }
+
+    async changeVisit() {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use changeVisit() before define it')
+
+        const currentVolunteer = await VOLUNTEERS_TAB.findOne({ where: { id: this.id } })
+        if(!currentVolunteer) throw new Error('Module volunteerClass.ts error: changeVisit() undefined instance of object by id')
+
+        this.visit = !this.visit
+
+        currentVolunteer.update({ visit: this.visit })
+    }
+
+    async changeLate() {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use changeLate() before define it')
+
+        const currentVolunteer = await VOLUNTEERS_TAB.findOne({ where: { id: this.id } })
+        if(!currentVolunteer) throw new Error('Module volunteerClass.ts error: changeLate() undefined instance of object by id')
+
+        this.late = !this.late
+
+        currentVolunteer.update({ late: this.late })
+    }
+
+    async promoteToCRD(preceptorId: number) {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use promoteToCRD() before define it')
+
+        const foundPerms = await EVENTPERMS_TAB.findOne({ where: { eventId: this.eventId, day: this.day, userId: this.userId } })
+        if(!foundPerms) {
+            await EVENTPERMS_TAB.create({
+                userId: this.userId,
+                eventId: this.eventId,
+                day: this.day,
+                permission: 'CRD',
+                preceptorId
+            })
+        } else {
+            await foundPerms.update({ permission: 'CRD', preceptorId })
+        }
+    }
+
+    async reduce() {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use reduce() before define it')
+
+        const foundPerms = await EVENTPERMS_TAB.findOne({ where: { eventId: this.eventId, day: this.day, userId: this.userId } })
+        if(!foundPerms) throw new Error('Module volunteerClass.ts error: cant reduce(), user permissions not found')
+
+        await foundPerms.destroy()
+    }
+
+    async warn(executerId: number, arg: { force: boolean } = { force: false }, remove: boolean = false) {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use warn() before define it')
+
+        const currentVolunteer = await VOLUNTEERS_TAB.findOne({ where: { id: this.id } })
+        if(!currentVolunteer) throw new Error('Module volunteerClass.ts error: reduce() undefined instance of object by id')
+
+        if(remove) {
+            return await currentVolunteer.update({ warning: false })
+        }
+
+        if(arg.force) {
+            await currentVolunteer.update({ warning: true })
+            
+            await BLACKLISTS_TAB.create({
+                userId: this.userId,
+                executerId
+            }) 
+        } else {
+            await currentVolunteer.update({ warning: true })
+        }
+    }
+
+
 
 
 
