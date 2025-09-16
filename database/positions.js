@@ -19,7 +19,7 @@ const POSITIONS_TAB = sequelize.define('positions', {
     location: { // Описание локации
         type: DataTypes.STRING,
     },
-    userId: { // id назначенного пользователя
+    volunteerId: { // id назначенного волонтера
         type: DataTypes.INTEGER,
     },
     eventId: { // id события

@@ -14,7 +14,11 @@ export type equipmentStatus = 'GET' | 'RETURN' | 'REQUEST'
 
 export type eventPermission = 'CRD' | 'HCRD' 
 
+export type mapMarker = sector | sectorEnter | 'VIP_Enter' | 'VVIP_Enter' | 'Hospital' | 'Main_Enter' | 'Wardrobe_1' | 'Wardrobe_2' | 'Wardrobe_3' | 'Wardrobe_4' | 'Stairs_12_Left' | 'Stairs_12_Right' | 'Restroom_Left' | 'Restroom_Right' | 'Food_Left' | 'Food_Right' | 'Stall' | 'Press_Center' | 'Stairs_21_Left' | 'Stairs_21_Right' | 'Skybox_1' | 'Skybox_2' | 'Skybox_3' | 'Skybox_4' | 'Skybox_5' | 'Skybox_6' | 'Skybox_7' | 'Skybox_8' | 'Skybox_9' | 'Skybox_10' | 'Skybox_11' | 'Skybox_12' | 'Stairs_23_Left' | 'Stairs_23_Right' | 'VVIP_Sector' | 'Stairs_32_Left' | 'Stairs_32_Right'
 
+export type sector = 'B10' | 'B9' | 'B8' | 'B7' | 'B6' | 'B5' | 'B4' | 'B3' | 'B2' | 'B1' | 'A4' | 'A3' | 'A2' | 'A1' | 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6' | 'C7' | 'C8' | 'C9' | 'C10' | 'C11' | 'C12' | 'C13'
+
+export type sectorEnter = `${sector}_Enter`
 
 
 
@@ -168,6 +172,18 @@ export interface RequestData {
     }
 }
 
+export interface Position {
+    id?: number,
+    publicId: string,
+    name: string,
+    NameNumber: number,
+    location: string | null,
+    volunteerId: number | null,
+    eventId: number,
+    day: string,
+    mapLocId: string | null,
+}
+
 
 
 
@@ -262,7 +278,6 @@ export interface MasterKeyData {
 export interface eventPermsData {
     day: string,
     eventId: number,
-    
 }
 
 export interface localSessionCheck {

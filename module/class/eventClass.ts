@@ -1,5 +1,4 @@
 // DEPENDENCIES
-import express from 'express'
 import { Op } from 'sequelize'
 
 // MODULES
@@ -213,6 +212,27 @@ export class Event {
             })
         })
     }
+
+    async clearPosition(marker: Types.mapMarker) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use clearPosition() before define it')
+        const foundPosition = await Associations.POSITIONS_TAB.findAll({ where: { mapLocId: marker, eventId: this.id } })
+
+        foundPosition.map(async item => {
+            await item.update({ volunteerId: null })
+        })
+    }
+
+    async getMarkerPos(marker: Types.mapMarker, day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getMarkerPos() before define it')
+        const foundPosition = await Associations.POSITIONS_TAB.findAll({ where: { mapLocId: marker, eventId: this.id, day } })
+
+        const foundPositionsModel: (Types.Position)[] = foundPosition.map(item => item.get({ plain: true }))
+        return foundPositionsModel
+    }
+
+
+
+
 
 
 
@@ -479,5 +499,24 @@ export class Event {
 
         if(foundPerms) return true
         else return false
+    }
+
+    async getPositionsData(day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getPositionsData() before define it')
+
+        const foundPositions = await Associations.POSITIONS_TAB.findAll({ 
+            where: { eventId: this.id, day },
+            include: [{ 
+                model: Associations.VOLUNTEERS_TAB,
+                include: [{
+                    model: Associations.ACCOUNTS_TAB,
+                    attributes: ["id", "name"]
+                }]
+             }]
+        })
+
+        const foundPositionsModel: (Types.Position)[] = foundPositions.map(item => item.get({ plain: true }))
+
+        return foundPositionsModel
     }
 }

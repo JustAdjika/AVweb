@@ -1,7 +1,5 @@
 // DEPENDENCIES
 import express from 'express'
-import { fileURLToPath } from 'url'
-import path from 'path'
 
 // MODULES
 import * as Types from '../module/types/types.ts'

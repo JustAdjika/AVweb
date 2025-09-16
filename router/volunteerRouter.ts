@@ -1,27 +1,16 @@
 // DEPENDENCIES
 import express from 'express'
-import { Op } from 'sequelize'
-import ExcelJS from 'exceljs'
 import { fileURLToPath } from 'url'
 import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { unlink } from "fs/promises";
 
 // MODULES
 import * as Types from '../module/types/types.ts'
 import { Config } from '../config.ts'
 import { sendResponse } from '../module/response.ts'
-import { dataCheck } from '../module/dataCheck.ts'
-import { sendMail } from '../module/emailSend.ts'
 import { Event } from '../module/class/eventClass.ts'
-import { Request } from '../module/class/requestClass.ts'
 import { Volunteer } from '../module/class/volunteerClass.ts'
-import * as arrayCheck from '../module/arrayCheck.ts'
-import { GetDateInfo } from '../module/formattingDate.ts'
 
 // DATABASE
-import ACCOUNTS_TAB from '../database/accounts.js'
-import EVENTS_TAB from '../database/events.js'
 
 // MIDDLEWARES
 import masterKeyCheck from '../middleware/masterKeyCheck.ts'
@@ -31,21 +20,18 @@ import eventPermsCheck from '../middleware/eventPermsCheck.ts'
 const router = express.Router()
 const config = new Config()
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
 router.patch('/visit/change/:volunteerId', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
         const session = res.locals.sessionCheck as Types.localSessionCheck
         const permsDay = req.body.eventPerms.day
-        const perms: Types.localPermsCheck = res.locals.eventPermsCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
 
         const volunteerId = Number(req.params.volunteerId)
 
         if(!session || !perms) return sendResponse(res, 500, 'Попытка смены посещения волонтера. MW sessionCheck/eventPermsCheck не передал необходимые данные')
         if(isNaN(volunteerId)) return sendResponse(res, 400, 'Попытка смены посещения волонтера. Данные указаны неверно')
 
-        if(perms.perms === 'USER') return sendResponse(res, 403, 'Попытка смены посещения волонтера. Недостаточно прав')
+        if(perms.perms === 'Unexpected' || perms.perms === 'VOL') return sendResponse(res, 403, 'Попытка смены посещения волонтера. Недостаточно прав')
 
         const volunteer = await Volunteer.define()
         await volunteer.update(volunteerId)
@@ -187,6 +173,63 @@ router.patch('/warn', sessionCheck, eventPermsCheck, async(req,res) => {
         )
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/event/volunteer/warn')
+    }
+})
+
+router.post('/data/all/:eventId', sessionCheck, eventPermsCheck, async(req,res) => {
+    try {
+        const session = res.locals.sessionCheck as Types.localSessionCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
+        const permsDay = req.body.eventPerms.day
+
+        const eventId = Number(req.params.eventId)
+
+        if(!session || !perms) return sendResponse(res, 500, 'Попытка получения волонтеров. MW sessionCheck/eventPermsCheck не передал необходимые данные')
+        if(isNaN(eventId)) return sendResponse(res, 400, 'Попытка получения волонтеров. Данные указаны неверно')
+
+        if(perms.perms === 'VOL' || perms.perms === 'Unexpected') return sendResponse(res, 403, 'Попытка получения волонтеров. Недостаточно прав')
+
+        const event = await Event.define()
+        await event.update(eventId)
+
+        const volData = await event.getVolunteersData(permsDay)
+        
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка получения волонтеров. Успешная операция. Список выдан для ${session.account.id} по событию ${eventId} на день ${permsDay}`,
+            volData
+        )
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/event/volunteer/data/all')
+    }
+})
+
+router.post('/data/:volunteerId', sessionCheck, eventPermsCheck, async(req,res) => {
+    try {
+        const session = res.locals.sessionCheck as Types.localSessionCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
+
+        const volunteerId = Number(req.params.volunteerId)
+
+        if(!session || !perms) return sendResponse(res, 500, 'Попытка получения волонтера. MW sessionCheck/eventPermsCheck не передал необходимые данные')
+        if(isNaN(volunteerId)) return sendResponse(res, 400, 'Попытка получения волонтера. Данные указаны неверно')
+
+        if(perms.perms === 'VOL' || perms.perms === 'Unexpected') return sendResponse(res, 403, 'Попытка получения волонтера. Недостаточно прав')
+
+        const volunteer = await Volunteer.define()
+        await volunteer.update(volunteerId)
+
+        const volData = await volunteer.getVolunteerData()
+        
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка получения волонтера. Успешная операция. Волонтер ${volunteerId} выдан для ${session.account.id}`, 
+            volData
+        )
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/event/volunteer/data')
     }
 })
 

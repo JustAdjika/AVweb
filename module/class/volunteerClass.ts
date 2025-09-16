@@ -1,4 +1,5 @@
 // DEPENDENCIES
+import { Op } from 'sequelize'
 
 // MODULES
 import * as Types from '../types/types.ts'
@@ -7,6 +8,9 @@ import * as Types from '../types/types.ts'
 import VOLUNTEERS_TAB from '../../database/volunteers.js'
 import EVENTPERMS_TAB from '../../database/eventPerms.js'
 import BLACKLISTS_TAB from '../../database/blacklists.js'
+import EQUIPMENTS_TAB from '../../database/equipments.js'
+
+import * as Associations from '../../database/associations.js'
 
 // MIDDLEWARES
 
@@ -218,5 +222,81 @@ export class Volunteer {
         const currentVolunteer = await VOLUNTEERS_TAB.findOne({ where: { id: this.id } })
         if(!currentVolunteer) throw new Error('Module volunteerClass.ts error: getInstance() undefined instance of object by id')
         return currentVolunteer
+    }
+
+    async getVolunteerData() {
+        
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use getVolunteerData() before define it')
+
+        // Поиск данных и личной информации волонтера 
+        const foundVolunteer = await Associations.VOLUNTEERS_TAB.findOne({ 
+            where: { 
+                id: this.id
+            }, 
+            include: [{ 
+                model: Associations.ACCOUNTS_TAB,
+                attributes: ["id", "name", "birthday", "region", "iin", "email", "contactKaspi", "contactWhatsapp"]
+             }] 
+        })
+
+        if(!foundVolunteer) throw new Error('Module volunteerClass.ts error: getVolunteerData() cant find the user')
+
+        const foundVolunteerModel: Types.VolunteerData = await foundVolunteer.get({ plain: true })
+
+
+        // Поиск прав волонтера
+        const foundEventPerms = await EVENTPERMS_TAB.findOne({
+            where: {
+                userId: this.userId,
+                eventId: this.eventId,
+                day: this.day
+            }
+        })
+        
+        let foundEventPermsModel: Types.EventPerms | null = null
+
+        if(foundEventPerms) foundEventPermsModel = await foundEventPerms.get({ plain: true })
+
+        // Поиск информации об экипировке волонтера
+        const foundEquipments = await EQUIPMENTS_TAB.findOne({
+            where: {
+                userId: this.userId,
+                eventId: this.eventId,
+                day: this.day,
+                [Op.or]: [
+                    { status: 'GET' },
+                    { status: 'RETURN' }
+                ]
+            }
+        })
+
+        let foundEquipmentsModel: Types.Equipment | null = null
+
+        if(foundEquipments) foundEquipmentsModel = await foundEquipments.get({ plain: true })
+
+        // Поиск информации о занесении в ЧС
+        const foundBlacklist = await BLACKLISTS_TAB.findOne({
+            where: {
+                userId: this.userId
+            }
+        })
+
+        let foundBlacklistModel: Types.Blacklist | null = null
+
+        if(foundBlacklist) foundBlacklistModel = await foundBlacklist.get({ plain: true })
+
+
+        const formattedData = {
+            ...foundVolunteerModel,
+            blacklist: foundBlacklist ? true : false,
+            role: foundEventPerms ? foundEventPermsModel?.permission : 'VOL',
+            equip: foundEquipments ? foundEquipmentsModel?.status : 'NOT EQUIP'
+        }
+
+        return formattedData as (Types.VolunteerData & { 
+            role: 'HCRD' | 'CRD' | 'VOL', 
+            equip: 'GET' | 'RETURN' | 'NOT EQUIP',
+            blacklist: boolean
+        });
     }
 }
