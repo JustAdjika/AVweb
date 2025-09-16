@@ -1,17 +1,12 @@
 // DEPENDENCIES
-import { Op } from 'sequelize'
 
 // MODULES
 import * as Types from '../types/types.ts'
 
 // DATABASE
 import VOLUNTEERS_TAB from '../../database/volunteers.js'
-import EVENTPERMS_TAB from '../../database/eventPerms.js'
-import BLACKLISTS_TAB from '../../database/blacklists.js'
-import EQUIPMENTS_TAB from '../../database/equipments.js'
 import POSITIONS_TAB from '../../database/positions.js'
 
-import * as Associations from '../../database/associations.js'
 
 // MIDDLEWARES
 
