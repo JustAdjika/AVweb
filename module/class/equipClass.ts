@@ -1,5 +1,4 @@
 // DEPENDENCIES
-import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcrypt'
 
@@ -9,8 +8,6 @@ import { generateQr } from '../generateQr.ts'
 import { Config } from '../../config.ts'
 
 // DATABASE
-import VOLUNTEERS_TAB from '../../database/volunteers.js'
-import POSITIONS_TAB from '../../database/positions.js'
 import EQUIPMENTS_TAB from '../../database/equipments.js'
 import ACCOUNTS_TAB from '../../database/accounts.js'
 

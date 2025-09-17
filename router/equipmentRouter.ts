@@ -2,15 +2,12 @@
 import express from 'express'
 import { fileURLToPath } from 'url'
 import path from 'path'
-import { writeFile } from "fs/promises";
 
 // MODULES
 import * as Types from '../module/types/types.ts'
 import { Config } from '../config.ts'
 import { sendResponse } from '../module/response.ts'
 import { Event } from '../module/class/eventClass.ts'
-import { dataCheck } from '../module/dataCheck.ts'
-import { Position } from '../module/class/positionClass.ts'
 import { Equipment } from '../module/class/equipClass.ts';
 
 // DATABASE
@@ -21,9 +18,6 @@ import eventPermsCheck from '../middleware/eventPermsCheck.ts'
 
 const router = express.Router()
 const config = new Config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 router.patch('/qr/get/scan', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
