@@ -515,8 +515,24 @@ export class Event {
              }]
         })
 
-        const foundPositionsModel: (Types.Position)[] = foundPositions.map(item => item.get({ plain: true }))
+        const foundPositionsModel: (Types.PositionData)[] = foundPositions.map(item => item.get({ plain: true }))
 
         return foundPositionsModel
+    }
+
+    async getEquipmentData(day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use getPositionsData() before define it')
+
+        const foundEquipments = await Associations.EQUIPMENTS_TAB.findAll({ 
+            where: { eventId: this.id, day, [Op.or]: [ { status: 'GET' }, { status: 'RETURN' } ] },
+            include: [
+                { model: Associations.ACCOUNTS_TAB, attributes: ["id", "name"], as: 'provider' },
+                { model: Associations.ACCOUNTS_TAB, attributes: ["id", "name"], as: 'user' }
+            ]
+        })
+
+        const foundEquipmentsModel: (Types.EquipmentData)[] = foundEquipments.map(item => item.get({ plain: true }))
+
+        return foundEquipmentsModel
     }
 }

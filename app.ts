@@ -35,6 +35,7 @@ import eventRouter from './router/eventRouter.ts'
 import eventRequestRouter from './router/eventRequestRouter.ts'
 import volunteerRouter from './router/volunteerRouter.ts'
 import positionRouter from './router/positionRouter.ts'
+import equipmentRouter from './router/equipmentRouter.ts'
 
 // CONFIG
 
@@ -90,6 +91,7 @@ async function showMenu() {
                             app.use('/api/developer/event/request', eventRequestRouter)
                             app.use('/api/developer/event/volunteer', volunteerRouter)
                             app.use('/api/developer/event/position', positionRouter)
+                            app.use('/api/developer/event/equipment', equipmentRouter)
 
                             console.log('\x1b[37m |!-------- СЕРВЕР: \x1b[32mРАБОТА \x1b[37m-------!| \x1b[0m');
                             showMenu();

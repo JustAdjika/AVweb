@@ -104,10 +104,6 @@ export class Equipment {
             }
         }
 
-        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/event/equipment/qr/get/scan?token=${token}`, `getEquip_${qrId}.png`, 'getEquip')
-
-        if(!qr.status) throw new Error(`Module equipClass.ts error: Impossible to use create(), QR generate error ${qr.message}`)
-
         const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: userId } })
         if(!foundUser) throw new Error(`Module equipClass.ts error: Impossible to use create(), account undefined`)
 
@@ -123,6 +119,14 @@ export class Equipment {
         })
 
         const newEquipModel: Types.Equipment = await newEquip.get({ plain: true })
+
+        
+        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/event/equipment/qr/get/scan?token=${token}&equipId=${newEquipModel.id}`, `getEquip_${qrId}.png`, 'getEquip')
+
+        if(!qr.status) { 
+            await newEquip.destroy()
+            throw new Error(`Module equipClass.ts error: Impossible to use create(), QR generate error ${qr.message}`)
+        }
 
         return new Equipment(
             newEquipModel.id,
@@ -162,16 +166,20 @@ export class Equipment {
         this.status = currentEquipModel.status
     }
 
-    async getEquip(token: string) {
+    async getEquip(token: string, providerId: number, eventId: number, day: string) {
         if(!this.id) throw new Error('Module equipClass.ts error: Impossible to use getEquip() before define it or select id')
 
         if(!await bcrypt.compare(token, this.token as string)) throw new Error('Module equipClass.ts error: Impossible to use getEquip() token compare denied')
 
         const foundEquip = await EQUIPMENTS_TAB.findOne({ where: { id: this.id } })
         if(!foundEquip) throw new Error('Module equipClass.ts error: Impossible to use getEquip() equipment undefined')
+        
+        const now = new Date()
+        const foundEquipModel: Types.Equipment = await foundEquip.get({ plain: true })
+        if(foundEquipModel.expiresAt < now) throw new Error('Module equipClass.ts error: Impossible to use getEquip() equipment token expired')
             
         this.status = 'GET'
-        foundEquip.update({ status: 'GET' })
+        foundEquip.update({ status: 'GET', providerId, eventId, day })
     }
 
     async returnEquip(userId: number, arg: { force: boolean } = { force: false }) {
@@ -185,6 +193,27 @@ export class Equipment {
             this.status = 'RETURN'
             foundEquip.update({ status: 'RETURN' })
         } else throw new Error('Module equipClass.ts error: Impossible to use returnEquip() compare id denied')
+    }
+
+    async getLastEquip(userId: number) {
+        const lastUserEquip = await EQUIPMENTS_TAB.findOne({
+            where: { userId },
+            order: [['createdAt', 'DESC']]
+        }) 
+
+        if(!lastUserEquip) throw new Error('Module equipClass.ts error: Impossible to use getLastEquip() equipment undefined')
+
+        const lastUserEquipModel: Types.Equipment = await lastUserEquip.get({ plain: true })
+
+        this.id = lastUserEquipModel.id as number,
+        this.token = lastUserEquipModel.token,
+        this.qrId = lastUserEquipModel.qrId,
+        this.userId = lastUserEquipModel.userId,
+        this.providerId = lastUserEquipModel.providerId,
+        this.eventId = lastUserEquipModel.eventId,
+        this.day = lastUserEquipModel.day,
+        this.expiresAt = lastUserEquipModel.expiresAt,
+        this.status = lastUserEquipModel.status
     }
 
 

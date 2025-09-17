@@ -184,6 +184,42 @@ export interface Position {
     mapLocId: string | null,
 }
 
+export interface PositionData {
+    id?: number,
+    publicId: string,
+    name: string,
+    NameNumber: number,
+    location: string | null,
+    volunteerId: number | null,
+    eventId: number,
+    day: string,
+    mapLocId: string | null,
+    volunteer: VolunteerData & { ccount: { 
+        id: number,
+        name: string
+    }}
+}
+
+export interface EquipmentData {
+    id?: number, 
+    token: string,
+    userId: number,
+    providerId: number | null,
+    eventId: number | null,
+    day: string | null,
+    expiresAt: Date,
+    status: equipmentStatus,
+    qrId: string,
+    provider: {
+        id: number,
+        name: string
+    },
+    user: {
+        id: number,
+        name: string
+    }
+}
+
 
 
 
