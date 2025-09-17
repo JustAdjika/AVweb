@@ -149,6 +149,13 @@ export interface Blacklist {
     executerId: number
 }
 
+export interface RequestBlacklist {
+    id?: number,
+    userId: number,
+    executerId: number,
+    eventId: number
+}
+
 export interface Request {
     id?: number,
     userId: number,

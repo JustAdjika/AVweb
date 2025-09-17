@@ -6,6 +6,7 @@ import { Volunteer } from './volunteerClass.ts'
 
 // DATABASE
 import REQUESTS_TAB from '../../database/requests.js'
+import REQUESTBLACKLISTS_TAB from '../../database/requestBlacklists.js'
 
 // MIDDLEWARES
 
@@ -54,6 +55,9 @@ export class Request {
     }
 
     static async create(userId: number, guild: string, eventId: number, days: string[]) {
+        const foundBlacklist = await REQUESTBLACKLISTS_TAB.findOne({ where: { userId } })
+        if(foundBlacklist) throw new Error('Module requestClass.ts error: The user was added to the request blacklist at this event')
+
         const foundConflict = await REQUESTS_TAB.findOne({ where: { userId, eventId } })
         if(foundConflict) await foundConflict.destroy()
 
