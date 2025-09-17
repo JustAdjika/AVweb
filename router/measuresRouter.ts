@@ -5,21 +5,18 @@ import express from 'express'
 import * as Types from '../module/types/types.ts'
 import { Config } from '../config.ts'
 import { sendResponse } from '../module/response.ts'
-import { Event } from '../module/class/eventClass.ts'
-import { Equipment } from '../module/class/equipClass.ts';
 
 // DATABASE
 import ACCOUNTS_TAB from '../database/accounts.js'
 import BLACKLISTS_TAB from '../database/blacklists.js'
 import REQUESTBLACKLISTS_TAB from '../database/requestBlacklists.js'
+import EVENTS_TAB from '../database/events.js'
 
 import * as Associations from '../database/associations.js'
 
 // MIDDLEWARES
 import sessionCheck from '../middleware/sessionCheck.ts'
-import eventPermsCheck from '../middleware/eventPermsCheck.ts'
 import permsCheck from '../middleware/permsCheck.ts'
-import EVENTS_TAB from '../database/events.js'
 
 const router = express.Router()
 const config = new Config()
