@@ -19,6 +19,7 @@ import { sendResponse } from '../module/response.ts'
 import { sendMail } from '../module/emailSend.ts'
 import { generateQr } from '../module/generateQr.ts'
 import { Config } from '../config.ts'
+import { Equipment } from '../module/class/equipClass.ts'
 
 // DATABASE
 import ACCOUNTS_TAB from '../database/accounts.js'
@@ -896,66 +897,38 @@ router.post('/logout', sessionCheck, async(req, res) => {
     }
 })
 
-router.post('/equipment/get', sessionCheck, async(req, res) => {
+router.post('/equipment/qrgenerate/get', sessionCheck, async(req, res) => {
     try {
-        const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
+        const session: Types.localSessionCheck = res.locals.sessionCheck
 
-        if(!session) return sendResponse(res, 500, 'Попытка получения экипа. MW не вернул необходимые данные')
-
+        if(!session) return sendResponse(res, 500, 'Попытка генерации QR получения экипа. MW не вернул необходимые данные')
         
         const newToken = crypto.randomBytes(32).toString('hex')
-        const hashToken = await bcrypt.hash(newToken, 10)
-        const qrId = uuidv4()
-        const now = new Date()
 
-        const lastUserEquip = await EQUIPMENTS_TAB.findOne({
-            where: { userId: session.account.id },
-            order: [['createdAt', 'DESC']]
-        }) 
+        const newEquip = await Equipment.create(session.account.id as number, newToken)
 
-        if(lastUserEquip) {
-            const lastUserEquipModel: Types.Equipment = lastUserEquip.get({ plain: true })
+        const qrId = newEquip.getModel.qrId
 
-            if(lastUserEquipModel.expiresAt > now) {
-                return sendResponse(res, 200, `Попытка получения экипа. Успешная операция. Выдан старый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId: lastUserEquipModel.qrId })
-            } 
-        }
-
-        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/account/qr/equipment/get?token=${newToken}`, `getEquip_${qrId}.png`, 'getEquip')
-
-        if(!qr.status) return sendResponse(res, qr.code, qr.message)
-
-        const newEquip = await EQUIPMENTS_TAB.create({
-            token: hashToken,
-            userId: session.account.id,
-            providerId: null,
-            eventId: null,
-            day: null,
-            expiresAt: new Date(now.getTime() + 15*60*1000),
-            status: 'REQUEST',
-            qrId: `getEquip_${qrId}.png`,
-        })
-
-        return sendResponse(res, 200, `Попытка получения экипа. Успешная операция. Сгенерирован новый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId: `getEquip_${qrId}.png` })
+        return sendResponse(res, 200, `Попытка генерации QR получения экипа. Успешная операция. Сгенерирован новый QR код для выдачи экипа пользователю ${ session.account.id }`, { qrId })
     } catch (e:any) {
-        return sendResponse(res, 500, e.message, undefined, '/account/equipment/get')
+        return sendResponse(res, 500, e.message, undefined, '/account/equipment/qrgenerate/get')
     }
 })
 
-router.post('/equipment/return', sessionCheck, async(req, res) => {
+router.post('/equipment/qrgenerate/return', sessionCheck, async(req, res) => {
     try {
         const session: Types.localSessionCheck | undefined = res.locals.sessionCheck
 
-        if(!session) return sendResponse(res, 500, 'Попытка сдачи экипа. MW не вернул необходимые данные')
+        if(!session) return sendResponse(res, 500, 'Попытка генерации QR сдачи экипа. MW не вернул необходимые данные')
 
         const qrId = uuidv4()
-        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/account/qr/equipment/return?userId=${ session.account.id }`, `returnEquip_${qrId}.png`, 'returnEquip')
+        const qr: Types.moduleReturn = await generateQr(`${config.serverDomain}/api/developer/event/equipment/qr/return/scan?userId=${ session.account.id }`, `returnEquip_${qrId}.png`, 'returnEquip')
         
         if(!qr.status) return sendResponse(res, qr.code, qr.message)
 
-        return sendResponse(res, 200, `Попытка сдачи экипа. Успешная операция. Сгенерирован новый QR код для сдачи экипа пользователя ${ session.account.id }`, { qrId: `returnEquip_${qrId}.png` })
+        return sendResponse(res, 200, `Попытка генерации QR сдачи экипа. Успешная операция. Сгенерирован новый QR код для сдачи экипа пользователя ${ session.account.id }`, { qrId: `returnEquip_${qrId}.png` })
     } catch (e:any) {
-        return sendResponse(res, 500, e.message, undefined, '/account/equipment/return')
+        return sendResponse(res, 500, e.message, undefined, '/account/equipment/qrgenerate/return')
     }
 })
 
