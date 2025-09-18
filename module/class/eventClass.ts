@@ -492,10 +492,37 @@ export class Event {
         return formattedData
     }
 
-    async isCRD(userId: number) {
+    async isCRD(userId: number, ) {
         if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use isCRD() before define it')
 
         const foundPerms = await EVENTPERMS_TAB.findOne({ where: { userId, eventId: this.id } })
+
+        if(foundPerms) return true
+        else return false
+    }
+
+    async isCRDbyDay(userId: number, day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use isCRDbyDay() before define it')
+
+        const foundPerms = await EVENTPERMS_TAB.findOne({ where: { userId, eventId: this.id, day } })
+
+        if(foundPerms) return true
+        else return false
+    }
+
+    async isVolunteer(userId: number, day: string) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use isVolunteer() before define it')
+
+        const foundPerms = await VOLUNTEERS_TAB.findOne({ where: { userId, eventId: this.id, day } })
+
+        if(foundPerms) return true
+        else return false
+    }
+    
+    async isHCRD(userId: number) {
+        if(!this.id) throw new Error('Module eventClass.ts error: Impossible to use isHCRD() before define it')
+
+        const foundPerms = await EVENTPERMS_TAB.findOne({ where: { userId, eventId: this.id, permission: 'HCRD' } })
 
         if(foundPerms) return true
         else return false
