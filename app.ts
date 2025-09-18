@@ -243,6 +243,8 @@ async function showMenu() {
 
         // Закрыть меню
         case "МФИ: ЗАКРЫТ":
+            server = null;
+            task.destroy()
             process.exit();
     }
 }
