@@ -116,9 +116,9 @@ export class Request {
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: accept() undefined currentRequest by id')
 
-        const currentRequestModel = await currentRequest.get({ plain: true })
+        const currentRequestModel: Types.Request = await currentRequest.get({ plain: true })
 
-        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.id } })
+        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.userId } })
         if(!foundUser) throw new Error('Module requestClass.ts error: accept() User undefined')
 
         const foundUserModel: Types.Account = await foundUser.get({ plain: true })
@@ -150,9 +150,9 @@ export class Request {
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: denied() undefined currentRequest by id')
         
-        const currentRequestModel = await currentRequest.get({ plain: true })
+        const currentRequestModel: Types.Request = await currentRequest.get({ plain: true })
 
-        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.id } })
+        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.userId } })
         if(!foundUser) throw new Error('Module requestClass.ts error: denied() User undefined')
 
         const foundUserModel: Types.Account = await foundUser.get({ plain: true })
