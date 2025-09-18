@@ -8,7 +8,7 @@ const AVSTAFFS_TAB = sequelize.define('avstaffs', {
         primaryKey: true,
     },
     userId: { // ID пользователя
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
     },
     role: { // Роль в альянсе (Volunteer, Coordinator, Headquater, Administrator)
         type: DataTypes.STRING
