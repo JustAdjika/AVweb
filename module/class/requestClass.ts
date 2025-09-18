@@ -137,7 +137,10 @@ export class Request {
 
         parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day))
         
-        sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте`)
+        const result = await sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте`)
+    
+        if(!result.status) throw new Error(`Module requestClass.ts error: accept() ${result.message}`)
+
     }
 
     async denied(why: string) {
@@ -158,7 +161,9 @@ export class Request {
 
         await currentRequest.update({ status: 'DENIED' })
 
-        sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была отклонена составом координаторов, по причине: ${why}`)
+        const result = await sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была отклонена составом координаторов, по причине: ${why}`)
+
+        if(!result.status) throw new Error(`Module requestClass.ts error: denied() ${result.message}`)
 
     }
 
