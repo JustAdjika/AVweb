@@ -3,10 +3,12 @@
 // MODULES
 import * as Types from '../types/types.ts'
 import { Volunteer } from './volunteerClass.ts'
+import { sendMail } from '../emailSend.ts'
 
 // DATABASE
 import REQUESTS_TAB from '../../database/requests.js'
 import REQUESTBLACKLISTS_TAB from '../../database/requestBlacklists.js'
+import ACCOUNTS_TAB from '../../database/accounts.js'
 
 // MIDDLEWARES
 
@@ -111,12 +113,15 @@ export class Request {
 
         if(days.length === 0) throw new Error('Module requestClass.ts error: Impossible to accept the request without days')
 
-        // Процесс принятия
-        this.status = 'ACCEPT'
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: accept() undefined currentRequest by id')
-        await currentRequest.update({ status: 'ACCEPT' })
 
+        const currentRequestModel = await currentRequest.get({ plain: true })
+
+        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.id } })
+        if(!foundUser) throw new Error('Module requestClass.ts error: accept() User undefined')
+
+        const foundUserModel: Types.Account = await foundUser.get({ plain: true })
 
         // Процесс внесения в волонтеры
 
@@ -124,20 +129,36 @@ export class Request {
             if(!JSON.parse(this.days as unknown as string).includes(item)) throw new Error('Module requestClass.ts error: Impossible to accept the days, that the user has not selected')
         } 
 
+        this.status = 'ACCEPT'
+
+        await currentRequest.update({ status: 'ACCEPT' })
+
         const parsedDays = JSON.parse(this.days as unknown as string) as string[]
 
         parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day))
         
+        sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте`)
     }
 
-    async denied() {
+    async denied(why: string) {
 
         if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use deny() before define it')
 
-        this.status = 'DENIED'
         const currentRequest = await REQUESTS_TAB.findOne({ where: { id: this.id } })
         if(!currentRequest) throw new Error('Module requestClass.ts error: denied() undefined currentRequest by id')
+        
+        const currentRequestModel = await currentRequest.get({ plain: true })
+
+        const foundUser = await ACCOUNTS_TAB.findOne({ where: { id: currentRequestModel.id } })
+        if(!foundUser) throw new Error('Module requestClass.ts error: denied() User undefined')
+
+        const foundUserModel: Types.Account = await foundUser.get({ plain: true })
+
+        this.status = 'DENIED'
+
         await currentRequest.update({ status: 'DENIED' })
+
+        sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была отклонена составом координаторов, по причине: ${why}`)
 
     }
 

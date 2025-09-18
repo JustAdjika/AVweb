@@ -109,7 +109,9 @@ router.post('/solution/:option/:requestId', sessionCheck, async(req,res) => {
 
         const session = res.locals.sessionCheck as Types.localSessionCheck
 
-        if(isNaN(requestId) || ( option !== 'accept' && option !== 'denied' ) || !arrayCheck.isStringArray(days)) return sendResponse(res, 400, 'Попытка решения заявки. Данные указаны неверно')
+        const reason = req.body.reason
+
+        if(isNaN(requestId) || ( option !== 'accept' && option !== 'denied' ) || !arrayCheck.isStringArray(days) || ( option === 'denied' && !reason )) return sendResponse(res, 400, 'Попытка решения заявки. Данные указаны неверно')
 
         if(!session) return sendResponse(res, 500, 'Попытка решения заявки. MW eventPermsCheck/sessionCheck не передал необходимые данные')
         
@@ -124,7 +126,7 @@ router.post('/solution/:option/:requestId', sessionCheck, async(req,res) => {
         if(!await event.isCRD(session.account.id as number)) return sendResponse(res, 403, 'Попытка решения заявки. Недостаточно прав')
 
         if(option === 'accept') await request.accept(days)
-        else await request.denied()
+        else await request.denied(reason)
 
         return sendResponse(res, 200, `Попытка решения заявки. Успешная операция. Заявка ${requestId} ${option === 'accept' ? 'Одобрена' : 'Отклонена'} координатором ${session.account.id}`)
     } catch (e:any) {
