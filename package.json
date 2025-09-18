@@ -30,6 +30,7 @@
     "luxon": "^3.7.1",
     "mysql2": "^3.14.4",
     "mysql3": "^0.7.4",
+    "node-cron": "^4.2.1",
     "node.js": "^0.0.1-security",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
