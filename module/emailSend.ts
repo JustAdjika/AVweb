@@ -38,7 +38,7 @@ function isValidData(data: unknown): data is mailOptionType {
 
 
 
-export async function sendMail(to: unknown, subject: unknown, text: unknown, html?: unknown): Promise<Types.moduleReturn> {
+export async function sendMail(to: string, subject: string, text: string, html?: string): Promise<Types.moduleReturn> {
     try {
         const data: unknown = { from: 'Alliance of Volunteers Website <allianceofvolunteersweb@gmail.com>', to, subject, text, html }
         if(!isValidData(data)) {
