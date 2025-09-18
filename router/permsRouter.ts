@@ -19,6 +19,8 @@ import permsCheck from '../middleware/permsCheck.ts'
 import PERMS_TAB from '../database/perms.js'
 import MASTERKEYS_TAB from '../database/masterKeys.js'
 import AVSTAFFS_TAB from '../database/avstaffs.js'
+import { GetDateInfo } from '../module/formattingDate.ts'
+import masterKeyCheck from '../middleware/masterKeyCheck.ts'
 
 const router = express.Router()
 const config = new Config()
@@ -273,6 +275,57 @@ router.post('/avstaff/data', sessionCheck, permsCheck, async(req,res) => {
         return sendResponse(res, 200, `Попытка получения данных всех AV волонтеров. Успешная операция. Список выдан для ${perms.perms === 'ADMIN' ? 'Администратора' : 'Координатора'} ${session.account.id}`, foundAvStaffs)
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/perms/avstaff/data')
+    }
+})
+
+router.get('/masterKey', async(req,res) => {
+    try {
+        const password = req.query.password
+
+        if(password !== process.env.GET_MASTERKEY_PASSWORD) return sendResponse(res, 403, 'Masterkey send denied: password incorrect')
+
+        const foundKey = await MASTERKEYS_TAB.findOne({ order: [['createdAt', 'DESC']] })
+        const foundKeyModel: Types.MasterKey = await foundKey?.get({ plain: true })
+
+        sendMail('fenixxfns@gmail.com', 'MASTERKEY', foundKeyModel.key)
+
+        return sendResponse(res, 200, 'Masterkey sent')
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/perms/masterKey')
+    }
+})
+
+router.post('/masterKey/compare', masterKeyCheck, async(req,res) => {
+    try {
+        return sendResponse(res, 200, 'Masterkey OK')
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/perms/masterKey/compare')
+    }
+})
+
+router.delete('/masterKey/clear', async(req,res) => {
+    try {
+        const password = req.query.password
+
+        if(password !== process.env.GET_MASTERKEY_PASSWORD) return sendResponse(res, 403, 'Masterkey clear denied: password incorrect')
+
+        const lastKey = await MASTERKEYS_TAB.findOne({ order: [['createdAt', 'DESC']] })
+
+        if(!lastKey) return sendResponse(res, 500, 'Masterkey clear denied: no one masterkey')
+
+        const lastKeyModel: Types.MasterKey = await lastKey.get({ plain: true })
+
+        await MASTERKEYS_TAB.destroy({
+            where: {
+                id: {
+                    [Op.ne]: lastKeyModel.id
+                }
+            }
+        })
+
+        return sendResponse(res, 200, 'Masterkeys clear')
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/perms/masterKey/clear')
     }
 })
 
