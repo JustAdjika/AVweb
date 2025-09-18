@@ -5,6 +5,7 @@ import POSITIONS_TAB from "./positions.js";
 import EQUIPMENTS_TAB from "./equipments.js";
 import BLACKLISTS_TAB from "./blacklists.js";
 import REQUESTBLACKLISTS_TAB from "./requestBlacklists.js";
+import AVSTAFFS_TAB from "./avstaffs.js";
 
 VOLUNTEERS_TAB.belongsTo(ACCOUNTS_TAB, { foreignKey: "userId" });
 ACCOUNTS_TAB.hasMany(VOLUNTEERS_TAB, { foreignKey: "userId" });
@@ -20,6 +21,9 @@ ACCOUNTS_TAB.hasMany(BLACKLISTS_TAB, { foreignKey: "userId" })
 
 REQUESTBLACKLISTS_TAB.belongsTo(ACCOUNTS_TAB, { foreignKey: "userId" })
 ACCOUNTS_TAB.hasMany(REQUESTBLACKLISTS_TAB, { foreignKey: "userId" })
+
+AVSTAFFS_TAB.belongsTo(ACCOUNTS_TAB, { foreignKey: "userId" })
+ACCOUNTS_TAB.hasMany(AVSTAFFS_TAB, { foreignKey: "userId" })
 
 EQUIPMENTS_TAB.belongsTo(ACCOUNTS_TAB, { 
   foreignKey: "providerId", 
@@ -49,5 +53,6 @@ export {
     POSITIONS_TAB,
     EQUIPMENTS_TAB,
     BLACKLISTS_TAB,
-    REQUESTBLACKLISTS_TAB
+    REQUESTBLACKLISTS_TAB,
+    AVSTAFFS_TAB
 }
