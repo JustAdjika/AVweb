@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 import { useInView } from 'react-intersection-observer';
 import { Slider } from '../components/slider';
-
+import PhoneInput from '../components/phoneInput';
 import { Footer } from '../components/footer';
+import { Config } from '../../config';
+
+import * as Types from '../../module/types/types.ts'
 
 import './style/main.css'
+import 'cleave.js/dist/addons/cleave-phone.ru';
+
 
 type PropsSlide = {
     info: {
@@ -14,6 +20,10 @@ type PropsSlide = {
         staffs: number,
         img: string
     }
+}
+
+type Props = {
+    setErrorMessage: (message: string) => void
 }
 
 const SlideComponent = (props: PropsSlide) => {
@@ -28,7 +38,11 @@ const SlideComponent = (props: PropsSlide) => {
     )
 }
 
-export const Main = () => {
+export const Main = ({ setErrorMessage }: Props) => {
+    const config = new Config()
+
+    // UI
+
     const { ref: titleView, inView: isTitleView } = useInView({ threshold: 0.3 });
 
     const { ref: years1View, inView: isYears1View } = useInView({ threshold: 0.3 });
@@ -126,6 +140,33 @@ export const Main = () => {
         },
     ]
 
+
+
+
+    // UX
+
+    // Форматирование номера
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [message, setMessage] = useState("")
+
+    const sendMessage = async() => {
+        const response = await axios.post(`${config.serverDomain}/api/developer/forms/email/org`, {
+            email,
+            contact: phone,
+            text: message
+        })
+
+        const responseData: Types.Response = response.data
+
+        if(responseData.status === 200) {
+
+        } else {
+
+        }
+    }
+
+
     return (
         <div className='main-body'>
             <div className='main-background-container'>
@@ -133,6 +174,13 @@ export const Main = () => {
                     <span className='main-background-invite-title'>Стать частью нашей <span style={{ color: '#D9910D' }}>Команды</span></span>
                     <div className='main-background-invite-decorative-line' />
                 </button>
+                <div className='main-banner-title-container'>
+                    <h1>ALLIANCE OF</h1>
+                    <div>
+                        <h1>VOLUNTEERS</h1>
+                        <div />
+                    </div>
+                </div>
             </div>
             <div className='main-title-container' ref={titleView} style={{ marginTop: '30px' }}>
                 <h2 className={`main-title-text ${titleViewState ? 'view' : 'hidden'}`}>мечтай, твори и действуй вместе с alliance!</h2>
@@ -198,10 +246,10 @@ export const Main = () => {
                     </div>
                     <h3>Номер телефона</h3>
                     <div>
-                        <input type="text" placeholder='+7 (000) 000 00 00' autoComplete='tel' />
+                        <PhoneInput value={phone} changeValue={setPhone} />
                     </div>
                     <textarea name="" placeholder='Ваше сообщение' id=""></textarea>
-                    <button>Отправить</button>
+                    <button onClick={sendMessage}>Отправить</button>
                 </div>
             </div>
             <Footer />
