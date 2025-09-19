@@ -12,6 +12,9 @@ import * as Types from '../../module/types/types.ts'
 import './style/main.css'
 import 'cleave.js/dist/addons/cleave-phone.ru';
 
+import { ReactComponent as EmailIcon } from "../assets/icons/envelope-solid-full.svg"
+import { ReactComponent as PhoneIcon } from "../assets/icons/phone-icon.svg"
+
 
 type PropsSlide = {
     info: {
@@ -265,10 +268,12 @@ export const Main = ({ setErrorMessage }: Props) => {
                 <div className='main-org-mail-container' style={{ marginBottom: !isMessageSend ? '150px' : '0px' }}>
                     <h3>Почта для обратной связи</h3>
                     <div>
+                        <EmailIcon width={35} height={35} fill='#424242' className='footer-social-icon' style={{marginRight: '10px'}} />
                         <input type="text" placeholder='example@gmail.com' autoComplete='email' onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <h3>Номер телефона</h3>
-                    <div>
+                    <div style={{ display: 'flex', justifyItems: 'center' }}>
+                        <PhoneIcon width={35} height={35} fill='#424242' className='footer-social-icon' style={{marginRight: '10px'}} />
                         <PhoneInput value={phone} changeValue={setPhone} />
                     </div>
                     <textarea name="" placeholder='Ваше сообщение' id="" onChange={(e) => setMessage(e.target.value)}></textarea>
