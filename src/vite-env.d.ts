@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-svgr/client" />
+declare module 'cleave.js/react';
 
 declare module '*.svg' {
   import * as React from 'react';
