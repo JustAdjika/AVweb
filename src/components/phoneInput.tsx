@@ -61,6 +61,7 @@ export default function PhoneInput({ value, changeValue }: Props) {
   return (
     <input
       type="tel"
+      autoComplete="tel"
       value={value}
       onChange={handleChange}
       placeholder="+7 (___) ___ __ __"

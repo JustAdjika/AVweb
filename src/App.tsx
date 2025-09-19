@@ -41,14 +41,23 @@ function App() {
     IIN: '080104551740'
   }
 
+  const [errorMessage, setErrorMessage] = useState<null | string>(null)
+
 
   return (
     screenSize.width < 766 ? (
       <>
         <MenuPHN user={currentUser} />
+        <>
+            {errorMessage && (
+                <div className="error-message" style={{ zIndex: '1' }}>
+                    {errorMessage}
+                </div>
+            )}
+        </>
         <Routes>
-          <Route path='/' element={<Main />} />
-          <Route path='/auth/signin' element={<Main />} />
+          <Route path='/' element={<Main setErrorMessage={setErrorMessage}/>} />
+          {/* <Route path='/auth/signin' element={<Main />} />
           <Route path='/auth/signup' element={<Main />} />
           <Route path='/auth/confirm' element={<Main />} />
           <Route path='/auth/recovery' element={<Main />} />
@@ -58,7 +67,7 @@ function App() {
           <Route path='/event/:eventName/register' element={<Main />} />
           <Route path='/event/:eventName/cms' element={<Main />} />
           <Route path='/event/:eventName/cms/requests' element={<Main />} />
-          <Route path='/event/:eventName/map' element={<Main />} />
+          <Route path='/event/:eventName/map' element={<Main />} /> */}
           <Route path='/about' element={<Works />} />
           <Route path='/contacts' element={<Works />} />
           <Route path='/projects' element={<Works />} />

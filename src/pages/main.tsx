@@ -23,7 +23,7 @@ type PropsSlide = {
 }
 
 type Props = {
-    setErrorMessage: (message: string) => void
+    setErrorMessage: (message: string | null) => void
 }
 
 const SlideComponent = (props: PropsSlide) => {
@@ -150,20 +150,43 @@ export const Main = ({ setErrorMessage }: Props) => {
     const [phone, setPhone] = useState("")
     const [message, setMessage] = useState("")
 
+    const [isMessageSend, setIsMessageSend] = useState<boolean>(false)
+
     const sendMessage = async() => {
-        const response = await axios.post(`${config.serverDomain}/api/developer/forms/email/org`, {
-            email,
-            contact: phone,
-            text: message
-        })
+        if(phone.length < 18 || !email || !message) {
+            const message = `Одно из полей не заполнено!` 
+            console.error(message)
+            setErrorMessage(message)
+            setTimeout(() => setErrorMessage(null), 3000)
 
-        const responseData: Types.Response = response.data
-
-        if(responseData.status === 200) {
-
-        } else {
-
+            console.log(phone.length, email, message)
+            return  
         }
+
+        try {
+            const response = await axios.post(`${config.serverDomain}/api/developer/forms/email/org`, {
+                email,
+                contact: phone,
+                text: message
+            })
+
+            const responseData: Types.Response = response.data
+
+            if(responseData.status === 200) {
+                setIsMessageSend(true)
+                setTimeout(() => setIsMessageSend(false), 5000)
+            } else {
+                const message = `Ошибка ${responseData.status}: ${responseData.message}` 
+                console.error(message)
+                setErrorMessage(message)
+                setTimeout(() => setErrorMessage(null), 3000)
+            }
+        } catch (e: any) { 
+            console.error(e.message)
+            setErrorMessage(e.message)
+            setTimeout(() => setErrorMessage(null), 3000)
+        }
+
     }
 
 
@@ -239,18 +262,19 @@ export const Main = ({ setErrorMessage }: Props) => {
             </div>
             <div className='main-org-container'>
                 <h2 style={{ fontFamily: 'OpenSans_light', fontWeight: 'lighter', fontSize: '15pt', textAlign: 'left', position: 'relative', right: '25px' }}>Заявление для организаторов</h2>
-                <div className='main-org-mail-container'>
+                <div className='main-org-mail-container' style={{ marginBottom: !isMessageSend ? '150px' : '0px' }}>
                     <h3>Почта для обратной связи</h3>
                     <div>
-                        <input type="text" placeholder='example@gmail.com' autoComplete='email' />
+                        <input type="text" placeholder='example@gmail.com' autoComplete='email' onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <h3>Номер телефона</h3>
                     <div>
                         <PhoneInput value={phone} changeValue={setPhone} />
                     </div>
-                    <textarea name="" placeholder='Ваше сообщение' id=""></textarea>
+                    <textarea name="" placeholder='Ваше сообщение' id="" onChange={(e) => setMessage(e.target.value)}></textarea>
                     <button onClick={sendMessage}>Отправить</button>
                 </div>
+                <p style={{ display: isMessageSend ? 'flex' : 'none', marginBottom: '150px', width: '100%', marginLeft: '100px', fontFamily: 'OpenSans_light' }}>Сообщение отправлено</p>
             </div>
             <Footer />
         </div>
