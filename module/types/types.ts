@@ -20,6 +20,8 @@ export type sector = 'B10' | 'B9' | 'B8' | 'B7' | 'B6' | 'B5' | 'B4' | 'B3' | 'B
 
 export type sectorEnter = `${sector}_Enter`
 
+export type statusCode = 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 500
+
 
 
 
@@ -298,6 +300,11 @@ export type moduleReturn = {
     message?: string
 } 
 
+export type Response = {
+    status: statusCode,
+    message?: string,
+    container?: object
+}
 
 
 

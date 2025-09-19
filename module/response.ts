@@ -1,9 +1,10 @@
 import type { Response } from 'express'
 import { GetDateInfo } from './formattingDate.ts'
+import * as Types from '../module/types/types.ts'
 
 export function sendResponse(
     res: Response,
-    status: 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 500 = 200,
+    status: Types.statusCode = 200,
     message?: string,
     container?: object,
     routerPath?: string
