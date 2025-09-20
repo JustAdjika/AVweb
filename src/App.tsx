@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 import { Main } from './pages/main.tsx'
+import { Auth } from './pages/auth.tsx';
+
 import { MenuPHN } from './layouts/menu_phone.tsx';
+import { request } from './serverRequest.ts';
+import { errorLogger } from './errorLogger.ts';
+
+import * as Types from '../module/types/types.ts'
 
 import './App.css'
 
@@ -14,10 +21,8 @@ function Works() {
 
 
 function App() {
-  type User = {
-    id: number,
-    IIN: string
-  }
+
+  // Отслеживание размера экрана
 
   const [screenSize, setScreenSize] = useState({
     width: window.innerWidth,
@@ -36,18 +41,56 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   })
 
-  const currentUser: User = {
-    id: 3,
-    IIN: '080104551740'
-  }
+
+  // Отслеживание ошибки
 
   const [errorMessage, setErrorMessage] = useState<null | string>(null)
 
 
+  // Сессия
+
+  const location = useLocation();
+
+  // const [session, setSession] = useState<Types.Session | null>(null)
+  const [currentUser, setCurrentUser] = useState<Types.Account | null>(null)
+
+  useEffect(() => {
+    (async () => {
+      const cookie: string | undefined = Cookies.get("session")
+
+      console.log(cookie)
+
+      if(cookie) {
+        const parsedSession: Types.Session = JSON.parse(cookie) 
+
+        const res = await request({ 
+          method: 'POST', 
+          route: '/account/data/search', 
+          loadQuery: { id: 7 }, 
+          loadData: {
+            sessionId: parsedSession.id,
+            sessionKey: parsedSession.key
+          } 
+        })
+
+        if(res.status === 200) {
+          const container = res.container as { data: Types.Account }
+          
+          setCurrentUser(container.data)
+        } else errorLogger(setErrorMessage, res)
+      }
+
+    })()
+  }, [location.pathname])
+
+
+  // Отслеживание /auth страниц
+  const showLayout = !location.pathname.startsWith("/auth");
+
   return (
     screenSize.width < 766 ? (
       <>
-        <MenuPHN user={currentUser} />
+        {showLayout ? <MenuPHN user={currentUser} /> : null }
         <>
             {errorMessage && (
                 <div className="error-message" style={{ zIndex: '1' }}>
@@ -57,8 +100,8 @@ function App() {
         </>
         <Routes>
           <Route path='/' element={<Main setErrorMessage={setErrorMessage}/>} />
-          {/* <Route path='/auth/signin' element={<Main />} />
-          <Route path='/auth/signup' element={<Main />} />
+          <Route path='/auth/signin' element={<Auth setErrorMessage={setErrorMessage}/>} />
+          {/* <Route path='/auth/signup' element={<Main />} />
           <Route path='/auth/confirm' element={<Main />} />
           <Route path='/auth/recovery' element={<Main />} />
           <Route path='/user/:iin' element={<Main />} />
