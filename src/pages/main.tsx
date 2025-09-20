@@ -6,6 +6,7 @@ import { Footer } from '../components/footer';
 import { errorLogger } from '../errorLogger.ts';
 import { request } from '../serverRequest.ts';
 import PhoneInput from '../components/phoneInput';
+import Loader from '../components/loader.tsx';
 
 import './style/main.css'
 
@@ -40,6 +41,8 @@ const SlideComponent = (props: PropsSlide) => {
 
 export const Main = ({ setErrorMessage }: Props) => {
     // UI
+    
+    const [isLoad, setIsLoad] = useState<boolean>(false)
 
     const { ref: titleView, inView: isTitleView } = useInView({ threshold: 0.3 });
 
@@ -159,19 +162,19 @@ export const Main = ({ setErrorMessage }: Props) => {
         }
 
         try {
+            setIsLoad(true)
             const res = await request({ route: '/forms/email/org', method: 'POST', loadData: {
                 email,
                 contact: phone,
                 text: message
             } })
 
-            if(res.status === 200) {
-                setIsMessageSend(true)
-                setTimeout(() => setIsMessageSend(false), 5000)
-            } else {
-                errorLogger(setErrorMessage, res)
-            }
+            setIsMessageSend(true)
+            setTimeout(() => setIsMessageSend(false), 5000)
+            
+            setIsLoad(false)
         } catch (e: any) { 
+            setIsLoad(false)
             errorLogger(setErrorMessage, { status: 500, message: e.message })
         }
 
@@ -262,7 +265,9 @@ export const Main = ({ setErrorMessage }: Props) => {
                         <PhoneInput value={phone} changeValue={setPhone} />
                     </div>
                     <textarea name="" placeholder='Ваше сообщение' id="" onChange={(e) => setMessage(e.target.value)}></textarea>
-                    <button onClick={sendMessage}>Отправить</button>
+                    
+                    { isLoad ? <Loader /> : null }
+                    <button style={{ display: !isLoad ? 'block' : 'none'  }} onClick={sendMessage}>Отправить</button>
                 </div>
                 <p style={{ display: isMessageSend ? 'flex' : 'none', marginBottom: '150px', width: '100%', marginLeft: '100px', fontFamily: 'OpenSans_light' }}>Сообщение отправлено</p>
             </div>

@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 
 import { errorLogger } from '../errorLogger.ts';
 import { request } from '../serverRequest.ts';
+import Loader from '../components/loader.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -22,6 +23,8 @@ export const Signin = ({ setErrorMessage }: Props) => {
 
     const [isPassShow, setIsPassShow] = useState(false)
 
+    const [isLoad, setIsLoad] = useState<boolean>(false)
+
 
     // UX
     
@@ -30,15 +33,19 @@ export const Signin = ({ setErrorMessage }: Props) => {
 
     const confirm = async () => {
         try {
+            setIsLoad(true)
             const res = await request({ method: 'POST', route: '/account/login', loadData: { email, password: pass } })
 
             const container = res.container as { accountData: Types.Account, sessionData: { id: number, key: string } }
 
             const sessionData: string = JSON.stringify(container.sessionData)
 
+            setIsLoad(false)
+
             Cookies.set("session", sessionData)
             navigate('/')
         } catch (e: any) {
+            setIsLoad(false)
             const response = e.response
             errorLogger(setErrorMessage, { status: response.data.status, message: response.data.message })
         }
@@ -60,7 +67,8 @@ export const Signin = ({ setErrorMessage }: Props) => {
                 <NavLink to='/auth/recovery' className='signin-but-forgotPass'>Я забыл пароль</NavLink>
                 <div className='signin-bottom-container'>
                     <span>Еще не с нами?<NavLink to='/auth/signup' className='signin-bottom-but-createAccount'>Создать аккаунт</NavLink></span>
-                    <button className='signin-bottom-but-confirm' onClick={confirm}>Подтвердить</button>
+                    { isLoad ? <Loader /> : null }
+                    <button style={{ display: !isLoad ? 'block' : 'none' }} className='signin-bottom-but-confirm' onClick={confirm}>Подтвердить</button>
                 </div>
             </div>
         </div>
