@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 
 import { useInView } from 'react-intersection-observer';
 import { Slider } from '../components/slider';
 import PhoneInput from '../components/phoneInput';
 import { Footer } from '../components/footer';
-import { Config } from '../../config';
-
-import * as Types from '../../module/types/types.ts'
+import { errorLogger } from '../errorLogger.ts';
+import { request } from '../serverRequest.ts';
 
 import './style/main.css'
 import 'cleave.js/dist/addons/cleave-phone.ru';
@@ -42,8 +40,6 @@ const SlideComponent = (props: PropsSlide) => {
 }
 
 export const Main = ({ setErrorMessage }: Props) => {
-    const config = new Config()
-
     // UI
 
     const { ref: titleView, inView: isTitleView } = useInView({ threshold: 0.3 });
@@ -158,36 +154,26 @@ export const Main = ({ setErrorMessage }: Props) => {
     const sendMessage = async() => {
         if(phone.length < 18 || !email || !message) {
             const message = `Одно из полей не заполнено!` 
-            console.error(message)
-            setErrorMessage(message)
-            setTimeout(() => setErrorMessage(null), 3000)
+            errorLogger(setErrorMessage, { status: 400, message })
 
-            console.log(phone.length, email, message)
             return  
         }
 
         try {
-            const response = await axios.post(`${config.serverDomain}/api/developer/forms/email/org`, {
+            const res = await request({ route: '/forms/email/org', method: 'POST', loadData: {
                 email,
                 contact: phone,
                 text: message
-            })
+            } })
 
-            const responseData: Types.Response = response.data
-
-            if(responseData.status === 200) {
+            if(res.status === 200) {
                 setIsMessageSend(true)
                 setTimeout(() => setIsMessageSend(false), 5000)
             } else {
-                const message = `Ошибка ${responseData.status}: ${responseData.message}` 
-                console.error(message)
-                setErrorMessage(message)
-                setTimeout(() => setErrorMessage(null), 3000)
+                errorLogger(setErrorMessage, res)
             }
         } catch (e: any) { 
-            console.error(e.message)
-            setErrorMessage(e.message)
-            setTimeout(() => setErrorMessage(null), 3000)
+            errorLogger(setErrorMessage, { status: 500, message: e.message })
         }
 
     }
