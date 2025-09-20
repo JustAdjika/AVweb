@@ -22,6 +22,8 @@ export type sectorEnter = `${sector}_Enter`
 
 export type statusCode = 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 500
 
+export type requestMethod = 'GET' | 'POST' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD' 
+
 
 
 
@@ -283,6 +285,17 @@ export interface eventInfoObject {
     behavior: (string[])[],
     rules: (string[])[]
 }
+
+export interface serverRequest {
+    route: string,
+    loadData?: object, 
+    loadQuery?: {
+        [key: string]: string | number | null | undefined
+    } | undefined,
+    method: requestMethod
+}
+
+
 
 
 
