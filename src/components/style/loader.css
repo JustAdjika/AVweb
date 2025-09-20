@@ -1,8 +1,8 @@
 .loader {
-  color: #FFF;
+  color: #55868C;
   position: relative;
   font-size: 11px;
-  background: #FFF;
+  background: #55868C;
   animation: escaleY 1s infinite ease-in-out;
   width: 5px;
   height: 5px;
@@ -14,7 +14,7 @@
   position: absolute;
   top: 0;
   left: 10px;
-  background: #FFF;
+  background: #55868C;
   width: 5px;
   height: 5px;
   animation: escaleY 1s infinite ease-in-out;
@@ -26,12 +26,12 @@
 
 @keyframes escaleY {
   0%, 80%, 100% {
-    box-shadow: 0 0;
+    box-shadow: 0 0 #55868C;
     height: 4px;
     top: 0;
   }
   40% {
-    box-shadow: 0 -15px;
+    box-shadow: 0 -15px #55868C;
     height: 15px;
     top: 5px;
   }
