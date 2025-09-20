@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-
 import { useInView } from 'react-intersection-observer';
+
 import { Slider } from '../components/slider';
-import PhoneInput from '../components/phoneInput';
 import { Footer } from '../components/footer';
 import { errorLogger } from '../errorLogger.ts';
 import { request } from '../serverRequest.ts';
+import PhoneInput from '../components/phoneInput';
 
 import './style/main.css'
 
