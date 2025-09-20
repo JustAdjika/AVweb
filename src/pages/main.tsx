@@ -8,7 +8,6 @@ import { errorLogger } from '../errorLogger.ts';
 import { request } from '../serverRequest.ts';
 
 import './style/main.css'
-import 'cleave.js/dist/addons/cleave-phone.ru';
 
 import { ReactComponent as EmailIcon } from "../assets/icons/envelope-solid-full.svg"
 import { ReactComponent as PhoneIcon } from "../assets/icons/phone-icon.svg"
@@ -144,7 +143,7 @@ export const Main = ({ setErrorMessage }: Props) => {
 
     // UX
 
-    // Форматирование номера
+    // Отправка формы
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
     const [message, setMessage] = useState("")
@@ -255,7 +254,7 @@ export const Main = ({ setErrorMessage }: Props) => {
                     <h3>Почта для обратной связи</h3>
                     <div>
                         <EmailIcon width={35} height={35} fill='#424242' className='footer-social-icon' style={{marginRight: '10px'}} />
-                        <input type="text" placeholder='example@gmail.com' autoComplete='email' onChange={(e) => setEmail(e.target.value)} />
+                        <input type="email" placeholder='example@gmail.com' autoComplete='email' onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <h3>Номер телефона</h3>
                     <div style={{ display: 'flex', justifyItems: 'center' }}>
