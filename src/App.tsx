@@ -3,7 +3,8 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 import { Main } from './pages/main.tsx'
-import { Auth } from './pages/auth.tsx';
+import { Signin } from './pages/signin.tsx';
+import { Signup } from './pages/signup.tsx';
 
 import { MenuPHN } from './layouts/menu_phone.tsx';
 import { request } from './serverRequest.ts';
@@ -58,8 +59,6 @@ function App() {
     (async () => {
       const cookie: string | undefined = Cookies.get("session")
 
-      console.log(cookie)
-
       if(cookie) {
         const parsedSession: Types.Session = JSON.parse(cookie) 
 
@@ -100,9 +99,9 @@ function App() {
         </>
         <Routes>
           <Route path='/' element={<Main setErrorMessage={setErrorMessage}/>} />
-          <Route path='/auth/signin' element={<Auth setErrorMessage={setErrorMessage}/>} />
-          {/* <Route path='/auth/signup' element={<Main />} />
-          <Route path='/auth/confirm' element={<Main />} />
+          <Route path='/auth/signin' element={<Signin setErrorMessage={setErrorMessage}/>} />
+          <Route path='/auth/signup' element={<Signup setErrorMessage={setErrorMessage} />} />
+          {/* <Route path='/auth/confirm' element={<Main />} />
           <Route path='/auth/recovery' element={<Main />} />
           <Route path='/user/:iin' element={<Main />} />
           <Route path='/masterRemote' element={<Main />} />

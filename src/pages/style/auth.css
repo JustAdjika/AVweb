@@ -1,4 +1,4 @@
-.auth-body {
+.signin-body {
     background-image: url('../../assets/img/authBackground.png');
     background-position: center;
     background-size: cover;
@@ -9,7 +9,7 @@
     justify-content: center;
     align-items: center;
 }
-.auth-signin-container {
+.signin-container {
     width: 300px;
     height: 380px;
     background-color: rgba(0,0,0,0);
@@ -24,7 +24,7 @@
     align-items: center;
     justify-content: center;
 }
-.auth-signin-container>h2 {
+.signin-container>h2 {
     color: #D9D9D9;
     font-family: 'OpenSans_light';
     font-weight: lighter;
@@ -34,13 +34,13 @@
     right: 5px;
     width: 100%;
 }
-.auth-input-container {
+.signin-input-container {
     display: flex;
     flex-direction: column;
     margin-top: 20px;
     width: 100%;
 }
-.auth-input-container>h3 {
+.signin-input-container>h3 {
     color: #D9D9D9;
     font-family: 'OpenSans_light';
     font-weight: lighter;
@@ -49,7 +49,7 @@
     margin-left: 5px;
     margin-bottom: 5px;
 }
-.auth-input-container>input {
+.signin-input-container>input {
     height: 30px;
     border: none;
     outline: none;
@@ -58,7 +58,7 @@
     padding-left: 10px;
     font-size: 12 pt;
 }
-.auth-but-showPass {
+.signin-but-showPass {
     background-color: rgba(0,0,0,0);
     border: none;
     outline: none;
@@ -69,34 +69,34 @@
     transition: 0.3s;
     text-align: left;
 }
-.auth-but-showPass:hover {
+.signin-but-showPass:hover {
     color: #aaaaaa;
 }
-.auth-but-forgotPass {
+.signin-but-forgotPass {
     font-family: 'OpenSans_light';
     color: #D9D9D9;
     margin-top: 10px;
 }
-.auth-bottom-container {
+.signin-bottom-container {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
     width: 100%;
 }
-.auth-bottom-container {
+.signin-bottom-container {
     color: #D9D9D9;
     font-family: 'OpenSans_light';
     display: flex;
     align-items: center;
 }
-.auth-bottom-container>span {
+.signin-bottom-container>span {
     width: 130px;
     font-size: 11pt;
 }
-.auth-bottom-but-createAccount {
+.signin-bottom-but-createAccount {
     color: #00A3FF;
 }
-.auth-bottom-but-confirm {
+.signin-bottom-but-confirm {
     width: 130px;
     border: none;
     outline: none;
