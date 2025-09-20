@@ -1,3 +1,5 @@
+/* SIGN IN */
+
 .signin-body {
     background-image: url('../../assets/img/authBackground.png');
     background-position: center;
@@ -11,7 +13,7 @@
 }
 .signin-container {
     width: 300px;
-    height: 380px;
+    height: 360px;
     background-color: rgba(0,0,0,0);
     border-radius: 10px;
     border: solid 5px #D9D9D9;
@@ -37,7 +39,7 @@
 .signin-input-container {
     display: flex;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: 10px;
     width: 100%;
 }
 .signin-input-container>h3 {
@@ -105,4 +107,105 @@
     font-size: 12pt;
     font-weight: lighter;
     font-family: 'OpenSans_light';
+}
+
+
+
+
+
+/* SIGN UP */
+
+.signup-body {
+    background-image: url('../../assets/img/authBackground.png');
+    background-position: center;
+    background-size: cover;
+    position: fixed;
+    min-height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.signup-container {
+    width: 340px;
+    height: 610px;
+    background-color: rgba(0,0,0,0);
+    border-radius: 10px;
+    border: solid 5px #D9D9D9;
+    padding: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.signup-container>h2 {
+    color: #D9D9D9;
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    margin: 0px;
+    font-size: 23pt;
+    position: relative;
+    right: 5px;
+    width: 100%;
+}
+.signup-inputdata-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.signup-input-date-container {
+    width: 120px;
+    background-color: #FFF;
+    font-family: 'OpenSans_light';
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 35px;
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.signup-input-date-container>input {
+    background-color: rgba(0,0,0,0);
+    border: none;
+    outline: none;
+    text-align: center;
+    width: 30px;
+    font-size: 13pt;
+    font-weight: lighter;
+}
+.signup-input-date-container>span {
+    font-family: 'OpenSans_light';
+    color: black;
+    font-size: 15pt;
+    font-weight: bold;
+}
+.signup-inputdata-container>div>h3 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    color: #D9D9D9;
+    font-size: 13pt;
+    margin: 0px;
+    margin-top: 10px;
+}
+.singup-region-select {
+    border: none;
+    outline: none;
+    width: 120px;
+    height: 35px;
+    border-radius: 5px;
+    text-align: left;
+    font-size: 13pt;
+    font-weight: lighter;
+    font-family: 'OpenSans_light';
+    padding-left: 10px;
+}
+.signup-container>p {
+    font-family: 'OpenSans_light';
+    color: #D9D9D9;
+    font-size: 10pt;
 }
