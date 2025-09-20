@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import './style/menu_phone.css'
-
-import { ReactComponent as BarIcon } from "../assets/icons/bars-solid-full.svg"
 import { NavLink } from 'react-router-dom';
 
+import { ReactComponent as BarIcon } from "../assets/icons/bars-solid-full.svg"
+import * as Types from '../../module/types/types.ts'
+
+import './style/menu_phone.css'
+
 type Props = {
-    user: {
-        id: number,
-        IIN: string
-    }
+    user: Types.Account | null
 }
 
 export const MenuPHN = (props: Props) => {
@@ -21,7 +20,7 @@ export const MenuPHN = (props: Props) => {
                 <div className='nav-phn-logo'>ALLIANCE</div>
                 <div className='nav-phn-but-wrapper'>
                     <div className='nav-phn-container-but'>
-                        <a href={`/user/${props.user.IIN}${props.user.id}`} className='nav-phn-but std' style={{ marginBottom: '30px' }}>Кабинет</a>
+                        <a href={ props.user ? `/user/${props.user.iin}${props.user.id}` : '/auth/signin'} className='nav-phn-but std' style={{ marginBottom: '30px' }}>{ props.user ? 'Кабинет' : 'Войти' }</a>
                         <NavLink onClick={ () => setState(false) } to='/' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Главная</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/about' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>О нас</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/contacts' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Контакты</NavLink>
