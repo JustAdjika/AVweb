@@ -38,13 +38,11 @@ export const Signin = ({ setErrorMessage }: Props) => {
 
             const container = res.container as { userData: Types.Account, sessionData: { id: number, key: string } }
 
-            const sessionData: string = JSON.stringify(container.sessionData)
-            const userData: string = JSON.stringify({ id: container.userData.id as number })
+            const sessionData: string = JSON.stringify({ ...container.sessionData, userId: container.userData.id })
 
             setIsLoad(false)
 
             Cookies.set("session", sessionData)
-            Cookies.set("userData", userData)
             navigate('/')
         } catch (e: any) {
             setIsLoad(false)

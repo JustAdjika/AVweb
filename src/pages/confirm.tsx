@@ -34,12 +34,11 @@ export const Confirm = ({ setErrorMessage }: Props) => {
 
             const container = res.container as { userData: Types.Account, sessionData: { id: number, key: string } }
 
-            const sessionData: string = JSON.stringify(container.sessionData)
+            const sessionData: string = JSON.stringify({ ...container.sessionData, userId: container.userData.id })
 
             setIsLoad(false)
 
             Cookies.set("session", sessionData)
-            Cookies.set("userData", JSON.stringify({ id: container.userData.id as number }))
             navigate('/')
         } catch (e: any) {
             setIsLoad(false)
