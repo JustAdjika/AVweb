@@ -36,14 +36,15 @@ export const Signin = ({ setErrorMessage }: Props) => {
             setIsLoad(true)
             const res = await request({ method: 'POST', route: '/account/login', loadData: { email, password: pass } })
 
-            const container = res.container as { accountData: Types.Account, sessionData: { id: number, key: string } }
+            const container = res.container as { userData: Types.Account, sessionData: { id: number, key: string } }
 
             const sessionData: string = JSON.stringify(container.sessionData)
+            const userData: string = JSON.stringify({ id: container.userData.id as number })
 
             setIsLoad(false)
 
             Cookies.set("session", sessionData)
-            Cookies.set("userData", JSON.stringify({ id: container.accountData.id as number }))
+            Cookies.set("userData", userData)
             navigate('/')
         } catch (e: any) {
             setIsLoad(false)
