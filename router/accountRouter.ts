@@ -452,12 +452,16 @@ router.post('/data/search', sessionCheck, permsCheck, async(req, res) => {
     try {
         const id = Number(req.query.id)
 
+        const session: Types.localSessionCheck = res.locals.sessionCheck
+
+        if(!session) return sendResponse(res, 500, 'MW SessionCheck не вернул необходимые данные')
+
         if(!id || isNaN(id)) return sendResponse(res, 400, 'Попытка получения акканта. Данные указаны неверно')
 
         const hunterSession = res.locals.sessionCheck?.account as Types.Account
         const hunterPerms = res.locals.permsCheck?.perms as 'USER' | 'ADMIN' | 'COORDINATOR'
 
-        if(hunterPerms === 'USER') return sendResponse(res, 403, 'Попытка получения аккаунта. Недостаточно прав')
+        if(hunterPerms === 'USER' && session.account.id !== id) return sendResponse(res, 403, 'Попытка получения аккаунта. Недостаточно прав')
 
         const foundData = await ACCOUNTS_TAB.findOne({ where: { id } })
         if(!foundData) return sendResponse(res, 404, 'Попытка получения аккаунта. Пользователь не найден')
