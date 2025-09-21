@@ -107,6 +107,10 @@
     font-size: 12pt;
     font-weight: lighter;
     font-family: 'OpenSans_light';
+    transition: 0.3s;
+}
+.signin-bottom-but-confirm:hover {
+    background-color: #9c9c9c;
 }
 
 
