@@ -136,7 +136,7 @@ export class Equipment {
             newEquipModel.expiresAt,
             newEquipModel.status
         )
-        }
+    }
 
 
 
