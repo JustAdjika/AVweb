@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
 
 import { errorLogger } from '../errorLogger.ts';
 import { request } from '../serverRequest.ts';

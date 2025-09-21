@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { Main } from './pages/main.tsx'
 import { Signin } from './pages/signin.tsx';
 import { Signup } from './pages/signup.tsx';
+import { Confirm } from './pages/confirm.tsx';
 
 import { MenuPHN } from './layouts/menu_phone.tsx';
 import { request } from './serverRequest.ts';
@@ -101,8 +102,8 @@ function App() {
           <Route path='/' element={<Main setErrorMessage={setErrorMessage}/>} />
           <Route path='/auth/signin' element={<Signin setErrorMessage={setErrorMessage}/>} />
           <Route path='/auth/signup' element={<Signup setErrorMessage={setErrorMessage} />} />
-          {/* <Route path='/auth/confirm' element={<Main />} />
-          <Route path='/auth/recovery' element={<Main />} />
+          <Route path='/auth/confirm/:token' element={<Confirm setErrorMessage={setErrorMessage} />} />
+          {/* <Route path='/auth/recovery' element={<Main />} />
           <Route path='/user/:iin' element={<Main />} />
           <Route path='/masterRemote' element={<Main />} />
           <Route path='/event/:eventName' element={<Main />} />
@@ -113,7 +114,7 @@ function App() {
           <Route path='/about' element={<Works />} />
           <Route path='/contacts' element={<Works />} />
           <Route path='/projects' element={<Works />} />
-          <Route path="*" element={<h1 style={{ color: '#1A1A1A', margin: '0px', position: 'relative', top: '50px', left: '70px' }}>404. Page not found</h1>} />
+          <Route path="/*" element={<h1 style={{ color: '#1A1A1A', margin: '0px', position: 'relative', top: '0px', left: '70px' }}>404. Page not found</h1>} />
         </Routes>
       </>
     ) : (

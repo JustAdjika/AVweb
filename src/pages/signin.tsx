@@ -43,6 +43,7 @@ export const Signin = ({ setErrorMessage }: Props) => {
             setIsLoad(false)
 
             Cookies.set("session", sessionData)
+            Cookies.set("userData", JSON.stringify({ id: container.accountData.id as number }))
             navigate('/')
         } catch (e: any) {
             setIsLoad(false)

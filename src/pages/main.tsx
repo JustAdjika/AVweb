@@ -163,7 +163,7 @@ export const Main = ({ setErrorMessage }: Props) => {
 
         try {
             setIsLoad(true)
-            const res = await request({ route: '/forms/email/org', method: 'POST', loadData: {
+            await request({ route: '/forms/email/org', method: 'POST', loadData: {
                 email,
                 contact: phone,
                 text: message
