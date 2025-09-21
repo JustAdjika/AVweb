@@ -1,0 +1,233 @@
+.profile-body {
+    height: 100%;
+    padding: 20px;
+    padding-left: 50px;
+}
+.profile-header-container {
+    display: flex;
+    flex-direction: column;
+}
+.profile-header-container>h1 {
+    font-size: 20pt;
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+}
+.profile-role {
+    background-color: rgba(0,0,0,0);
+    border: solid 4px #077471;
+    box-sizing: border-box;
+    width: 170px;
+    height: 40px;
+    border-radius: 5px;
+    color: #077471;
+    font-family: 'Bebas_bold';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20pt;
+    text-align: center;
+}
+.profile-role>span {
+    position: relative;
+    top: 3px;
+}
+.profile-personalinfo-note {
+    width: 250px;
+    height: 90px;
+    background-color: #D9D9D9;
+    position: absolute;
+    right: 50px;
+    margin-top: 70px;
+    border: solid 3px #1a1a1a;
+    border-radius: 7px;
+    box-shadow: 0px 0px 5px 3px rgba(59, 59, 59, 0.365);
+    transition: 0.15s ease-in;
+    font-family: 'OpenSans_light';
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    text-decoration: underline;
+    user-select: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.profile-personalinfo-note.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+
+
+
+.profile-pesonalinfo-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+.profile-personalinfo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.profile-personalinfo-header>h2 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    font-size: 17pt;
+}
+.profile-personalinfo-container {
+    border: solid 3px #CACACA;
+    border-radius: 7px;
+    padding: 15px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+.profile-personalinfo-option-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.profile-personalinfo-option-title {
+    font-family: 'OpenSans_light';
+    font-size: 15pt;
+}
+.profile-personalinfo-option-value {
+    font-family: 'OpenSans_light';
+    font-size: 12pt;
+    color: #797979;
+}
+
+
+
+
+
+.profile-contactinfo-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+.profile-contactinfo-wrapper>h2 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    font-size: 17pt;
+}
+.profile-contactinfo-container {
+    border: solid 3px #CACACA;
+    border-radius: 7px;
+    padding: 15px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+.profile-contactinfo-option-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.profile-contactinfo-option-title {
+    font-family: 'OpenSans_light';
+    font-size: 15pt;
+}
+.profile-contactinfo-option-value {
+    font-family: 'OpenSans_light';
+    font-size: 12pt;
+    color: #797979;
+}
+.profile-contactinfo-footer {
+    display: flex;
+    margin-top: 10px;
+}
+.profile-contactinfo-edit {
+    background-color: rgba(0,0,0,0);
+    border-radius: 7px;
+    border: none;
+    outline: none;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'OpenSans_light';
+    font-size: 12pt;
+    margin-right: 10px;
+    height: 35px;
+    transition: 0.3s;
+}
+.profile-contactinfo-edit:hover {
+    background-color: #b8b8b8;
+}
+
+
+
+
+
+.profile-personconfirm-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+.profile-personconfirm-container>h2 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    font-size: 17pt;
+    margin-bottom: 0px;
+}
+.profile-personconfirm-container>p {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    font-size: 13pt;
+    padding: 15px;
+    border-radius: 7px;
+    border: solid 3px #CACACA;
+}
+.profile-personconfirm-status-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    width: 220px;
+    font-family: 'OpenSans_light';
+    font-size: 15pt;
+}
+.profile-personconfirm-status-value {
+    font-size: 13pt;
+}
+.profile-personconfirm-input {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    width: 190px;
+    height: 35px;
+    align-items: center;
+    font-family: 'OpenSans_light';
+    font-size: 15pt;
+    border-radius: 7px;
+    border: solid 2px #1a1a1a;
+    background-color: #d9d9d9;
+    transition: 0.3s;
+}
+.profile-personconfirm-input:hover {
+    background-color: #bebebe;
+}
+.profile-qr-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+.profile-qr-container>button {
+    background-color: #d9d9d9;
+    border-radius: 7px;
+    border: solid 2px #1a1a1a;
+    height: 40px;
+    margin-top: 10px;
+    font-family: 'OpenSans_light';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15pt;
+    transition: 0.3s;
+}
+.profile-qr-container>button:hover {
+    background-color: #bebebe;
+}
