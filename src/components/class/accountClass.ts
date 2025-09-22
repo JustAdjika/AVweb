@@ -16,12 +16,24 @@ export class Account {
 
     static async create(setErrorMessage: (message: string | null) => void): Promise<Account> {
         const user = await getUser({ setErrorMessage }) as Types.Account
-        
-        const isVolunteer = await request({ method: 'GET', route: '/perms/is/AV_VOLUNTEER', loadQuery: { userId: user.id } })
-        const isCoordinator = await request({ method: 'GET', route: '/perms/is/COORDINATOR', loadQuery: { userId: user.id } })
-        const isAdmin = await request({ method: 'GET', route: '/perms/is/ADMIN', loadQuery: { userId: user.id } })
 
-        const extendedAccount: extendedAccount = { ...user, role: isAdmin ? 'ADMIN' : isCoordinator ? 'COORDINATOR' : isVolunteer ? 'VOLUNTEER' : 'USER' }
+        interface correctReturnData {
+            status: Types.statusCode,
+            container: {
+                result: boolean
+            }
+        }
+        
+        const isVolunteer = await request({ method: 'GET', route: '/perms/is/AV_VOLUNTEER', loadQuery: { userId: user.id } }) as correctReturnData
+        const isCoordinator = await request({ method: 'GET', route: '/perms/is/COORDINATOR', loadQuery: { userId: user.id } }) as correctReturnData
+        const isAdmin = await request({ method: 'GET', route: '/perms/is/ADMIN', loadQuery: { userId: user.id } }) as correctReturnData
+
+        if(!isAdmin?.container || !isCoordinator.container || !isVolunteer.container) {
+            const errorAccount: extendedAccount = { ...user, role: 'USER' } 
+            return new Account(errorAccount)
+        }
+
+        const extendedAccount: extendedAccount = { ...user, role: isAdmin.container.result ? 'ADMIN' : isCoordinator.container.result ? 'COORDINATOR' : isVolunteer.container.result ? 'VOLUNTEER' : 'USER' }
 
         return new Account(extendedAccount);
     }
@@ -66,6 +78,8 @@ export class Account {
 
     async updateEmailconfirm({ code, token }: { code: string, token: string }) {
         const session = Cookies.get("session")
+
+        console.log('sta')
 
         if(session) {
             const parsedSession = JSON.parse(session) as Types.Session
@@ -128,6 +142,24 @@ export class Account {
 
             if(res.status === 200) return res as { status: Types.statusCode, container: { qrId: string } }
             else return res
+        }
+    }
+
+    async changePassword({ oldPassword, newPassword }: { oldPassword: string, newPassword: string }) {
+        const session = Cookies.get("session")
+
+        if(session) {
+            const parsedSession = JSON.parse(session) as Types.Session
+
+            const res = await request({ method: 'PATCH', route: `/account/password/change`, loadData: {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key,
+                userId: parsedSession.userId,
+                oldPassword,
+                newPassword
+            } })
+
+            return res
         }
     }
 }
