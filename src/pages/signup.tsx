@@ -91,7 +91,6 @@ export const Signup = ({ setErrorMessage }: Props) => {
 
     const confirm = async () => {
         if(birthday.length < 8) return errorLogger(setErrorMessage, { status: 400, message: 'Дата рождения указана неверно' })
-        if(iin.length < 12) return errorLogger(setErrorMessage, { status: 400, message: 'ИИН указан неверно' })
         if(pass.length < 8) return errorLogger(setErrorMessage, { status: 400, message: 'Длина пароля должна быть не менее 8 символов' })
 
         try {
@@ -186,7 +185,7 @@ export const Signup = ({ setErrorMessage }: Props) => {
 
                 <div className='signin-input-container'>
                     <h3>ИИН</h3>
-                    <input type='text' autoComplete='off' value={iin} onChange={handleIinChange} placeholder='XXXXXXXXXXXX'/>
+                    <input type='text' autoComplete='off' value={iin} maxLength={12} onChange={handleIinChange} placeholder='XXXXXXXXXXXX'/>
                 </div>
 
                 <p>Обязательно! Для участия в проектах указывайте реальные данные </p>
