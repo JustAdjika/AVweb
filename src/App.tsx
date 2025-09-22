@@ -9,6 +9,7 @@ import { Confirm } from './pages/confirm.tsx';
 import { Recovery } from './pages/recovery.tsx';
 import { RecoveryLink } from './pages/recoveryLink.tsx';
 import { Profile } from './pages/profile.tsx';
+import { Event } from './pages/event.tsx';
 
 import { MenuPHN } from './layouts/menu_phone.tsx';
 import { request } from './serverRequest.ts';
@@ -94,9 +95,9 @@ function App() {
           <Route path='/auth/recovery' element={<Recovery setErrorMessage={setErrorMessage} />} />
           <Route path='/passwordRecovery' element={<RecoveryLink setErrorMessage={setErrorMessage} />} />
           <Route path='/user/:iin' element={<Profile setErrorMessage={setErrorMessage} />} />
-          {/* <Route path='/masterRemote' element={<Main />} />
-          <Route path='/event/:eventName' element={<Main />} />
-          <Route path='/event/:eventName/register' element={<Main />} />
+          {/* <Route path='/masterRemote' element={<Main />} /> */}
+          <Route path='/event/atp250' element={<Event setErrorMessage={setErrorMessage}/>} />
+          {/* <Route path='/event/:eventName/register' element={<Main />} />
           <Route path='/event/:eventName/cms' element={<Main />} />
           <Route path='/event/:eventName/cms/requests' element={<Main />} />
           <Route path='/event/:eventName/map' element={<Main />} /> */}
