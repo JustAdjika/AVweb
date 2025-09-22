@@ -30,3 +30,7 @@ body {
   font-family: 'OpenSans_light';
   src: url('/src/assets/fonts/OpenSans-Light.ttf');
 }
+@font-face {
+  font-family: "Bebas_light";
+  src: url('/src/assets/fonts/Bebas_light.ttf')
+}
