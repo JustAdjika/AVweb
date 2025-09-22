@@ -1,9 +1,12 @@
 type Props = {
-  value: string;
+  value: string | null;
   changeValue: (val: string) => void;
+  style?: object;
+  className?: string;
+  autoComplete?: string
 };
 
-export default function PhoneInput({ value, changeValue }: Props) {
+export default function PhoneInput({ value, changeValue, style, className, autoComplete = "tel" }: Props) {
   function formatPhone(raw: string) {
     const digits = raw.replace(/\D/g, "").slice(0, 11);
 
@@ -18,7 +21,7 @@ export default function PhoneInput({ value, changeValue }: Props) {
       result += " " + digits.slice(7, 9);
     }
     if (digits.length >= 9) {
-      result += " " + digits.slice(9, 11);
+      result += digits.slice(9, 11);
     }
     return result;
   }
@@ -61,9 +64,11 @@ export default function PhoneInput({ value, changeValue }: Props) {
   return (
     <input
       type="tel"
-      autoComplete="tel"
-      value={value}
+      autoComplete={autoComplete}
+      value={value || ""}
       onChange={handleChange}
+      style={style}
+      className={className}
       placeholder="+7 (___) ___ __ __"
     />
   );
