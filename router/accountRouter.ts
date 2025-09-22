@@ -232,7 +232,7 @@ router.post('/emailconfirm/:token', async(req, res) => {
                 email: parsedData.email,
                 password: await bcrypt.hash(parsedData.password, 10),
                 contactKaspi: null,
-                contactWhatspapp: null,
+                contactWhatsapp: null,
                 idCardId: null,
                 personalQrId: personalQrName,
                 registerAt: new Date(),
