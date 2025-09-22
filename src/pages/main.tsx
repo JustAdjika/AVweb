@@ -154,7 +154,7 @@ export const Main = ({ setErrorMessage }: Props) => {
     const [isMessageSend, setIsMessageSend] = useState<boolean>(false)
 
     const sendMessage = async() => {
-        if(phone.length < 18 || !email || !message) {
+        if(phone.length < 17 || !email || !message) {
             const message = `Одно из полей не заполнено!` 
             errorLogger(setErrorMessage, { status: 400, message })
 
