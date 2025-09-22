@@ -371,6 +371,10 @@ router.post('/emailChange', sessionCheck, async(req, res) => {
         if(userSession.id !== data.userId) return sendResponse(res, 403, 'Попытка смены почты. Пользователь сессии и целевой пользователь не совпадают')
 
 
+        const foundConflict = await ACCOUNTS_TAB.findOne({ where: { email: data.newEmail } })
+
+        if(foundConflict) return sendResponse(res, 409, 'Попытка смены почты. Пользователь с такой почтой уже существует')
+
 
         const token = crypto.randomBytes(32).toString('hex')
         const confirmCode = crypto.randomBytes(3).toString('hex').toUpperCase()
