@@ -612,6 +612,10 @@ router.post('/idCard/upload', sessionCheck, async(req, res) => {
         const foundAccount = await ACCOUNTS_TAB.findOne({ where: { id: sessionAccount.account.id } })
         if(!foundAccount) return sendResponse(res, 500, 'Попытка загрузки удостоверения. Сессия не привязана к аккаунту')
 
+        await foundAccount.update({
+            idCardConfirm: 'AWAITING'
+        })
+
         foundAccount.update({ idCardId: fileName })
 
         return sendResponse(res, 200, `Попытка загрузки удостоверения. Успешная операция. Удостоверение ${ sessionAccount.account.id } загружено и ждет подтверждения`)
