@@ -6,6 +6,8 @@ import dotenv from 'dotenv'
 import cron from 'node-cron'
 import crypto from 'crypto'
 import axios from 'axios'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 // MODULES
 import { Config } from './config.ts'
@@ -47,6 +49,9 @@ import permsRouter from './router/permsRouter.ts'
 
 let server: any = null
 let task: any = null
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 function generateKey(): string {
     return crypto.randomBytes(64).toString('hex')
@@ -106,6 +111,17 @@ async function showMenu() {
                 app.use(cors())
                 app.use(express.json())
 
+                app.use('/api/developer/account', accountRouter)
+                app.use('/api/developer/forms', formsRouter)
+                app.use('/api/developer/event', eventRouter)
+                app.use('/api/developer/event/request', eventRequestRouter)
+                app.use('/api/developer/event/volunteer', volunteerRouter)
+                app.use('/api/developer/event/position', positionRouter)
+                app.use('/api/developer/event/equipment', equipmentRouter)
+                app.use('/api/developer/measure', measuresRouter)
+                app.use('/api/developer/perms', permsRouter)
+                app.use("/uploads", express.static("uploads"))
+
                 const startServer = async () => {
                     try {
                         console.log('\x1b[37m================\x1b[0m')
@@ -119,16 +135,6 @@ async function showMenu() {
                         dotenv.config()
 
                         server = app.listen(config.serverPort, '0.0.0.0', () => {
-                            app.use('/api/developer/account', accountRouter)
-                            app.use('/api/developer/forms', formsRouter)
-                            app.use('/api/developer/event', eventRouter)
-                            app.use('/api/developer/event/request', eventRequestRouter)
-                            app.use('/api/developer/event/volunteer', volunteerRouter)
-                            app.use('/api/developer/event/position', positionRouter)
-                            app.use('/api/developer/event/equipment', equipmentRouter)
-                            app.use('/api/developer/measure', measuresRouter)
-                            app.use('/api/developer/perms', permsRouter)
-
                             task = cron.schedule("0 */6 * * *", saveKey)
 
                             saveKey()
@@ -160,6 +166,17 @@ async function showMenu() {
             app.use(cors())
             app.use(express.json())
 
+            app.use('/api/developer/account', accountRouter)
+            app.use('/api/developer/forms', formsRouter)
+            app.use('/api/developer/event', eventRouter)
+            app.use('/api/developer/event/request', eventRequestRouter)
+            app.use('/api/developer/event/volunteer', volunteerRouter)
+            app.use('/api/developer/event/position', positionRouter)
+            app.use('/api/developer/event/equipment', equipmentRouter)
+            app.use('/api/developer/measure', measuresRouter)
+            app.use('/api/developer/perms', permsRouter)
+            app.use("/uploads", express.static("uploads"))
+
             const startServer = async () => {
                 try {
                     console.log('\x1b[37m================\x1b[0m')
@@ -173,16 +190,6 @@ async function showMenu() {
                     dotenv.config()
 
                     server = app.listen(config.serverPort, '0.0.0.0', () => {
-                        app.use('/api/developer/account', accountRouter)
-                        app.use('/api/developer/forms', formsRouter)
-                        app.use('/api/developer/event', eventRouter)
-                        app.use('/api/developer/event/request', eventRequestRouter)
-                        app.use('/api/developer/event/volunteer', volunteerRouter)
-                        app.use('/api/developer/event/position', positionRouter)
-                        app.use('/api/developer/event/equipment', equipmentRouter)
-                        app.use('/api/developer/measure', measuresRouter)
-                        app.use('/api/developer/perms', permsRouter)
-
                         task = cron.schedule("0 */6 * * *", saveKey)
 
                         saveKey()
