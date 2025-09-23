@@ -319,6 +319,16 @@ export type Response = {
     container?: object
 }
 
+export type preParsedEvent = {
+    id?: number,
+    name: string,
+    info: string,
+    uniqueInfo: string,
+    guilds: string,
+    days: string,
+    isRegisterOpen: boolean
+}
+
 
 
 
