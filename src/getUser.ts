@@ -33,6 +33,6 @@ export const getUser = async({ setErrorMessage }: Props) => {
         }
     } catch (e: any) {
         const response = e.response
-        errorLogger(setErrorMessage, { status: response.data.status, message: response.data.message })
+        return errorLogger(setErrorMessage, { status: response.data.status, message: response.data.message })
     }
 }
