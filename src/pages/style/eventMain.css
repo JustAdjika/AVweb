@@ -166,7 +166,7 @@
     transition: 0.3s;
 }
 .event-dresscode-editicon:hover {
-    background-color: #b1b1b1;
+    fill: #b1b1b1;
     border-radius: 5px;
 }
 .event-dresscode-cms-container {
@@ -219,4 +219,139 @@
 }
 .event-dresscode-cms-add:hover {
     background-color: #b1b1b1;
+}
+
+
+
+.event-behavior-wrapper {
+    margin-left: 50px;
+    display: flex;
+    flex-direction: column;
+}
+.event-behavior-container {
+    border: solid 5px #CACACA;
+    border-radius: 7px;
+    margin-right: 20px;
+    padding-right: 15px;
+    margin-top: 10px;
+    position: relative;
+}
+.event-behavior-option-container {
+    margin-left: 15px;
+}
+.event-behavior-header {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    margin-top: 20px;
+    width: 290px;
+    user-select: none;
+    padding-left: 10px;
+    transition: 0.3s;
+}
+.event-behavior-header:hover {
+    background-color: #b1b1b1;
+    border-radius: 10px;
+}
+.event-behavior-header>h2 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+}
+.event-behavior-option-container>h3 {
+    font-family: 'OpenSans_light';
+    font-weight: lighter;
+    font-size: 17pt;
+}
+.event-behavior-option-container>ul>li {
+    font-family: 'OpenSans_light';
+    font-size: 13pt;
+    margin-bottom: 5px;
+}
+.event-behavior-editicon {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    transition: 0.3s;
+}
+.event-behavior-editicon:hover {
+    border-radius: 5px;
+    fill: #b1b1b1;
+}
+.event-behavior-savebut {
+    height: 40px;
+    width: 100%;
+    margin-top: 10px;
+    background-color: #1A1A1A;
+    border: none;
+    outline: none;
+    color: #D9D9D9;
+    font-family: 'OpenSans_light';
+    border-radius: 7px;
+    font-size: 14pt;
+    transition: 0.3s;
+}
+.event-behavior-savebut.denied {
+    background-color: #afafaf;
+} 
+.event-behavior-savebut.denied:hover {
+    background-color: #afafaf;
+} 
+.event-behavior-savebut:hover {
+    background-color: #505050;
+}
+.event-behavior-savebut.cancel {
+    background-color: rgba(0,0,0,0);
+    color: #1A1A1A;
+    font-size: 12pt;
+}
+.event-behavior-savebut.cancel:hover {
+    background-color: #b1b1b1;
+}
+.event-behavior-alert-cantsave {
+    position: absolute;
+    font-family: 'OpenSans_light';
+    box-shadow: 0px 0px 3px #a13d3d;
+    border: solid 2px #c47575;
+    border-radius: 5px;
+    background-color: #D9D9D9;
+    padding: 10px;
+    bottom: 80px;
+    left: 90px;
+    width: 200px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.event-behavior-alert-cantsave.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.event-behavior-cms-item-container {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+.event-behavior-cms-item-container>button {
+    background-color: #1A1A1A;
+    border: none;
+    outline: none;
+    width: 20px;
+    height: 5px;
+    border-radius: 10px;
+    margin-right: 5px;
+}
+.event-behavior-cms-item-container>input {
+    height: 35px;
+    width: 240px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    background-color: #D9D9D9;
+    box-shadow: 0px 0px 5px #505050;
+    font-family: 'OpenSans_light';
+    padding-left: 20px;
+    font-size: 12pt;
+    box-sizing: border-box;
 }
