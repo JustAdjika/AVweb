@@ -27,7 +27,7 @@ export const MenuPHN = (props: Props) => {
                 <div className='nav-phn-logo'>ALLIANCE</div>
                 <div className='nav-phn-but-wrapper'>
                     <div className='nav-phn-container-but'>
-                        <a href={ props.user ? `/user/${props.user.iin}${props.user.id}` : '/auth/signin'} className='nav-phn-but std' style={{ marginBottom: '30px' }}>{ props.user ? 'Кабинет' : 'Войти' }</a>
+                        <a href={ props.user ? `/user/${props.user.iin}${props.user.id}` : '/auth/signin'} className='nav-phn-but signin'>{ props.user ? 'Кабинет' : 'Войти' }</a>
                         <NavLink onClick={ () => setState(false) } to='/' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Главная</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/about' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>О нас</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/contacts' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Контакты</NavLink>

@@ -116,11 +116,17 @@ export const ATPMenuPHN = (props: Props) => {
                 <div className='nav-phn-logo'>ALLIANCE</div>
                 <div className='nav-phn-but-wrapper'>
                     <div className='nav-phn-container-but'>
-                        <a href={ props.user ? `/user/${props.user.iin}${props.user.id}` : '/auth/signin'} className='nav-phn-but std' style={{ marginBottom: '30px' }}>{ props.user ? 'Кабинет' : 'Войти' }</a>
+                        <a href={ props.user ? `/user/${props.user.iin}${props.user.id}` : '/auth/signin'} className='nav-phn-but signin' style={{ marginBottom: '30px' }}>{ props.user ? 'Кабинет' : 'Войти' }</a>
                         <NavLink end onClick={ () => setState(false) } to='/event/atp250' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Инфо</NavLink>
                         <NavLink style={{ display: isVol ? 'flex' : 'none' }} end onClick={ () => setState(false) } to='/event/atp250/map' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Арена</NavLink>
                         <NavLink style={{ display: !isVol ? 'flex' : 'none' }} end onClick={ () => setState(false) } to='/event/atp250/register' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Запись</NavLink>
-                        <NavLink style={{ display: isCRD ? 'flex' : 'none' }} end onClick={ () => setState(false) } to='/event/atp250/cms' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Панель</NavLink>
+                        <a 
+                            href="/event/atp250/cms" 
+                            className='nav-phn-but std' 
+                            style={{ 
+                                display: isCRD ? 'block' : 'none', 
+                                textDecoration: 'none', 
+                            }}>Панель</a>
                     </div>
                     <div className='nav-phn-but-close' onClick={ !state ? () => {} : () => setState(false) } />
                 </div>
