@@ -63,26 +63,4 @@ export class Event {
             throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
-
-
-    
-    // async updateContactInfo({ contactWhatsapp, contactKaspi }: { contactWhatsapp: string | null, contactKaspi: string | null }) {
-    //     const session = Cookies.get("session")
-
-    //     if(session) {
-    //         const parsedSession = JSON.parse(session) as Types.Session
-
-    //         const res = await request({ method: 'PUT', route: '/account/info/contact/edit', loadData: {
-    //             userId: this.data.id,
-    //             sessionId: parsedSession.id,
-    //             sessionKey: parsedSession.key,
-    //             contactInfo: {
-    //                 contactKaspi,
-    //                 contactWhatsapp
-    //             }
-    //         } })
-
-    //         return res
-    //     }
-    // }
 }
