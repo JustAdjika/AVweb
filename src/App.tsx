@@ -9,8 +9,10 @@ import { Recovery } from './pages/recovery.tsx';
 import { RecoveryLink } from './pages/recoveryLink.tsx';
 import { Profile } from './pages/profile.tsx';
 import { Event } from './pages/event.tsx';
+import { EventRegister } from './pages/eventRegister.tsx';
 
 import { MenuPHN } from './layouts/menu_phone.tsx';
+import { ATPMenuPHN } from './layouts/ATPmenu_phone.tsx';
 import { getUser } from './module/getUser.ts';
 
 import * as Types from '../module/types/types.ts'
@@ -55,7 +57,6 @@ function App() {
 
   const location = useLocation();
 
-  // const [session, setSession] = useState<Types.Session | null>(null)
   const [currentUser, setCurrentUser] = useState<Types.Account | null>(null)
 
   useEffect(() => {
@@ -69,13 +70,27 @@ function App() {
   }, [location.pathname])
 
 
-  // Отслеживание /auth страниц
-  const showLayout = !location.pathname.startsWith("/auth") && location.pathname !== '/passwordRecovery';
+  // Отслеживание страниц
+  const showLayout = 
+    !location.pathname.startsWith("/auth") && 
+    location.pathname !== '/passwordRecovery' && 
+    location.pathname !== '/event/atp250/register'
+  const menu = localStorage.getItem("lastStage") === 'ATP' ?  <ATPMenuPHN user={currentUser} /> : <MenuPHN user={currentUser} />
+
+
+  // Последний раздел сайта 
+
+  useEffect(() => {
+    if(location.pathname.startsWith("/user")) return
+    if(location.pathname.startsWith("/event/atp250/cms")) localStorage.setItem("lastStage", 'ATP_CMS')
+    else if(location.pathname.startsWith("/event/atp250")) localStorage.setItem("lastStage", 'ATP')
+    else localStorage.setItem("lastStage", 'main')
+  }, [location.pathname])
 
   return (
     screenSize.width < 766 ? (
       <>
-        {showLayout ? <MenuPHN user={currentUser} /> : null }
+        {showLayout ? menu : null }
         <>
             {errorMessage && (
                 <div className="error-message" style={{ zIndex: '1' }}>
@@ -91,12 +106,12 @@ function App() {
           <Route path='/auth/recovery' element={<Recovery setErrorMessage={setErrorMessage} />} />
           <Route path='/passwordRecovery' element={<RecoveryLink setErrorMessage={setErrorMessage} />} />
           <Route path='/user/:iin' element={<Profile setErrorMessage={setErrorMessage} />} />
-          {/* <Route path='/masterRemote' element={<Main />} /> */}
           <Route path='/event/atp250' element={<Event setErrorMessage={setErrorMessage}/>} />
-          {/* <Route path='/event/:eventName/register' element={<Main />} />
-          <Route path='/event/:eventName/cms' element={<Main />} />
+          <Route path='/event/:eventName/register' element={<EventRegister setErrorMessage={setErrorMessage} />} />
+          {/* <Route path='/event/:eventName/cms' element={<Main />} />
           <Route path='/event/:eventName/cms/requests' element={<Main />} />
           <Route path='/event/:eventName/map' element={<Main />} /> */}
+          {/* <Route path='/masterRemote' element={<Main />} /> */}
           <Route path='/about' element={<Works />} />
           <Route path='/contacts' element={<Works />} />
           <Route path='/projects' element={<Works />} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import { ReactComponent as BarIcon } from "../assets/icons/bars-solid-full.svg"
@@ -13,6 +13,13 @@ type Props = {
 export const MenuPHN = (props: Props) => {
     const [state, setState] = useState<boolean>(false)
 
+    // Допуск к ATP странице
+    const [ATPAccept, setATPAccept] = useState(false)
+
+    useEffect(() => {
+        if(props.user) setATPAccept(true)
+    }, [props.user])
+
     return (
         <div className={`nav-phn-container ${state ? 'open' : 'closed'}`} onClick={ state ? () => {} : () => setState(true)}>
             <div className={`nav-phn-bar-icon-wrapper ${ state ? 'open' : 'closed' }`}><BarIcon width={40} height={40} fill={'#D9D9D9'}/></div>
@@ -25,7 +32,16 @@ export const MenuPHN = (props: Props) => {
                         <NavLink onClick={ () => setState(false) } to='/about' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>О нас</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/contacts' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Контакты</NavLink>
                         <NavLink onClick={ () => setState(false) } to='/projects' className={({ isActive }) => `nav-phn-but ${ isActive ? 'active' : 'std' }`}>Проекты</NavLink>
-                        <a href="/event/atp250" className='nav-phn-but std' style={{ marginTop: '50px', textDecoration: 'underline', textDecorationThickness: '1px', textUnderlineOffset: '3px' }}>ATP250</a>
+                        <a 
+                            href="/event/atp250" 
+                            className='nav-phn-but std' 
+                            style={{ 
+                                display: ATPAccept ? 'block' : 'none', 
+                                marginTop: '50px', 
+                                textDecoration: 'underline', 
+                                textDecorationThickness: '1px', 
+                                textUnderlineOffset: '3px' 
+                            }}>ATP250</a>
                     </div>
                     <div className='nav-phn-but-close' onClick={ !state ? () => {} : () => setState(false) } />
                 </div>
