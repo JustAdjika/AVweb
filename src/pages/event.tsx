@@ -7,15 +7,15 @@ import { ReactComponent as PlusIcon } from '../assets/icons/plus-solid-full.svg'
 import { ReactComponent as CheckIcon } from '../assets/icons/check-solid-full.svg'
 
 import { Event as EventClass } from '../components/class/eventClass.ts';
-import { getUser } from '../getUser.ts';
-import { request } from '../serverRequest.ts';
+import { getUser } from '../module/getUser.ts';
+import { request } from '../module/serverRequest.ts';
 import { Footer } from '../components/footer.tsx';
 import { Config } from '../../config.ts';
 
 import * as Types from '../../module/types/types.ts'
 
 import './style/eventMain.css'
-import { errorLogger } from '../errorLogger.ts';
+import { errorLogger } from '../module/errorLogger.ts';
 
 export const Event = ({ setErrorMessage }: { setErrorMessage: (message: string | null) => void }) => {
 

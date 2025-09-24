@@ -2,7 +2,7 @@ import { request } from './serverRequest.ts'
 import { errorLogger } from './errorLogger.ts'
 import Cookies from 'js-cookie'
 
-import * as Types from '../module/types/types.ts'
+import * as Types from '../../module/types/types.ts'
 
 type Props = {
     setErrorMessage: (message: string | null) => void

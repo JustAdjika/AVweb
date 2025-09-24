@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-import { errorLogger } from '../errorLogger.ts';
-import { request } from '../serverRequest.ts';
+import { errorLogger } from '../module/errorLogger.ts';
+import { request } from '../module/serverRequest.ts';
 import Loader from '../components/loader.tsx';
 
 import * as Types from '../../module/types/types.ts'

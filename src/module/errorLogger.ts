@@ -1,4 +1,4 @@
-import * as Types from '../module/types/types.ts'
+import * as Types from '../../module/types/types.ts'
 
 export function errorLogger(setErrorMessage: (message: string | null) => void, responseData: Types.Response) {
     const message = `Ошибка ${responseData.status}: ${responseData.message}` 

@@ -1,6 +1,6 @@
-import api from "./axiosConfig";
+import api from "../module/axiosConfig.ts";
 
-import * as Types from '../module/types/types.ts'
+import * as Types from '../../module/types/types.ts'
 
 interface formattedQuery {
     [key: string]: string

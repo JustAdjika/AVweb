@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Config } from '../config.ts'
+import { Config } from '../../config.ts'
 
 const config = new Config()
 

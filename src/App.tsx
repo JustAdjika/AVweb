@@ -11,7 +11,7 @@ import { Profile } from './pages/profile.tsx';
 import { Event } from './pages/event.tsx';
 
 import { MenuPHN } from './layouts/menu_phone.tsx';
-import { getUser } from './getUser.ts';
+import { getUser } from './module/getUser.ts';
 
 import * as Types from '../module/types/types.ts'
 

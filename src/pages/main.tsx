@@ -3,8 +3,8 @@ import { useInView } from 'react-intersection-observer';
 
 import { Slider } from '../components/slider';
 import { Footer } from '../components/footer';
-import { errorLogger } from '../errorLogger.ts';
-import { request } from '../serverRequest.ts';
+import { errorLogger } from '../module/errorLogger.ts';
+import { request } from '../module/serverRequest.ts';
 import PhoneInput from '../components/phoneInput';
 import Loader from '../components/loader.tsx';
 

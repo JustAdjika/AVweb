@@ -1,8 +1,8 @@
 import Cookies from 'js-cookie'
 
 import * as Types from '../../../module/types/types.ts'
-import { request } from '../../serverRequest.ts'
-import { errorLogger } from '../../errorLogger.ts'
+import { request } from '../../module/serverRequest.ts'
+import { errorLogger } from '../../module/errorLogger.ts'
 
 export class Event {
     data: Types.Event;
