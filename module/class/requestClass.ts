@@ -9,6 +9,7 @@ import { sendMail } from '../emailSend.ts'
 import REQUESTS_TAB from '../../database/requests.js'
 import REQUESTBLACKLISTS_TAB from '../../database/requestBlacklists.js'
 import ACCOUNTS_TAB from '../../database/accounts.js'
+import AVSTAFFS_TAB from '../../database/avstaffs.js'
 
 // MIDDLEWARES
 
@@ -61,7 +62,20 @@ export class Request {
         if(foundBlacklist) throw new Error('Module requestClass.ts error: The user was added to the request blacklist at this event')
 
         const foundConflict = await REQUESTS_TAB.findOne({ where: { userId, eventId } })
-        if(foundConflict) await foundConflict.destroy()
+
+        if(foundConflict) {
+            const foundConflictModel: Types.Request = await foundConflict.get({ plain: true })
+
+            if(foundConflictModel.status === 'ACCEPT') throw new Error('Module requestClass.ts error: Found accepted conflict, impossible to create new event request')
+
+            await foundConflict.destroy()
+        }
+
+        if(guild === 'AV') {
+            const foundAvStaff = await AVSTAFFS_TAB.findOne({ where: { userId } })
+
+            if(!foundAvStaff) throw new Error('Module requestClass.ts error: User is not AV_VOLUNTEER')
+        }
 
         const newRequest = await REQUESTS_TAB.create({
             userId,
