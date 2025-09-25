@@ -45,7 +45,7 @@ router.post('/add', sessionCheck, async(req,res) => {
                     [obj.shift, 'string'],
                     [obj.days, 'object'], 
                 ])) {
-                    if(obj.shift !== '1st' && obj.shift !== '2nd' && obj.shift !== 'both') return arrayCheck.isStringArray(obj.days)
+                    return (obj.shift === '1st' || obj.shift === '2nd' || obj.shift !== 'both') && arrayCheck.isStringArray(obj.days)
                 } 
             }
             return false
