@@ -154,6 +154,17 @@ export class Volunteer {
         currentVolunteer.update({ late: this.late })
     }
 
+    async changeStaffRoom() {
+        if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use changeLate() before define it')
+
+        const currentVolunteer = await VOLUNTEERS_TAB.findOne({ where: { id: this.id } })
+        if(!currentVolunteer) throw new Error('Module volunteerClass.ts error: changeLate() undefined instance of object by id')
+
+        this.inStaffRoom = !this.inStaffRoom
+
+        currentVolunteer.update({ inStaffRoom: this.inStaffRoom })
+    }
+
     async promoteToCRD(preceptorId: number) {
         if(!this.id) throw new Error('Module volunteerClass.ts error: Impossible to use promoteToCRD() before define it')
 

@@ -80,6 +80,36 @@ router.patch('/late/change/:volunteerId', sessionCheck, eventPermsCheck, async(r
     }
 })
 
+router.patch('/staffRoom/change/:volunteerId', sessionCheck, eventPermsCheck, async(req,res) => {
+    try {
+        const session = res.locals.sessionCheck as Types.localSessionCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
+        const permsDay = req.body.eventPerms.day
+        
+        const volunteerId = Number(req.params.volunteerId)
+
+        if(!session || !perms) return sendResponse(res, 500, 'Попытка смены "Штаб-статуса" волонтера. MW sessionCheck/eventPermsCheck не передал необходимые данные')
+        if(isNaN(volunteerId)) return sendResponse(res, 400, 'Попытка смены "Штаб-статуса" волонтера. Данные указаны неверно')
+
+        if(perms.perms === 'VOL' || perms.perms === 'Unexpected') return sendResponse(res, 403, 'Попытка смены "Штаб-статуса" волонтера. Недостаточно прав')
+
+        const volunteer = await Volunteer.define()
+        await volunteer.update(volunteerId)
+
+        if(permsDay !== volunteer.getModel.day) return sendResponse(res, 403, 'Попытка смены "Штаб-статуса" волонтера. Недостаточно прав')
+
+        await volunteer.changeStaffRoom()
+
+        return sendResponse(
+            res, 
+            200, 
+            `Попытка смены "Штаб-статуса" волонтера. Успешная операция. Выставлено ${ volunteer.getModel.inStaffRoom ? 'В штабе' : 'Вне штаба' } ${ volunteer.getModel.id } ${ perms.perms } ${ session.account.id }`
+        )
+    } catch (e:any) {
+        return sendResponse(res, 500, e.message, undefined, '/event/volunteer/late/change')
+    }
+})
+
 router.patch('/promote/CRD/:volunteerId', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
         const session = res.locals.sessionCheck as Types.localSessionCheck
