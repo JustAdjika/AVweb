@@ -93,7 +93,7 @@ function App() {
   }, [location.pathname]) 
 
   return (
-    screenSize.width < 700 || location.pathname.startsWith('/event/atp250/cms') ? (
+    screenSize.width < 700 || location.pathname.startsWith('/event/atp250/cms') && screenSize.width < 1024 ? (
       <>
         {showLayout ? menu : null }
         <>
