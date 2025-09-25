@@ -201,7 +201,8 @@ export class Event {
                 visit: true,
                 late: false,
                 warning: false,
-                inStaffRoom: true
+                inStaffRoom: true,
+                shift: 'both'
             })
             await EVENTPERMS_TAB.create({
                 userId,
