@@ -21,6 +21,7 @@ export const EventRegister = ({ setErrorMessage }: Props) => {
     const [event, setEvent] = useState<EventClass | null>(null)
 
     const [guild, setGuild] = useState('AV')
+    const [shift, setShift] = useState<Types.shift>('1st')
 
     // Обработка выбранных дней
 
@@ -99,7 +100,8 @@ export const EventRegister = ({ setErrorMessage }: Props) => {
                     sessionId: parsedSession.id,
                     sessionKey: parsedSession.key,
                     guild,
-                    days: selectedDays
+                    days: selectedDays,
+                    shift
                 } 
             })
 
@@ -124,10 +126,18 @@ export const EventRegister = ({ setErrorMessage }: Props) => {
                 <h2>Запись на ATP250</h2>
                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <h3 className='event-register-h3'>Организация</h3>
-                    <select onChange={(e) => setGuild(e.target.value)} className='singup-guild-select' name="month" autoComplete="bday-month">
+                    <select onChange={(e) => setGuild(e.target.value)} className='singup-guild-select'>
                         <option value="AV">Alliance of Volutneers</option>
                         <option value="Jas">Jas</option>
                         <option value="AJ">Ashyq Jurek</option>
+                    </select>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <h3 className='event-register-h3'>Смена</h3>
+                    <select onChange={(e) => setShift(e.target.value as Types.shift)} className='singup-guild-select'>
+                        <option value="1st">1ая (7:30 - 15:00)</option>
+                        <option value="2nd">2ая (15:30 - 22:00)</option>
+                        <option value="both">Обе смены</option>
                     </select>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
