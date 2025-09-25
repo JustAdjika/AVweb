@@ -341,6 +341,27 @@ export class Event {
 
         const foundBlacklistsModel: (Types.Blacklist)[] = foundBlacklists.map(item => item.get({ plain: true }))
 
+
+        
+        
+        // Поиск названия и id позиции волонтёра
+        
+        const foundPosition = await Associations.POSITIONS_TAB.findOne({
+            where: {
+                volunteerId: this.id
+            }
+        })
+
+        let posId = null
+        let posName = null
+
+        if(foundPosition) {
+            const foundPositionModel: Types.Position = await foundPosition.get({plain: true})
+
+            posId = foundPositionModel.id
+            posName = `${foundPositionModel.name}-${foundPositionModel.NameNumber}`
+        }
+
         const formattedData = foundVolsModel.map(vol => {
             if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'CRD')) {
                 let equip: 'GET' | 'RETURN' | null = null
@@ -352,7 +373,9 @@ export class Event {
                     ...vol,
                     role: 'CRD',
                     equip,
-                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id),
+                    posId,
+                    posName
                 }
             } else if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'HCRD')) {
                 let equip: 'GET' | 'RETURN' | null = null
@@ -364,7 +387,9 @@ export class Event {
                     ...vol,
                     role: 'HCRD',
                     equip,
-                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id),
+                    posId,
+                    posName
                 }
             } else {
                 let equip: 'GET' | 'RETURN' | null = null
@@ -376,7 +401,9 @@ export class Event {
                     ...vol,
                     role: 'VOL',
                     equip,
-                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id)
+                    blacklist: foundBlacklistsModel.some(item => item.userId === vol.account.id),
+                    posId,
+                    posName
                 }
             }
         })
@@ -385,7 +412,9 @@ export class Event {
         return formattedData as (Types.VolunteerData & { 
             role: 'HCRD' | 'CRD' | 'VOL', 
             equip: 'GET' | 'RETURN' | null,
-            blacklist: boolean
+            blacklist: boolean,
+            posId: number,
+            posName: string
         })[];
     }
 
