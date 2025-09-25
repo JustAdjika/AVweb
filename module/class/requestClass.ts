@@ -22,6 +22,7 @@ export class Request {
     private eventId: number | null = null
     private days: string[] = []
     private status: Types.requestStatus | null = null
+    private shift: Types.shift = '1st'
 
 
 
@@ -36,7 +37,8 @@ export class Request {
         guild: string | null,
         eventId: number | null,
         days: string[],
-        status: Types.requestStatus | null
+        status: Types.requestStatus | null,
+        shift: Types.shift
     ) {
         this.id = id
         this.userId = userId
@@ -44,6 +46,7 @@ export class Request {
         this.days = days
         this.eventId = eventId,
         this.status = status
+        this.shift = shift
     }
 
     static async define() {
@@ -53,11 +56,12 @@ export class Request {
             null,
             null,
             [],
-            null
+            null,
+            '1st'
         )
     }
 
-    static async create(userId: number, guild: string, eventId: number, days: string[]) {
+    static async create(userId: number, guild: string, eventId: number, days: string[], shift: Types.shift) {
         const foundBlacklist = await REQUESTBLACKLISTS_TAB.findOne({ where: { userId } })
         if(foundBlacklist) throw new Error('Module requestClass.ts error: The user was added to the request blacklist at this event')
 
@@ -82,7 +86,8 @@ export class Request {
             guild,
             eventId,
             days,
-            status: 'AWAITING'
+            status: 'AWAITING',
+            shift
         })
 
         const newRequestModel: Types.Request = await newRequest.get({ plain: true })
@@ -94,6 +99,7 @@ export class Request {
             newRequestModel.eventId,
             newRequestModel.days,
             newRequestModel.status,
+            newRequestModel.shift
         )
     }
 
@@ -118,10 +124,10 @@ export class Request {
         this.days = currentRequestModel.days
         this.eventId = currentRequestModel.eventId,
         this.status = currentRequestModel.status
-
+        this.shift = currentRequestModel.shift
     }
 
-    async accept(days: string[]) {
+    async accept(days: string[], shift: Types.shift) {
 
         if(!this.id) throw new Error('Module requestClass.ts error: Impossible to use accept() before define it')
 
@@ -143,13 +149,17 @@ export class Request {
             if(!JSON.parse(this.days as unknown as string).includes(item)) throw new Error('Module requestClass.ts error: Impossible to accept the days, that the user has not selected')
         } 
 
+        if(this.shift === '1st' || this.shift === '2nd') {
+            if(shift === 'both' || shift !== this.shift) throw new Error('Module requestClass.ts error: Impossible to accept the shift, that the user has not selected')
+        }
+
         this.status = 'ACCEPT'
 
         await currentRequest.update({ status: 'ACCEPT' })
 
         const parsedDays = JSON.parse(this.days as unknown as string) as string[]
 
-        parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day))
+        parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day, shift))
         
         const result = await sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте`)
     
@@ -194,7 +204,8 @@ export class Request {
             guild: this.guild,
             days: this.days,
             eventId: this.eventId,
-            status: this.status
+            status: this.status,
+            shift: this.shift
         }
     }
 

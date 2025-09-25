@@ -24,6 +24,8 @@ export type statusCode = 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 5
 
 export type requestMethod = 'GET' | 'POST' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD' 
 
+export type shift = '1st' | '2nd' | 'both'
+
 
 
 
@@ -123,6 +125,7 @@ export interface Volunteer {
     day: string,
     warning: boolean,
     inStaffRoom: boolean,
+    shift: shift
 }
 
 export interface VolunteerData {
@@ -135,6 +138,7 @@ export interface VolunteerData {
     day: string,
     warning: boolean,
     inStaffRoom: boolean,
+    shift: shift,
     account: {
         id: number,
         name: string,
@@ -166,7 +170,8 @@ export interface Request {
     guild: string,
     eventId: number,
     days: string[],
-    status: requestStatus
+    status: requestStatus,
+    shift: shift
 }
 
 export interface RequestData {
@@ -176,6 +181,7 @@ export interface RequestData {
     eventId: number,
     days: string[],
     status: requestStatus,
+    shift: shift,
     account: {
         id: number,
         name: string,

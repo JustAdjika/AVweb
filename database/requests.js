@@ -21,6 +21,9 @@ const REQUESTS_TAB = sequelize.define('requests', {
     },
     status: { // Статус заявки (AWAITING, ACCEPT, DENIED)
         type: DataTypes.STRING,
+    },
+    shift: {
+        type: DataTypes.STRING
     }
 });
 

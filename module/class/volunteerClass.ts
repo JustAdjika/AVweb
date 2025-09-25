@@ -26,6 +26,7 @@ export class Volunteer {
     private day: string | null = null
     private warning: boolean = false
     private inStaffRoom: boolean = false
+    private shift: Types.shift = '1st'
 
 
 
@@ -43,7 +44,8 @@ export class Volunteer {
         eventId: number | null = null,
         day: string | null = null,
         warning: boolean = false,
-        inStaffRoom: boolean = false
+        inStaffRoom: boolean = false,
+        shift: Types.shift = '1st'
     ) {
         this.id = id,
         this.userId = userId,
@@ -54,6 +56,7 @@ export class Volunteer {
         this.day = day,
         this.warning = warning,
         this.inStaffRoom = inStaffRoom
+        this.shift = '1st'
     }
 
     static async define() {
@@ -66,11 +69,12 @@ export class Volunteer {
             null,
             null,
             false,
-            false
+            false,
+            '1st'
         )
     }
 
-    static async create(userId: number, guild: string, eventId: number, day: string) {
+    static async create(userId: number, guild: string, eventId: number, day: string, shift: Types.shift) {
         const foundConflict = await VOLUNTEERS_TAB.findOne({ where: { userId, eventId } })
         if(foundConflict) await foundConflict.destroy()
 
@@ -82,7 +86,8 @@ export class Volunteer {
             visit: false,
             late: false,
             warning: false,
-            inStaffRoom: false
+            inStaffRoom: false,
+            shift
         })
 
         const newVolunteerModel: Types.Volunteer = await newVolunteer.get({ plain: true })
@@ -96,7 +101,8 @@ export class Volunteer {
             newVolunteerModel.eventId,
             newVolunteerModel.day,
             false,
-            false
+            false,
+            newVolunteerModel.shift
         )
     }
 
@@ -123,6 +129,7 @@ export class Volunteer {
         this.day = currentVolunteerModel.day
         this.warning = currentVolunteerModel.warning
         this.inStaffRoom = currentVolunteerModel.inStaffRoom
+        this.shift = currentVolunteerModel.shift
     }
 
     async changeVisit() {
@@ -213,6 +220,7 @@ export class Volunteer {
             day: this.day,
             warning: this.warning,
             inStaffRoom: this.inStaffRoom,
+            shift: this.shift
         }
     }
 

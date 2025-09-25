@@ -241,7 +241,8 @@ router.post('/export/:for', sessionCheck, eventPermsCheck, async(req,res) => {
             contactKaspi: vol.account.contactKaspi,
             guild: vol.guild,
             equip: vol.equip,
-            visit: vol.visit
+            visit: vol.visit,
+            shift: vol.shift
         } ))
 
         const allEquipData: ({ provider: string, volunteer: string, status: 'GET' | 'RETURN' })[] = await event.getEquip(day)
@@ -262,6 +263,7 @@ router.post('/export/:for', sessionCheck, eventPermsCheck, async(req,res) => {
                 { header: 'Организация', key: 'guild', width: 15},
                 { header: 'Экипировка', key: 'equip', width: 15},
                 { header: 'Посещение', key: 'visit', width: 15},
+                { header: 'Смена', key: 'shift', width: 15},
             ]
 
             formattedData.forEach((vol, i) => {
@@ -274,7 +276,8 @@ router.post('/export/:for', sessionCheck, eventPermsCheck, async(req,res) => {
                     whatsapp: vol.contactWhatsapp,
                     guild: vol.guild,
                     equip: vol.equip === 'RETURN' ? 'Сдал' : vol.equip === 'GET' ? 'Не сдал' : '???',
-                    visit: vol.visit ? 'Пришел' : 'Не пришел'
+                    visit: vol.visit ? 'Пришел' : 'Не пришел',
+                    shift: vol.shift === '1st' ? 'Первая' : vol.shift === '2nd' ? 'Вторая' : 'Обе' 
                 })
             })
 

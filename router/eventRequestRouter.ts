@@ -23,6 +23,7 @@ router.post('/add', sessionCheck, async(req,res) => {
     try {
         interface dataType {
             guild: string,
+            shift: Types.shift,
             days: string[]
         }
 
@@ -41,9 +42,10 @@ router.post('/add', sessionCheck, async(req,res) => {
 
                 if(dataCheck([
                     [obj.guild, 'string'],
+                    [obj.shift, 'string'],
                     [obj.days, 'object'], 
                 ])) {
-                    return arrayCheck.isStringArray(obj.days)
+                    if(obj.shift !== '1st' && obj.shift !== '2nd' && obj.shift !== 'both') return arrayCheck.isStringArray(obj.days)
                 } 
             }
             return false
@@ -58,7 +60,7 @@ router.post('/add', sessionCheck, async(req,res) => {
 
         if(!await event.checkDays(data.days) || !await event.checkGuilds(data.guild)) return sendResponse(res, 400, 'Попытка отправки заявки. Организация или день указаны неверно')
 
-        const newRequest = await Request.create(session.account.id as number, data.guild, eventId, data.days)
+        const newRequest = await Request.create(session.account.id as number, data.guild, eventId, data.days, data.shift)
 
         return sendResponse(res, 200, `Попытка отправки заявки. Успешная операция. Заявка на событие ${eventId} отправлена от ${session.account.id}. Заявка ${newRequest.getModel.id}`)
     } catch (e:any) {
@@ -106,6 +108,7 @@ router.post('/solution/:option/:requestId', sessionCheck, async(req,res) => {
         const requestId = Number(req.params.requestId)
         const option = req.params.option
         const days = req.body.days
+        const shift = req.body.shift
 
         const session = res.locals.sessionCheck as Types.localSessionCheck
 
@@ -125,7 +128,7 @@ router.post('/solution/:option/:requestId', sessionCheck, async(req,res) => {
 
         if(!await event.isCRD(session.account.id as number)) return sendResponse(res, 403, 'Попытка решения заявки. Недостаточно прав')
 
-        if(option === 'accept') await request.accept(days)
+        if(option === 'accept') await request.accept(days, shift)
         else await request.denied(reason)
 
         return sendResponse(res, 200, `Попытка решения заявки. Успешная операция. Заявка ${requestId} ${option === 'accept' ? 'Одобрена' : 'Отклонена'} координатором ${session.account.id}`)

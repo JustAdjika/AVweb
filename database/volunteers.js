@@ -30,6 +30,9 @@ const VOLUNTEERS_TAB = sequelize.define('volunteers', {
     },
     inStaffRoom: { // В штабе или нет
         type: DataTypes.BOOLEAN,
+    },
+    shift: {
+        type: DataTypes.STRING
     }
 });
 
