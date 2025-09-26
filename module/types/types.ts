@@ -335,6 +335,14 @@ export type preParsedEvent = {
     isRegisterOpen: boolean
 }
 
+export interface moreVolsData {
+    role: "HCRD" | "CRD" | "VOL";
+    equip: "GET" | "RETURN" | null;
+    blacklist: boolean;
+    posId: number | null,
+    posName: string | null
+}
+
 
 
 
