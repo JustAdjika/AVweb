@@ -63,4 +63,56 @@ export class Event {
             throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
+
+    async setLink(setErrorMessage: (message: string | null) => void, day: string, newLink: Types.eventInfoObject) {
+        try {
+            const session: string | undefined = Cookies.get("session")
+
+            if(!session) throw errorLogger(setErrorMessage, { status: 400, message: 'Сессия отсутствует' })
+
+            const parsedSession: Types.Session = JSON.parse(session)
+
+            const res = await request({method: 'POST', route: 'event/linkadd', loadData: {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key,
+                eventPerms: {
+                    eventId: this.data.id,
+                    day: day
+                },
+                link: newLink
+            }})
+        
+            return res as Types.Response
+        }catch (err: any) {
+            const res = err.response.data as Types.Response
+            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+        }
+    }
+
+    async getVolunteers(setErrorMessage: (message: string | null) => void, day: string) {
+        try {
+            const session: string | undefined = Cookies.get("session")
+
+            if(!session) throw errorLogger(setErrorMessage, { status: 400, message: 'Сессия отсутствует' })
+
+            const parsedSession: Types.Session = JSON.parse(session)
+
+            const res = await request({method: 'POST', route: `event/volunteer/data/all/${this.data.id}`, loadData: {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key,
+                eventPerms: {
+                    eventId: this.data.id,
+                    day: day
+                }
+            }})
+        
+            if(res.status === 200) {
+                return res as { status: Types.statusCode, container: (Types.VolunteerData & Types.moreVolsData)[] }
+            }
+            else return res as Types.Response
+        }catch (err: any) {
+            const res = err.response.data as Types.Response
+            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+        }
+    }
 }
