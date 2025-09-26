@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 import * as Types from '../../../module/types/types.ts'
 import { request } from '../../module/serverRequest.ts'
 import { getUser } from '../../module/getUser.ts'
-import api from '../../module/axiosConfig.ts'
+import { api } from '../../module/axiosConfig.ts'
 
 type extendedAccount = Types.Account & { role: Types.permission | 'USER' | 'VOLUNTEER' } 
 

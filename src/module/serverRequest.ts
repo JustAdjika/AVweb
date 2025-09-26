@@ -1,4 +1,4 @@
-import api from "../module/axiosConfig.ts";
+import { api } from "../module/axiosConfig.ts";
 
 import * as Types from '../../module/types/types.ts'
 

@@ -3,8 +3,11 @@ import { Config } from '../../config.ts'
 
 const config = new Config()
 
-const api = axios.create({ 
-    baseURL: `${config.serverDomain}/api/developer`
+export const api = axios.create({ 
+    baseURL: `${config.serverDomain}/api/developer`,
 })
 
-export default api
+export const downloadApi = axios.create({
+    baseURL: `${config.serverDomain}/api/developer`,
+    responseType: "blob"
+})
