@@ -1,12 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
-import { useZxing } from "react-zxing";
+import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
-import { ReactComponent as WhatsappIcon } from '../assets/icons/whatsapp-brands-solid-full.svg'
-import { ReactComponent as QRcodeIcon } from '../assets/icons/qrcode-solid-full.svg'
-import { ReactComponent as FileExportIcon } from '../assets/icons/file-arrow-down-solid-full.svg'
 
 import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { getUser } from '../module/getUser.ts';
@@ -14,6 +10,9 @@ import { Event as EventClass } from '../components/class/eventClass.ts'
 import { errorLogger } from '../module/errorLogger.ts';
 import { request } from '../module/serverRequest.ts';
 import { downloadApi } from '../module/axiosConfig.ts';
+import { ExportModal } from '../components/eventCMS/exportModal.tsx';
+import { QRModal } from '../components/eventCMS/qrModal.tsx';
+import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -36,6 +35,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [exportMenu, setExportMenu] = useState<boolean>(false)
 
+    const [calendar, setCalendar] = useState<boolean>(false)
+
 
 
     // UX
@@ -48,10 +49,18 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [firstCRDDay, setFirstCRDDay] = useState(0)
 
+    const [exportFor, setExportFor] = useState(0)
+
+    const [qrResult,setQrResult] = useState("")
+
+
     const [_dayLoaded, _setDayLoaded] = useState(false)
     const [_gotDays, _setGotDays] = useState(false)
 
-    const [exportFor, setExportFor] = useState(0)
+
+
+
+
 
     // Получение события
 
@@ -159,6 +168,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     }, [user])
 
 
+
+    // Определение первого доступного дня для координатора
+
     useEffect(() => {
         if(!firstCRDDay) return
         setCurrentDay(firstCRDDay)
@@ -175,29 +187,6 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
-    // QR Reader
-
-    const [qrResult,setQrResult] = useState("")
-    const videoRef = useRef<HTMLVideoElement | null>(null)
-    
-    const { ref: zxingRef } = useZxing({
-    onDecodeResult(result) {
-        setQrResult(result.getText());
-    },
-    constraints: {
-        video: { facingMode: "environment" },
-    },
-    });
-
-
-    useEffect(() => {
-        if (!qrMenu) {
-            const stream = (videoRef.current?.srcObject as MediaStream) || null;
-            stream?.getTracks().forEach(track => track.stop());
-        }
-    }, [qrMenu]);
-
-
     const handleVolExport = async() => {
         const session = Cookies.get("session") as string
 
@@ -206,7 +195,6 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         const parsedSession: Types.Session = JSON.parse(session)
 
         try {
-
             const res = await downloadApi.post(`/event/export/${exportFor === 0 ? 'coordinator' : 'staff'}?type=vols`, {
                 eventPerms: {
                     eventId: event?.data.id,
@@ -221,9 +209,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             let filename = "export.xlsx";
             const disposition = res.headers["content-disposition"];
             if (disposition && disposition.includes("filename=")) {
-            filename = disposition
-                .split("filename=")[1]
-                .replace(/['"]/g, "");
+                filename = disposition
+                    .split("filename=")[1]
+                    .replace(/['"]/g, "");
             }
 
             const url = window.URL.createObjectURL(blob);
@@ -242,40 +230,18 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     return (<>
-        <div className="profile-qrmodal-wrapper" style={{ display: exportMenu ? 'flex' : 'none' }} onClick={() => setExportMenu(false)}>
-            <div className="event-export-container" onClick={(e) => e.stopPropagation()}>
-                <h2>Экспорт</h2>
-                <button 
-                    className={`event-export-but-select ${exportFor === 0 ? 'selected' : ''}`}
-                    onClick={() => setExportFor(0)}
-                >Для координаторов</button>
-                <button 
-                    className={`event-export-but-select ${exportFor === 1 ? 'selected' : ''}`}
-                    onClick={() => setExportFor(1)}
-                >Для организаторов</button>
-                <button className='event-export-but-confirm' onClick={() => handleVolExport()}>Подтвердить</button>
-            </div>
-        </div>
-        <div className="profile-qrmodal-wrapper" style={{ display: qrMenu ? 'flex' : 'none' }} onClick={() => setQrMenu(false)}>
-            <div className="event-qrscanner-container" onClick={(e) => e.stopPropagation()}>
-                <h2>Сканировать профиль</h2>
-                <ul>
-                    <li>На устройстве волонтера зайдите в личный кабинет и нажмите “QR код Профиля”</li>
-                    <li>Отсканируйте QR код через это меню</li>
-                </ul>
-                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5px' }}>
-                    <video 
-                        className='qrscanner' 
-                        ref={el => {
-                            zxingRef.current = el
-                            videoRef.current = el
-                        }} 
-                        style={{ width: '250px', height: '250px', objectFit: 'cover'}}>
-                    </video>
-                </div>
-                <span>{qrResult}</span>
-            </div>
-        </div>
+        <ExportModal 
+            setExportFor={setExportFor} 
+            exportFor={exportFor} 
+            exportMenu={exportMenu} 
+            setExportMenu={setExportMenu}
+            handleVolExport={handleVolExport}
+        />
+        <QRModal 
+            qrMenu={qrMenu} 
+            setQrResult={setQrResult} 
+            setQrMenu={setQrMenu}
+        />
         <div className='cms-body'>
             <div className='cms-header-container'>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -324,33 +290,28 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             </div>
             <div className='cms-headpanel-functions-but-container'>
                 <div className='cms-headpanel-center-wrapper'>
-                    <div className='cms-headpanel-but-calendar-container' style={{ marginRight: userRole === 'CRD' ? '10px' : '0px' }}>
+                    <div 
+                        className='cms-headpanel-but-calendar-container' 
+                        onClick={() => setCalendar(true)} 
+                        style={{ marginRight: userRole === 'CRD' ? '10px' : '0px', display: calendar ? 'none' : 'flex' }}
+                    >
                         <CalendarIcon className='cms-headpanel-but-calendar-icon'/>
                         <span style={{ marginRight: '3px' }}>{currentDay+1} день</span>
                         <span>({days[currentDay]})</span>
                     </div>
-                    <div className='cms-headpanel-linkinput-container' style={{ marginRight: '10px', display: userRole === 'HCRD' ? 'flex' : 'none' }}>
-                        <WhatsappIcon className='cms-headpanel-linkinput-icon'/>
-                        <input 
-                            type="text" 
-                            className='cms-headpanel-linkinput-input' 
-                            placeholder='Ссылка на группу' 
-                            onBlur={handleChangeLink} 
-                        />
-                    </div>
-                    <div style={{ display: 'flex' }}>
-                        <div className='cms-headpanel-qr-but-container' onClick={() => setQrMenu(true)}>
-                            <QRcodeIcon className='cms-headpanel-function-but-icon'/>
-                            <span>QR</span>
-                        </div>
-                        <div className='cms-headpanel-export-but-container' onClick={() => setExportMenu(true)}>
-                            <FileExportIcon className='cms-headpanel-function-but-icon'/>
-                            <span>Экспорт</span>
-                        </div>
-                    </div>
+                    { !calendar && selectedMenu === 0 ? (
+                    <VolunteersHeader 
+                        setQrMenu={setQrMenu} 
+                        setExportMenu={setExportMenu} 
+                        userRole={userRole} 
+                        handleChangeLink={handleChangeLink}
+                    />
+                    ) : null}
                 </div>
             </div>
-            { selectedMenu === 0 ? (
+            { calendar ? (
+                <div></div>
+            ) : selectedMenu === 0 ? (
                 <Volunteers 
                     shiftMenu={shiftMenu} 
                     currentDay={currentDay} 
