@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useZxing } from "react-zxing";
 
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
@@ -29,11 +30,13 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [shiftMenu, setShiftMenu] = useState(0)
     const [currentDay, setCurrentDay] = useState(0)
 
+    const [qrMenu, setQrMenu] = useState<boolean>(false)
+
 
 
     // UX
 
-    const [days, setDays] = useState(['11.10.25', '12.10.25', '13.10.25', '14.10.25'])
+    const [days, setDays] = useState<string[]>([])
 
     const [user, setUser] = useState<Types.Account | null>(null)
     const [event, setEvent] = useState<EventClass | null>(null)
@@ -42,6 +45,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [firstCRDDay, setFirstCRDDay] = useState(0)
 
     const [_dayLoaded, _setDayLoaded] = useState(false)
+    const [_gotDays, _setGotDays] = useState(false)
 
     // Получение события
 
@@ -61,6 +65,16 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                 errorLogger(setErrorMessage, { status: 500, message: `Непредвиденная ошибка: ${err}` })
             })
     }, [])
+
+    // Получение дней события
+
+    useEffect(() => {
+        if(_gotDays || !event) return
+
+        setDays(event.data.days)
+
+        _setGotDays(true)
+    }, [event])
 
 
     // Получение аккаунта
@@ -155,7 +169,51 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
-    return (
+    // QR Reader
+
+    const [qrResult,setQrResult] = useState("")
+    const videoRef = useRef<HTMLVideoElement | null>(null)
+    
+    const { ref: zxingRef } = useZxing({
+    onDecodeResult(result) {
+        setQrResult(result.getText());
+    },
+    constraints: {
+        video: { facingMode: "environment" },
+    },
+    });
+
+
+    useEffect(() => {
+        if (!qrMenu) {
+            const stream = (videoRef.current?.srcObject as MediaStream) || null;
+            stream?.getTracks().forEach(track => track.stop());
+        }
+    }, [qrMenu]);
+
+
+
+    return (<>
+        <div className="profile-qrmodal-wrapper" style={{ display: qrMenu ? 'flex' : 'none' }} onClick={() => setQrMenu(false)}>
+            <div className="event-qrscanner-container" onClick={(e) => e.stopPropagation()}>
+                <h2>Сканировать профиль</h2>
+                <ul>
+                    <li>На устройстве волонтера зайдите в личный кабинет и нажмите “QR код Профиля”</li>
+                    <li>Отсканируйте QR код через это меню</li>
+                </ul>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5px' }}>
+                    <video 
+                        className='qrscanner' 
+                        ref={el => {
+                            zxingRef.current = el
+                            videoRef.current = el
+                        }} 
+                        style={{ width: '250px', height: '250px', objectFit: 'cover'}}>
+                    </video>
+                </div>
+                <span>{qrResult}</span>
+            </div>
+        </div>
         <div className='cms-body'>
             <div className='cms-header-container'>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -219,7 +277,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                         />
                     </div>
                     <div style={{ display: 'flex' }}>
-                        <div className='cms-headpanel-qr-but-container'>
+                        <div className='cms-headpanel-qr-but-container' onClick={() => setQrMenu(true)}>
                             <QRcodeIcon className='cms-headpanel-function-but-icon'/>
                             <span>QR</span>
                         </div>
@@ -242,5 +300,5 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                 />
             ) : null }
         </div>
-    );
+    </>);
 };
