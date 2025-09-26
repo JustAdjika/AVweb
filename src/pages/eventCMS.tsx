@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useZxing } from "react-zxing";
+import Cookies from 'js-cookie';
 
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
@@ -12,6 +13,7 @@ import { getUser } from '../module/getUser.ts';
 import { Event as EventClass } from '../components/class/eventClass.ts'
 import { errorLogger } from '../module/errorLogger.ts';
 import { request } from '../module/serverRequest.ts';
+import { downloadApi } from '../module/axiosConfig.ts';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -32,6 +34,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [qrMenu, setQrMenu] = useState<boolean>(false)
 
+    const [exportMenu, setExportMenu] = useState<boolean>(false)
+
 
 
     // UX
@@ -46,6 +50,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [_dayLoaded, _setDayLoaded] = useState(false)
     const [_gotDays, _setGotDays] = useState(false)
+
+    const [exportFor, setExportFor] = useState(0)
 
     // Получение события
 
@@ -192,8 +198,64 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     }, [qrMenu]);
 
 
+    const handleVolExport = async() => {
+        const session = Cookies.get("session") as string
+
+        if(!session) errorLogger(setErrorMessage, { status: 500, message: 'Сессия не найдена' })
+
+        const parsedSession: Types.Session = JSON.parse(session)
+
+        try {
+
+            const res = await downloadApi.post(`/event/export/${exportFor === 0 ? 'coordinator' : 'staff'}?type=vols`, {
+                eventPerms: {
+                    eventId: event?.data.id,
+                    day: days[currentDay]
+                },
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key
+            })
+
+            const blob = res.data;
+
+            let filename = "export.xlsx";
+            const disposition = res.headers["content-disposition"];
+            if (disposition && disposition.includes("filename=")) {
+            filename = disposition
+                .split("filename=")[1]
+                .replace(/['"]/g, "");
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err:any) {
+            errorLogger(setErrorMessage, { status: err.response.data.status ?? 500, message: err.response.data.message ?? 'Непредвиденная ошибка'})
+        }
+    }
+
+
 
     return (<>
+        <div className="profile-qrmodal-wrapper" style={{ display: exportMenu ? 'flex' : 'none' }} onClick={() => setExportMenu(false)}>
+            <div className="event-export-container" onClick={(e) => e.stopPropagation()}>
+                <h2>Экспорт</h2>
+                <button 
+                    className={`event-export-but-select ${exportFor === 0 ? 'selected' : ''}`}
+                    onClick={() => setExportFor(0)}
+                >Для координаторов</button>
+                <button 
+                    className={`event-export-but-select ${exportFor === 1 ? 'selected' : ''}`}
+                    onClick={() => setExportFor(1)}
+                >Для организаторов</button>
+                <button className='event-export-but-confirm' onClick={() => handleVolExport()}>Подтвердить</button>
+            </div>
+        </div>
         <div className="profile-qrmodal-wrapper" style={{ display: qrMenu ? 'flex' : 'none' }} onClick={() => setQrMenu(false)}>
             <div className="event-qrscanner-container" onClick={(e) => e.stopPropagation()}>
                 <h2>Сканировать профиль</h2>
@@ -281,7 +343,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                             <QRcodeIcon className='cms-headpanel-function-but-icon'/>
                             <span>QR</span>
                         </div>
-                        <div className='cms-headpanel-export-but-container'>
+                        <div className='cms-headpanel-export-but-container' onClick={() => setExportMenu(true)}>
                             <FileExportIcon className='cms-headpanel-function-but-icon'/>
                             <span>Экспорт</span>
                         </div>
