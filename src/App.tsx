@@ -113,7 +113,7 @@ function App() {
           <Route path='/user/:iin' element={<Profile setErrorMessage={setErrorMessage} />} />
           <Route path='/event/atp250' element={<Event setErrorMessage={setErrorMessage}/>} />
           <Route path='/event/:eventName/register' element={<EventRegister setErrorMessage={setErrorMessage} />} />
-          <Route path='/event/:eventName/cms' element={<EventCMS setErrorMesssage={setErrorMessage} />} />
+          <Route path='/event/:eventName/cms' element={<EventCMS setErrorMessage={setErrorMessage} />} />
           {/* <Route path='/event/:eventName/cms/requests' element={<Main />} />
           <Route path='/event/:eventName/map' element={<Main />} />
           <Route path='/masterRemote' element={<Main />} /> */}
