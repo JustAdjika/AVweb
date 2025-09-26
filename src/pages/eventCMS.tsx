@@ -4,15 +4,17 @@ import Cookies from 'js-cookie';
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
 
-import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { getUser } from '../module/getUser.ts';
 import { Event as EventClass } from '../components/class/eventClass.ts'
 import { errorLogger } from '../module/errorLogger.ts';
 import { request } from '../module/serverRequest.ts';
 import { downloadApi } from '../module/axiosConfig.ts';
+
+import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { ExportModal } from '../components/eventCMS/exportModal.tsx';
 import { QRModal } from '../components/eventCMS/qrModal.tsx';
 import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
+import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -32,8 +34,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [currentDay, setCurrentDay] = useState(0)
 
     const [qrMenu, setQrMenu] = useState<boolean>(false)
-
     const [exportMenu, setExportMenu] = useState<boolean>(false)
+    const [profileMenu, setProfileMenu] = useState<boolean>(true)
 
     const [calendar, setCalendar] = useState<boolean>(false)
 
@@ -51,7 +53,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [exportFor, setExportFor] = useState(0)
 
-    const [qrResult,setQrResult] = useState("")
+    const [qrResult, setQrResult] = useState<string | null>(null)
 
 
     const [_dayLoaded, _setDayLoaded] = useState(false)
@@ -187,6 +189,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
+
+    // Экспорт волонтеров
+
     const handleVolExport = async() => {
         const session = Cookies.get("session") as string
 
@@ -228,8 +233,22 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     }
 
 
+    // Отображение профиля при сканировании QR кода
+
+
+    useEffect(() => {
+        if(!qrResult) return
+
+
+    }, [qrResult])
+
+
 
     return (<>
+        <ProfileModal 
+            profileMenu={profileMenu}
+            setProfileMenu={setProfileMenu}
+        />
         <ExportModal 
             setExportFor={setExportFor} 
             exportFor={exportFor} 
