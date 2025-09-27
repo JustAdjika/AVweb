@@ -316,7 +316,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             profileMenu={profileMenu}
             setProfileMenu={setProfileMenu}
             handleDownloadIdCard={handleDownloadIdCard}
-            userId={10}
+            userId={targetUser}
             event={event as EventClass}
         />
         <ExportModal 
