@@ -530,7 +530,7 @@
 .event-profile-footer-wrapper>span {
     font-family: 'OpenSans_light';
 }
-.event-profile-footer-wrapper>button {
+.event-profile-footer-wrapper>div>button {
     width: 170px;
     height: 30px;
     font-family: 'OpenSans_light';
@@ -542,7 +542,13 @@
     color: #d9d9d9;
     transition: 0.3s;
 }
-.event-profile-footer-wrapper>button:active {
+.event-profile-footer-wrapper>div>span {
+    font-family: 'OpenSans_light';
+    color: #1a1a1a;
+    margin-left: 5px;
+    text-decoration: underline;
+}
+.event-profile-footer-wrapper>div>button:active {
     background-color: #464646;
 }
 .event-profile-personal-idcard-container {
