@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { ReactComponent as UserIcon } from '../../assets/icons/user-solid-full.svg'
 import { ReactComponent as UserCheckIcon } from '../../assets/icons/user-check-solid-full.svg'
@@ -16,28 +16,63 @@ type Props = {
     setMenuVisible: (value: boolean) => any,
     contextMenuData: Types.contextMenuData,
     setProfileMenu: (value: boolean) => any
-    setTargetUser: (value: number) => any
+    setTargetUser: (value: number) => any,
 }
 
 
 
 export const ContextMenu = ({ menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser }: Props) => {
-    const [menuPosition, setMenuPosition] = useState({
-        y: '150px',
-        x: '100px'
-    })
 
+    const menuRef = useRef<HTMLUListElement>(null)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
+
+    const handleProfile = (e: any) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setTimeout(() => {
+            setMenuVisible(false); 
+            setTargetUser(contextMenuData.userId as number); 
+            setProfileMenu(true)
+        }, 400)
+    }
+
+    useEffect(() => {
+        if (contextMenuData.e) {
+            const clickX = contextMenuData.e.pageX;
+            const clickY = contextMenuData.e.pageY;
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+            const menuW = menuRef.current?.offsetWidth as number
+            const menuH = menuRef.current?.offsetHeight as number
+
+            let newX = clickX;
+            let newY = clickY;
+
+            if (clickX - scrollX + menuW > screenW) {
+                newX = clickX - menuW;
+            }
+
+            if (clickY - scrollY + menuH > screenH) {
+                newY = clickY - menuH;
+            }
+
+            setPosition({ x: newX, y: newY });
+            setMenuVisible(!menuVisible)
+        }
+    }, [contextMenuData]);
+    
     return (
         <ul
+            ref={menuRef}
             className={`cms-contextmenu ${menuVisible ? 'visible' : ''}`}
             style={{
                 position: "absolute",
-                top: menuPosition.y,
-                left: menuPosition.x,
+                top: position.y,
+                left: position.x,
                 listStyle: "none",
             }}
         >
-            <li className='cms-contextmenu-item-container' onClick={ (e) => {e.preventDefault(); e.stopPropagation(); setMenuVisible(false); setTargetUser(contextMenuData.userId as number); setProfileMenu(true) } }>
+            <li className='cms-contextmenu-item-container' onClick={ (e) => handleProfile(e) }>
                 <div className='cms-contextmenu-item-icon-container'>
                     <UserIcon width={20} height={20} fill='#333'/>
                 </div>

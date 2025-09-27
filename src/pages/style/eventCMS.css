@@ -579,7 +579,6 @@
     box-sizing: border-box;
     z-index: 444;
     opacity: 0;
-    transition: 0.2s ease-in-out;
     pointer-events: none;
 }
 .cms-contextmenu-item-icon-container {

@@ -196,16 +196,18 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     // Открытие модального окна
-    const handleContextMenu = (volData: Types.VolunteerData & Types.moreVolsData) => {
+    const handleContextMenu = (volData: Types.VolunteerData & Types.moreVolsData, e:any) => {
+        if(contextMenuVisible) return setContextMenuVisible(false)
+
         setContextMenuData({
             visit: volData.visit,
             late: volData.late,
             isCRD: volData.role === 'CRD' || volData.role === 'HCRD',
             warn: volData.warning,
             bl: volData.blacklist,
-            userId: volData.userId as number
+            userId: volData.userId as number,
+            e: contextMenuVisible ? null : e
         })
-        setContextMenuVisible(!contextMenuVisible)
     }
 
 
@@ -333,7 +335,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         isCRD: false,
         warn: false,
         bl: false,
-        userId: null
+        userId: null,
+        e: null
     })
 
 
