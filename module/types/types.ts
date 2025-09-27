@@ -343,6 +343,15 @@ export interface moreVolsData {
     posName: string | null
 }
 
+export interface contextMenuData {
+    visit: boolean,
+    late: boolean,
+    isCRD: boolean,
+    warn: boolean,
+    bl: boolean,
+    userId: number | null
+}
+
 
 
 
