@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
@@ -35,7 +36,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [qrMenu, setQrMenu] = useState<boolean>(false)
     const [exportMenu, setExportMenu] = useState<boolean>(false)
-    const [profileMenu, setProfileMenu] = useState<boolean>(true)
+    const [profileMenu, setProfileMenu] = useState<boolean>(false)
 
     const [calendar, setCalendar] = useState<boolean>(false)
 
@@ -232,14 +233,78 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         }
     }
 
+    const handleDownloadIdCard = async(id: number) => {
+        const session = Cookies.get("session") as string
+
+        if(!session) errorLogger(setErrorMessage, { status: 500, message: 'Сессия не найдена' })
+
+        const parsedSession: Types.Session = JSON.parse(session)
+
+        try {
+            const res = await downloadApi.post(`/account/idCard/download/${id}`, {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key
+            })
+
+            const blob = res.data;
+
+            let filename = "idCard.png";
+            const disposition = res.headers["content-disposition"];
+            if (disposition && disposition.includes("filename=")) {
+                filename = disposition
+                    .split("filename=")[1]
+                    .replace(/['"]/g, "");
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err:any) {
+            errorLogger(setErrorMessage, { status: err.response.data.status ?? 500, message: err.response.data.message ?? 'Непредвиденная ошибка'})
+        }
+    }
+
 
     // Отображение профиля при сканировании QR кода
 
+    const [targetUser, setTargetUser] = useState<number | null>(null)
 
     useEffect(() => {
         if(!qrResult) return
 
 
+        const session = Cookies.get("session")
+
+        if(!session) return
+
+        const parsedSession: Types.Session = JSON.parse(session)
+
+        const getUserData = async() => {
+            const res: Types.Response = await axios.post(qrResult, {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key
+            })
+
+            if(res.status === 200) {
+                setQrMenu(false)
+                setProfileMenu(true)
+
+                const container = res.container as { data: Types.Account }
+                setTargetUser(container.data.id as number)
+            }
+        }
+
+        try {
+            getUserData()
+        } catch (err: any) {
+            const response = err.response.data
+            errorLogger(setErrorMessage, { status: response.status ?? 500, message: response.message ?? 'Непредвиденная ошибка' })
+        }
     }, [qrResult])
 
 
@@ -248,6 +313,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         <ProfileModal 
             profileMenu={profileMenu}
             setProfileMenu={setProfileMenu}
+            handleDownloadIdCard={handleDownloadIdCard}
+            userId={10}
+            event={event as EventClass}
         />
         <ExportModal 
             setExportFor={setExportFor} 
