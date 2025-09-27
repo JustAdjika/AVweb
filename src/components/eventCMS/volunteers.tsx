@@ -13,12 +13,13 @@ type Props = {
     setErrorMessage: (msg: string | null) => void,
     days: string[],
     errorLogger: any,
-    _dayLoaded: boolean
+    _dayLoaded: boolean,
+    volunteers: (Types.VolunteerData & Types.moreVolsData)[],
+    setVolunteers: (value: (Types.VolunteerData & Types.moreVolsData)[]) => any
 }
 
-export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded }: Props) => {
+export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers }: Props) => {
 
-    const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
     const [focusVolunteer,setFocusVolunteer] = useState<number | null>(null)
 
     const [_volGot, _setVolGot] = useState(false)

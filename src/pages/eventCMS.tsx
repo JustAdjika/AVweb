@@ -56,6 +56,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     const [qrResult, setQrResult] = useState<string | null>(null)
 
+    const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
+
 
     const [_dayLoaded, _setDayLoaded] = useState(false)
     const [_gotDays, _setGotDays] = useState(false)
@@ -407,6 +409,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     errorLogger={errorLogger} 
                     days={days}
                     _dayLoaded={_dayLoaded}
+                    volunteers={volunteers}
+                    setVolunteers={setVolunteers}
                 />
             ) : null }
         </div>
