@@ -3,7 +3,6 @@ import Cookies from 'js-cookie';
 
 import { Config } from '../../../config';
 import Loader from '../../components/loader.tsx';
-import { api } from '../../module/axiosConfig';
 import { request } from '../../module/serverRequest.ts';
 
 import { Event as EventClass } from '../class/eventClass.ts';
