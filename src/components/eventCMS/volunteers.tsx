@@ -15,10 +15,11 @@ type Props = {
     errorLogger: any,
     _dayLoaded: boolean,
     volunteers: (Types.VolunteerData & Types.moreVolsData)[],
-    setVolunteers: (value: (Types.VolunteerData & Types.moreVolsData)[]) => any
+    setVolunteers: (value: (Types.VolunteerData & Types.moreVolsData)[]) => any,
+    handleContextMenu: (value: Types.VolunteerData & Types.moreVolsData) => void,
 }
 
-export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers }: Props) => {
+export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers, handleContextMenu }: Props) => {
 
     const [focusVolunteer,setFocusVolunteer] = useState<number | null>(null)
 
@@ -77,8 +78,9 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
                 {volunteers.filter(item => item.shift === selectedShift || item.shift === 'both').map((item, i) => item.id !== focusVolunteer ? (
                     <div 
                         className={`cms-table-object-container ${ item.blacklist ? 'bl' : item.warning ? 'warn' : item.role.toLowerCase()}`} 
-                        onClick={() => setFocusVolunteer(item.id as number)
-                    }>
+                        onClick={() => setFocusVolunteer(item.id as number) }
+                        onContextMenu={(e) => { e.preventDefault(); handleContextMenu(item) }}
+                    >
                         <div className='cms-table-cell a'>{i+1}</div>
                         <div className='cms-table-cell b'>{item.account.name}</div>
                         <div className='cms-table-cell-more-wrapper'>
@@ -93,6 +95,7 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
                         <div 
                             className={`cms-table-object-container ${ item.blacklist ? 'bl' : item.warning ? 'warn' : item.role.toLowerCase()} selected`} 
                             onClick={() => setFocusVolunteer(null)}
+                            onContextMenu={(e) => { e.preventDefault(); handleContextMenu(item) }}
                         >
                             <div className='cms-table-cell a'>{i+1}</div>
                             <div className='cms-table-cell b'>{item.account.name}</div>
@@ -106,6 +109,7 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
                         <div 
                             className={`cms-table-object-info-container ${ item.blacklist ? 'bl' : item.warning ? 'warn' : item.role.toLowerCase()}`} 
                             onClick={() => setFocusVolunteer(null)}
+                            onContextMenu={(e) => { e.preventDefault(); handleContextMenu(item) }}
                         >
                             <div className='cms-table-object-more-wrapper'>
                                 <div className='cms-table-object-info-item-wrapper'>

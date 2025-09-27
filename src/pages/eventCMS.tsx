@@ -16,6 +16,7 @@ import { ExportModal } from '../components/eventCMS/exportModal.tsx';
 import { QRModal } from '../components/eventCMS/qrModal.tsx';
 import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
 import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
+import { ContextMenu } from '../components/eventCMS/contextMenu.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -39,6 +40,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [profileMenu, setProfileMenu] = useState<boolean>(false)
 
     const [calendar, setCalendar] = useState<boolean>(false)
+
+    const [contextMenuVisible, setContextMenuVisible] = useState(false)
 
 
 
@@ -192,6 +195,21 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
+    // Открытие модального окна
+    const handleContextMenu = (volData: Types.VolunteerData & Types.moreVolsData) => {
+        setContextMenuData({
+            visit: volData.visit,
+            late: volData.late,
+            isCRD: volData.role === 'CRD' || volData.role === 'HCRD',
+            warn: volData.warning,
+            bl: volData.blacklist,
+            userId: volData.userId as number
+        })
+        setContextMenuVisible(!contextMenuVisible)
+    }
+
+
+
 
     // Экспорт волонтеров
 
@@ -309,9 +327,25 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         }
     }, [qrResult])
 
+    const [contextMenuData, setContextMenuData] = useState<Types.contextMenuData>({
+        visit: false,
+        late: false,
+        isCRD: false,
+        warn: false,
+        bl: false,
+        userId: null
+    })
+
 
 
     return (<>
+        <ContextMenu 
+            menuVisible={contextMenuVisible} 
+            contextMenuData={contextMenuData}
+            setMenuVisible={setContextMenuVisible}
+            setProfileMenu={setProfileMenu}
+            setTargetUser={setTargetUser}
+        />
         <ProfileModal 
             profileMenu={profileMenu}
             setProfileMenu={setProfileMenu}
@@ -331,7 +365,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setQrResult={setQrResult} 
             setQrMenu={setQrMenu}
         />
-        <div className='cms-body'>
+        <div className='cms-body' onClick={() => setContextMenuVisible(false)}>
             <div className='cms-header-container'>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <h1>База данных волонтёров</h1>
@@ -411,6 +445,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     _dayLoaded={_dayLoaded}
                     volunteers={volunteers}
                     setVolunteers={setVolunteers}
+                    handleContextMenu={handleContextMenu}
                 />
             ) : null }
         </div>
