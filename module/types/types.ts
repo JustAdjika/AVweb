@@ -350,6 +350,7 @@ export interface contextMenuData {
     warn: boolean,
     bl: boolean,
     userId: number | null
+    e: any
 }
 
 
