@@ -18,7 +18,7 @@ export class Volunteer {
             return new Volunteer(volunteer, setErrorMessage)
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
 
     }
@@ -44,8 +44,8 @@ export class Volunteer {
         
             return res as Types.Response
         }catch (err: any) {
-            const res = err.response.data as Types.Response
-            throw errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            const res = err?.response?.data as Types.Response
+            return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 
@@ -71,7 +71,7 @@ export class Volunteer {
             return res as Types.Response
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 
@@ -119,7 +119,7 @@ export class Volunteer {
             }
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 
@@ -162,7 +162,7 @@ export class Volunteer {
             }
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 }

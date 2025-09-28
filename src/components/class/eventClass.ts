@@ -34,7 +34,7 @@ export class Event {
             } else throw errorLogger(setErrorMessage, { status: 500, message: 'Event undefined' })
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
 
     }
@@ -60,7 +60,7 @@ export class Event {
             return res as Types.Response
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 
@@ -85,7 +85,7 @@ export class Event {
             return res as Types.Response
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 
@@ -112,7 +112,7 @@ export class Event {
             else return res as Types.Response
         }catch (err: any) {
             const res = err.response.data as Types.Response
-            throw errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+            return errorLogger(setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
 }

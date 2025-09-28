@@ -33,7 +33,7 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
 
         event.getVolunteers(setErrorMessage, days[currentDay])
             .then(res => { 
-                if(res.status === 200) {
+                if(res?.status === 200) {
                     const container = res.container as (Types.VolunteerData & Types.moreVolsData)[]
 
                     setVolunteers(container)
