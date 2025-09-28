@@ -197,7 +197,7 @@ router.post('/requestblacklist/add/:userId', sessionCheck, eventPermsCheck, asyn
         return sendResponse(
             res, 
             200, 
-            `Попытка занесения в ЧС заявок. Успешная операция. Пользователь ${userId} добавлен в ЧС заявок ${perms.perms === 'COORDINATOR' ? 'Координатором' : 'Администратором'} ${session.account.id}`
+            `Попытка занесения в ЧС заявок. Успешная операция. Пользователь ${userId} добавлен в ЧС заявок ${perms.perms === 'HCRD' ? 'Координатором' : 'Администратором'} ${session.account.id}`
         )
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/measure/requestblacklist/add')
@@ -226,7 +226,7 @@ router.delete('/requestblacklist/remove/userId', sessionCheck, eventPermsCheck, 
         return sendResponse(
             res, 
             200, 
-            `Попытка удаления из ЧС заявок (UserId). Успешная операция. Пользователь ${userId} убран из ЧС заявок события ${eventId} ${perms.perms === 'COORDINATOR' ? 'Координатором' : 'Администратором'} ${session.account.id}`
+            `Попытка удаления из ЧС заявок (UserId). Успешная операция. Пользователь ${userId} убран из ЧС заявок события ${eventId} ${perms.perms === 'HCRD' ? 'Координатором' : 'Администратором'} ${session.account.id}`
         )
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/measure/requestblacklist/remove/userId')
@@ -256,7 +256,7 @@ router.delete('/requestblacklist/remove/blId', sessionCheck, eventPermsCheck, as
         return sendResponse(
             res, 
             200, 
-            `Попытка удаления из ЧС заявок (blId). Успешная операция. Пользователь ${foundBlacklistModel.userId} убран из ЧС заявок события ${foundBlacklistModel.eventId} ${perms.perms === 'COORDINATOR' ? 'Координатором' : 'Администратором'} ${session.account.id}`
+            `Попытка удаления из ЧС заявок (blId). Успешная операция. Пользователь ${foundBlacklistModel.userId} убран из ЧС заявок события ${foundBlacklistModel.eventId} ${perms.perms === 'HCRD' ? 'Координатором' : 'Администратором'} ${session.account.id}`
         )
     } catch (e:any) {
         return sendResponse(res, 500, e.message, undefined, '/measure/requestblacklist/remove/blId')
