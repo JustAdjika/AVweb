@@ -17,6 +17,7 @@ import * as Associations from '../database/associations.js'
 // MIDDLEWARES
 import sessionCheck from '../middleware/sessionCheck.ts'
 import permsCheck from '../middleware/permsCheck.ts'
+import eventPermsCheck from '../middleware/eventPermsCheck.ts'
 
 const router = express.Router()
 const config = new Config()
@@ -164,17 +165,17 @@ router.get('/blacklist/list', async(req,res) => {
 
 
 // ЧС Заявок
-router.post('/requestblacklist/add/:userId', sessionCheck, permsCheck, async(req,res) => {
+router.post('/requestblacklist/add/:userId', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
         const session = res.locals.sessionCheck as Types.localSessionCheck
-        const perms: Types.localPermsCheck = res.locals.permsCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
 
         const userId = Number(req.params.userId)
         const eventId = Number(req.query.eventId)
 
         if(!session || !perms) return sendResponse(res, 500, 'Попытка занесения в ЧС заявок. MW sessionCheck/permsCheck не передал необходимые данные')
 
-        if(perms.perms !== 'COORDINATOR' && perms.perms !== 'ADMIN') return sendResponse(res, 403, 'Попытка занесения в ЧС заявок. Недостаточно прав')
+        if(perms.perms !== 'HCRD') return sendResponse(res, 403, 'Попытка занесения в ЧС заявок. Недостаточно прав')
 
         if(isNaN(userId) && isNaN(eventId)) return sendResponse(res, 400, 'Попытка занесения в ЧС заявок. Входные данные указаны неверно')
 
@@ -203,17 +204,17 @@ router.post('/requestblacklist/add/:userId', sessionCheck, permsCheck, async(req
     }
 })
 
-router.delete('/requestblacklist/remove/userId', sessionCheck, permsCheck, async(req,res) => {
+router.delete('/requestblacklist/remove/userId', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
         const session = res.locals.sessionCheck as Types.localSessionCheck
-        const perms: Types.localPermsCheck = res.locals.permsCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
 
         const userId = Number(req.query.userId)
         const eventId = Number(req.query.eventId)
 
         if(!session || !perms) return sendResponse(res, 500, 'Попытка удаления из ЧС заявок (UserId). MW sessionCheck/permsCheck не передал необходимые данные')
 
-        if(perms.perms !== 'COORDINATOR' && perms.perms !== 'ADMIN') return sendResponse(res, 403, 'Попытка удаления из ЧС заявок (UserId). Недостаточно прав')
+        if(perms.perms !== 'HCRD') return sendResponse(res, 403, 'Попытка удаления из ЧС заявок (UserId). Недостаточно прав')
 
         if(isNaN(userId) && isNaN(eventId)) return sendResponse(res, 400, 'Попытка удаления из ЧС заявок (UserId). Входные данные указаны неверно')
 
@@ -232,16 +233,16 @@ router.delete('/requestblacklist/remove/userId', sessionCheck, permsCheck, async
     }
 })
 
-router.delete('/requestblacklist/remove/blId', sessionCheck, permsCheck, async(req,res) => {
+router.delete('/requestblacklist/remove/blId', sessionCheck, eventPermsCheck, async(req,res) => {
     try {
         const session = res.locals.sessionCheck as Types.localSessionCheck
-        const perms: Types.localPermsCheck = res.locals.permsCheck
+        const perms: Types.localEventPermsCheck = res.locals.eventPermsCheck
 
         const blId = Number(req.query.blId)
 
         if(!session || !perms) return sendResponse(res, 500, 'Попытка удаления из ЧС заявок (blId). MW sessionCheck/permsCheck не передал необходимые данные')
 
-        if(perms.perms !== 'COORDINATOR' && perms.perms !== 'ADMIN') return sendResponse(res, 403, 'Попытка удаления из ЧС заявок (blId). Недостаточно прав')
+        if(perms.perms !== 'HCRD') return sendResponse(res, 403, 'Попытка удаления из ЧС заявок (blId). Недостаточно прав')
 
         if(isNaN(blId)) return sendResponse(res, 400, 'Попытка удаления из ЧС заявок (blId). Входные данные указаны неверно')
 
