@@ -31,7 +31,6 @@ export class menuConfig {
 
     updateContextData = (newData: Types.contextMenuData) => {
         this.contextMenuData = newData
-        console.log(this.contextMenuData.isCRD === true ? 'Назначить волонтером' : 'Назначить координатором')
     }
 
     get options(): Record<menuType, menuOption[]> {
