@@ -17,6 +17,7 @@ import { QRModal } from '../components/eventCMS/qrModal.tsx';
 import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
 import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
 import { ContextMenu } from '../components/eventCMS/contextMenu.tsx';
+import { Calendar } from '../components/eventCMS/calendar.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -382,7 +383,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     { userRole === 'HCRD' ? 'Гл. Координатор' : 'Координатор' }
                 </span>
             </div>
-            <div className='cms-headpanel-container'>
+            { calendar ? <Calendar activeDays={days} currentDay={days[currentDay]} setCurrentDay={setCurrentDay} setCalendar={setCalendar}/> : null }
+            <div className='cms-headpanel-container' style={{ display: calendar ? 'none' : 'flex' }}>
                 <div className='cms-headpanel-selector'>
                     <div className='cms-headpanel-selector-wrapper'>
                         <button 
@@ -418,12 +420,12 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     <div className={`cms-headpanel-selector-line shift pos${shiftMenu+1}`}/>
                 </div>
             </div>
-            <div className='cms-headpanel-functions-but-container'>
+            <div className='cms-headpanel-functions-but-container' style={{ display: calendar ? 'none' : 'flex' }}>
                 <div className='cms-headpanel-center-wrapper'>
                     <div 
                         className='cms-headpanel-but-calendar-container' 
-                        onClick={() => setCalendar(true)} 
-                        style={{ marginRight: userRole === 'CRD' ? '10px' : '0px', display: calendar ? 'none' : 'flex' }}
+                        onClick={() => setTimeout(() => setCalendar(true), 300)} 
+                        style={{ marginRight: userRole === 'CRD' ? '10px' : '0px' }}
                     >
                         <CalendarIcon className='cms-headpanel-but-calendar-icon'/>
                         <span style={{ marginRight: '3px' }}>{currentDay+1} день</span>
