@@ -1,4 +1,3 @@
-import React from 'react';
 import { eachDayOfInterval, format } from 'date-fns';
 
 import { ReactComponent as CalendarIcon } from '../../assets/icons/calendar-days-solid-full.svg'
