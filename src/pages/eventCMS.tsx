@@ -348,6 +348,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setMenuVisible={setContextMenuVisible}
             setProfileMenu={setProfileMenu}
             setTargetUser={setTargetUser}
+            volunteers={volunteers}
+            setVolunteers={setVolunteers}
+            setErrorMessage={setErrorMessage}
         />
         <ProfileModal 
             profileMenu={profileMenu}

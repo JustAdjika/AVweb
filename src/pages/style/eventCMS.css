@@ -578,8 +578,8 @@
     padding-bottom: 15px;
     box-sizing: border-box;
     z-index: 2222;
-    opacity: 0;
     pointer-events: none;
+    display: none;
 }
 .cms-contextmenu-item-icon-container {
     display: flex;
@@ -602,8 +602,8 @@
     transition: 0.3s;
 }
 .cms-contextmenu.visible {
-    opacity: 1;
     pointer-events: auto;
+    display: flex;
 }
 .cms-contextmenu-item-container:hover {
     background-color: #B2B2B2;
