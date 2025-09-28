@@ -180,10 +180,10 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     // Определение первого доступного дня для координатора
 
     useEffect(() => {
-        if(!firstCRDDay) return
+        if(firstCRDDay === null || !_gotDays) return
         setCurrentDay(firstCRDDay)
         _setDayLoaded(true)
-    }, [firstCRDDay])
+    }, [firstCRDDay, _gotDays])
 
 
 
@@ -351,6 +351,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             volunteers={volunteers}
             setVolunteers={setVolunteers}
             setErrorMessage={setErrorMessage}
+            userRole={userRole}
         />
         <ProfileModal 
             profileMenu={profileMenu}
