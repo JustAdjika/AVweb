@@ -37,9 +37,9 @@ export async function request(data: Types.serverRequest): Promise<Types.Response
             break;
         case "DELETE":
             query ? 
-                response = await api.delete(`${data.route}?${params}`, data.loadData)
+                response = await api.delete(`${data.route}?${params}`, { data: data.loadData })
             : 
-                response = await api.delete(`${data.route}`, data.loadData)
+                response = await api.delete(`${data.route}`, { data: data.loadData })
             break;
         case "PATCH":
             query ? 
