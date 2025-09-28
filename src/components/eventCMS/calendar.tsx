@@ -42,7 +42,7 @@ export const Calendar = ({activeDays, currentDay, setCurrentDay, setCalendar}: P
                     <CalendarIcon fill='#1a1a1a' width={25} height={25}/>
                     <h2>Календарь</h2>
                 </div>
-                <div className='cms-calendar-but-exit-container' onClick={() => { setTimeout(() => setCalendar(false), 300) }}>
+                <div className='cms-calendar-but-exit-container' onClick={() => setTimeout(() => setCalendar(false), 300)}>
                     <ArrowLeftIcon fill='#1a1a1a' width={20} height={20}/>
                     <span>Вернуться на главную</span>
                 </div>

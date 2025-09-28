@@ -26,11 +26,11 @@ export const VolunteersHeader = ({ setQrMenu, setExportMenu, userRole, handleCha
             />
         </div>
         <div style={{ display: 'flex' }}>
-            <div className='cms-headpanel-qr-but-container' onClick={() => setQrMenu(true)}>
+            <div className='cms-headpanel-qr-but-container' onClick={() => setTimeout(() => setQrMenu(true),300)}>
                 <QRcodeIcon className='cms-headpanel-function-but-icon'/>
                 <span>QR</span>
             </div>
-            <div className='cms-headpanel-export-but-container' onClick={() => setExportMenu(true)}>
+            <div className='cms-headpanel-export-but-container' onClick={() => setTimeout(() => setExportMenu(true),300)}>
                 <FileExportIcon className='cms-headpanel-function-but-icon'/>
                 <span>Экспорт</span>
             </div>
