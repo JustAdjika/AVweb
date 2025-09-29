@@ -160,7 +160,7 @@ export const ProfileModal = ({ profileMenu, setProfileMenu, handleDownloadIdCard
                     </div>
                     <div className='event-profile-footer-wrapper'>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <button onClick={() => setShowIdCard(!showIdCard)}>Удостоверение</button>
+                            <button onClick={() => setTimeout(() => setShowIdCard(!showIdCard), 300)}>{showIdCard ? 'Спрятать' : 'Удостоверение'}</button>
                             <span onClick={() => handleDownloadIdCard(foundUser?.id as number)}>Скачать</span>
                         </div>
                         <span>Дни ATP: {atpDays.map( day => `${day.split('.')[0]}, `)}</span>
