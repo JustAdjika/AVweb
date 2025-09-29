@@ -211,10 +211,10 @@ export interface PositionData {
     eventId: number,
     day: string,
     mapLocId: string | null,
-    volunteer: VolunteerData & { ccount: { 
+    volunteer: Omit<VolunteerData, 'account'> & { account: { 
         id: number,
         name: string
-    }}
+    }} | null
 }
 
 export interface EquipmentData {
