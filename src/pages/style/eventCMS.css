@@ -400,7 +400,7 @@
     background-color: #464646;
 }
 .event-qrscanner-container {
-    width: 300px;
+    width: 80vh;
     height: 500px;
     border-radius: 15px;
     background-color: #D9D9D9;
