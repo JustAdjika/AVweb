@@ -201,18 +201,30 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     // Открытие модального окна
-    const handleContextMenu = (volData: Types.VolunteerData & Types.moreVolsData, e:any) => {
+    function handleContextMenu <T extends Types.contextMenuType = Types.VolunteerData & Types.moreVolsData >(loadData: T, e:any)  {
         if(contextMenuVisible) return setContextMenuVisible(false)
 
-        setContextMenuData({
-            visit: volData.visit,
-            late: volData.late,
-            isCRD: volData.role === 'CRD' || volData.role === 'HCRD',
-            warn: volData.warning,
-            bl: volData.blacklist,
-            userId: volData.userId as number,
-            e: contextMenuVisible ? null : e
-        })
+        // const isVolunteerType = (data: any): data is Types.VolunteerData & Types.moreVolsData => 'visit' in data
+        const isPosition = (data:any): data is Position => data instanceof Position
+
+        if(isPosition(loadData)) {
+            setContextMenuData({
+                positionClass: loadData,
+                e: contextMenuVisible ? null : e,
+                type: 'position'
+            })
+        } else {
+            setContextMenuData({
+                visit: loadData.visit,
+                late: loadData.late,
+                isCRD: loadData.role === 'CRD' || loadData.role === 'HCRD',
+                warn: loadData.warning,
+                bl: loadData.blacklist,
+                userId: loadData.userId as number,
+                e: contextMenuVisible ? null : e,
+                type: 'volunteer'
+            })
+        }
     }
 
 
@@ -341,7 +353,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         warn: false,
         bl: false,
         userId: null,
-        e: null
+        e: null,
+        type: 'volunteer'
     })
 
 

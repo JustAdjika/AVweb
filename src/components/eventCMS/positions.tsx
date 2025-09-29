@@ -10,7 +10,7 @@ import { errorLogger } from '../../module/errorLogger.ts';
 import { ReactComponent as PersonAlertIcon } from '../../assets/icons/person-circle-exclamation-solid-full.svg'
 
 type Props = {
-    handleContextMenu: () => void,
+    handleContextMenu: <T extends Types.contextMenuType>(loadData: T, e:any) => void,
     positions: Position[],
     setPositions: (value: Position[]) => any,
     _dayLoaded: boolean,
@@ -54,7 +54,7 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                     <div 
                         className={`cms-table-object-container`} 
                         onClick={() => setFocusPosition(item.data.id as number) }
-                        onContextMenu={(e) => { e.preventDefault() }}
+                        onContextMenu={(e) => { e.preventDefault(); handleContextMenu<Position>(item, e) }}
                     >
                         <div className='cms-table-cell apos'>
                             <div>{ i+1 }</div>
@@ -71,7 +71,7 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                         <div 
                             className={`cms-table-object-container vol selected`} 
                             onClick={() => setFocusPosition(null) }
-                            onContextMenu={(e) => { e.preventDefault() }}
+                            onContextMenu={(e) => { e.preventDefault(); handleContextMenu<Position>(item, e) }}
                         >
                             <div className='cms-table-cell apos'>
                                 <div>{ i+1 }</div>
@@ -86,7 +86,7 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                         <div 
                             className={`cms-table-object-info-position-container vol`} 
                             onClick={() => setFocusPosition(null)}
-                            onContextMenu={(e) => { e.preventDefault() }}
+                            onContextMenu={(e) => { e.preventDefault(); handleContextMenu<Position>(item, e) }}
                         >
                             <div className='cms-table-object-more-wrapper'>
                                 <div className='cms-table-object-info-item-wrapper'>
