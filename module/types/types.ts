@@ -1,3 +1,5 @@
+import { Position as PositionClass } from "../../src/components/class/positionClass"
+
 // LITERALS
 
 export type region = 'almaty' | 'astana'
@@ -25,6 +27,10 @@ export type statusCode = 200 | 400 | 401 | 403 | 404 | 409 | 410 | 422 | 498 | 5
 export type requestMethod = 'GET' | 'POST' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD' 
 
 export type shift = '1st' | '2nd' | 'both'
+
+export type contextMenuDataTypes = 'position' | 'volunteer'
+
+export type contextMenuType = VolunteerData & moreVolsData | PositionClass
 
 
 
@@ -344,13 +350,15 @@ export interface moreVolsData {
 }
 
 export interface contextMenuData {
-    visit: boolean,
-    late: boolean,
-    isCRD: boolean,
-    warn: boolean,
-    bl: boolean,
-    userId: number | null
-    e: any
+    positionClass?: PositionClass,
+    visit?: boolean,
+    late?: boolean,
+    isCRD?: boolean,
+    warn?: boolean,
+    bl?: boolean,
+    userId?: number | null,
+    e: any,
+    type: contextMenuDataTypes
 }
 
 
