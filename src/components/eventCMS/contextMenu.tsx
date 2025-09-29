@@ -41,12 +41,16 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
         if(!session) return
         const parsedSession: Types.Session = JSON.parse(session)
 
-
-        if(contextMenuData.userId === parsedSession.userId && userRole === 'HCRD') setMenuType('target_yourself_hcrd')
-        else if(contextMenuData.userId === parsedSession.userId) setMenuType('target_yourself')
-        else if(userRole === 'HCRD') setMenuType('for_hcrd')
-        else if(contextMenuData.isCRD) setMenuType('target_coordinator')
-        else setMenuType('target_classic')
+        if(contextMenuData.type === 'volunteer') {
+            if(contextMenuData.userId === parsedSession.userId && userRole === 'HCRD') setMenuType('target_yourself_hcrd')
+            else if(contextMenuData.userId === parsedSession.userId) setMenuType('target_yourself')
+            else if(userRole === 'HCRD') setMenuType('for_hcrd')
+            else if(contextMenuData.isCRD) setMenuType('target_coordinator')
+            else setMenuType('target_classic')
+        } else if(contextMenuData.type === 'position') {
+            if(userRole === 'CRD') setMenuType('position')
+            else setMenuType('position_hcrd')
+        }
     }, [contextMenuData])
 
 
@@ -270,7 +274,7 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
             }}
         >
             {
-                contextMenuConfig?.options[menuType].map(option => (
+                contextMenuConfig?.options[menuType].map((option) => (
                     <li className='cms-contextmenu-item-container' onClick={ (e) => option.function(e) }>
                         <div className='cms-contextmenu-item-icon-container'>
                             <option.icon width={20} height={20} fill={option.color}/>

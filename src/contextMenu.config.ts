@@ -6,11 +6,16 @@ import { ReactComponent as ReduceIcon } from './assets/icons/arrow-down-short-wi
 import { ReactComponent as LocationIcon } from './assets/icons/location-dot-solid-full.svg'
 import { ReactComponent as WarnIcon } from './assets/icons/triangle-exclamation-solid-full.svg'
 import { ReactComponent as BanIcon } from './assets/icons/ban-solid-full.svg'
+import { ReactComponent as MapIcon } from './assets/icons/map-location-dot-solid-full.svg'
+import { ReactComponent as NoteIcon } from './assets/icons/note-sticky-solid-full.svg'
+import { ReactComponent as PersonPlusIcon } from './assets/icons/person-circle-plus-solid-full.svg'
+import { ReactComponent as PersonMinusIcon } from './assets/icons/person-circle-minus-solid-full.svg'
+import { ReactComponent as TrashIcon } from './assets/icons/trash-can-solid-full.svg'
 
 import * as Types from '../module/types/types.ts'
 
 
-export type menuType = 'target_yourself' | 'target_coordinator' | 'target_classic' | 'for_hcrd' | 'target_yourself_hcrd'
+export type menuType = 'target_yourself' | 'target_coordinator' | 'target_classic' | 'for_hcrd' | 'target_yourself_hcrd' | 'position' | 'position_hcrd'
 
 type menuOption = {
     icon: React.FC<React.SVGProps<SVGSVGElement>>,
@@ -35,6 +40,52 @@ export class menuConfig {
 
     get options(): Record<menuType, menuOption[]> {
         return ({
+            position: [
+                {
+                    icon: MapIcon,
+                    color: '#333',
+                    name: 'Показать на карте',
+                    function: (e:any) => {}
+                },
+                {
+                    icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
+                    color: '#333',
+                    name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
+                    function: (e:any) => {} // Не работает
+                },
+                {
+                    icon: NoteIcon,
+                    color: '#333',
+                    name: 'Заметка локации',
+                    function: (e:any) => {}
+                },
+            ],
+            position_hcrd: [
+                {
+                    icon: MapIcon,
+                    color: '#333',
+                    name: 'Показать на карте',
+                    function: (e:any) => {}
+                },
+                {
+                    icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
+                    color: '#333',
+                    name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
+                    function: (e:any) => {} // Не работает
+                },
+                {
+                    icon: NoteIcon,
+                    color: '#333',
+                    name: 'Заметка локации',
+                    function: (e:any) => {}
+                },
+                {
+                    icon: TrashIcon,
+                    color: '#C0392B',
+                    name: 'Удалить позицию',
+                    function: (e:any) => {} // Не работает
+                },
+            ],
             target_yourself: [
                 {
                     icon: UserIcon,
