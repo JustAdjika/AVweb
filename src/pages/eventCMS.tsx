@@ -7,6 +7,7 @@ import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-so
 
 import { getUser } from '../module/getUser.ts';
 import { Event as EventClass } from '../components/class/eventClass.ts'
+import { Position } from '../components/class/positionClass.ts';
 import { errorLogger } from '../module/errorLogger.ts';
 import { request } from '../module/serverRequest.ts';
 import { downloadApi } from '../module/axiosConfig.ts';
@@ -18,6 +19,8 @@ import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
 import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
 import { ContextMenu } from '../components/eventCMS/contextMenu.tsx';
 import { Calendar } from '../components/eventCMS/calendar.tsx';
+import { PositionsHeader } from '../components/eventCMS/positionsHeader.tsx';
+import { Positions } from '../components/eventCMS/positions.tsx';
 
 import * as Types from '../../module/types/types.ts'
 
@@ -61,6 +64,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [qrResult, setQrResult] = useState<string | null>(null)
 
     const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
+    const [positions, setPositions] = useState<Position[]>([])
 
 
     const [_dayLoaded, _setDayLoaded] = useState(false)
@@ -438,6 +442,10 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                         userRole={userRole} 
                         handleChangeLink={handleChangeLink}
                     />
+                    ) : selectedMenu === 1 ? (
+                        <PositionsHeader
+                        
+                        />
                     ) : null}
                 </div>
             </div>
@@ -455,6 +463,16 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     volunteers={volunteers}
                     setVolunteers={setVolunteers}
                     handleContextMenu={handleContextMenu}
+                />
+            ) : selectedMenu === 1 ? (
+                <Positions 
+                    handleContextMenu={handleContextMenu}
+                    positions={positions}
+                    setPositions={setPositions}
+                    _dayLoaded={_dayLoaded}
+                    currentDay={days[currentDay]}
+                    setErrorMessage={setErrorMessage}
+                    event={event}
                 />
             ) : null }
         </div>

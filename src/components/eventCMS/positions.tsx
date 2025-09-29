@@ -1,0 +1,107 @@
+import { useEffect, useState } from 'react';
+
+import { Event as EventClass } from '../class/eventClass.ts';
+import { Position } from '../class/positionClass.ts';
+
+import * as Types from '../../../module/types/types.ts'
+
+import '../../pages/style/eventCMS.css'
+import { errorLogger } from '../../module/errorLogger.ts';
+import { ReactComponent as PersonAlertIcon } from '../../assets/icons/person-circle-exclamation-solid-full.svg'
+
+type Props = {
+    handleContextMenu: () => void,
+    positions: Position[],
+    setPositions: (value: Position[]) => any,
+    _dayLoaded: boolean,
+    setErrorMessage: (msg: string | null) => void,
+    event: EventClass | null,
+    currentDay: string
+}
+
+export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoaded, event, currentDay, setErrorMessage }: Props) => {
+
+    const [focusPosition, setFocusPosition] = useState<number | null>(null)
+
+    const [_volGot, _setVolGot] = useState(false)
+    
+
+    // Получение списка волонтёров
+
+    useEffect(() => {
+        if(_volGot || !event || !_dayLoaded) return 
+
+        Position.create(setErrorMessage, event.data.id as number, currentDay)
+            .then(container => {
+                if(container) setPositions(container)
+            })
+    }, [event, _dayLoaded])
+
+
+
+    return (
+        <div className='cms-table-container'>
+            <div className='cms-table-header'>
+                <div className='cms-table-cell apos'>№</div>
+                <div className='cms-table-cell bpos'>Название</div>
+                <div className='cms-table-cell-more-wrapper'>
+                    <div className='cms-table-cell cpos'>Public ID</div>
+                    <div className='cms-table-cell dpos'>Назначенный</div>
+                </div>
+            </div>
+            <div className='cms-table-main'>
+                {positions.map((item, i) => item.data.id !== focusPosition ? (
+                    <div 
+                        className={`cms-table-object-container`} 
+                        onClick={() => setFocusPosition(item.data.id as number) }
+                        onContextMenu={(e) => { e.preventDefault() }}
+                    >
+                        <div className='cms-table-cell apos'>
+                            <div>{ i+1 }</div>
+                            <PersonAlertIcon width={25} height={25} fill='#C21706'/>
+                        </div>
+                        <div className='cms-table-cell bpos'>{ `${item.data.name}-${item.data.NameNumber}` }</div>
+                        <div className='cms-table-cell-more-wrapper'>
+                            <div className='cms-table-cell cpos'>{ item.data.publicId }</div>
+                            <div className='cms-table-cell dpos'>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div 
+                            className={`cms-table-object-container vol selected`} 
+                            onClick={() => setFocusPosition(null) }
+                            onContextMenu={(e) => { e.preventDefault() }}
+                        >
+                            <div className='cms-table-cell apos'>
+                                <div>{ i+1 }</div>
+                                <PersonAlertIcon width={25} height={25} fill='#C21706' />
+                            </div>
+                            <div className='cms-table-cell bpos'>{ `${item.data.name}-${item.data.NameNumber}` }</div>
+                            <div className='cms-table-cell-more-wrapper'>
+                                <div className='cms-table-cell cpos'>{ item.data.publicId }</div>
+                                <div className='cms-table-cell dpos'>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                            </div>
+                        </div>
+                        <div 
+                            className={`cms-table-object-info-position-container vol`} 
+                            onClick={() => setFocusPosition(null)}
+                            onContextMenu={(e) => { e.preventDefault() }}
+                        >
+                            <div className='cms-table-object-more-wrapper'>
+                                <div className='cms-table-object-info-item-wrapper'>
+                                    <span>Public ID</span>
+                                    <div>{item.data.publicId}</div>
+                                </div>
+                                <div className='cms-table-object-info-item-wrapper'>
+                                    <span style={{ marginRight: '15px' }}>Назначенный</span>
+                                    <div>{item.data.volunteer?.account.name ?? 'Мирас Серкебаев Ермекович'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                ))}
+            </div>
+        </div>
+    );
+};
