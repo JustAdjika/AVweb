@@ -1,4 +1,4 @@
-import { Position as PositionClass } from "../../src/components/class/positionClass"
+import { Position as PositionClass } from "../../src/components/class/positionClass.ts"
 
 // LITERALS
 
