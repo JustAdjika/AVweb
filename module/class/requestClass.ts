@@ -10,6 +10,7 @@ import REQUESTS_TAB from '../../database/requests.js'
 import REQUESTBLACKLISTS_TAB from '../../database/requestBlacklists.js'
 import ACCOUNTS_TAB from '../../database/accounts.js'
 import AVSTAFFS_TAB from '../../database/avstaffs.js'
+import GROUPLINKS_TAB from '../../database/groupLinks.js'
 
 // MIDDLEWARES
 
@@ -143,6 +144,13 @@ export class Request {
 
         const foundUserModel: Types.Account = await foundUser.get({ plain: true })
 
+        const foundLinks = await GROUPLINKS_TAB.findAll({ where: { eventId: this.eventId } })
+        if(!foundLinks) throw new Error('Module requestClass.ts error: accept() Links undefined')
+
+        const foundLinksModel: Types.GroupLink[] = foundLinks.map( item => item.get({ plain: true }) ) 
+
+        const acceptedDays = foundLinksModel.filter(link => days.some(day => day === link.day))
+
         // Процесс внесения в волонтеры
 
         for(const item of days) {
@@ -161,7 +169,7 @@ export class Request {
 
         parsedDays.map(day => Volunteer.create(this.userId as number, this.guild as string, this.eventId as number, day, shift))
         
-        const result = await sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте`)
+        const result = await sendMail(foundUserModel.email, `Вердикт к вашей заявки на событие`, `Ваша заявка была одобрена составом координаторов, вы допущены к событию, всю подробную информацию о событии узнайте на сайте. Ссылка на группы: ${acceptedDays.map(day => (`день ${day.day} - ${day.link}, `))}`)
     
         if(!result.status) throw new Error(`Module requestClass.ts error: accept() ${result.message}`)
 
