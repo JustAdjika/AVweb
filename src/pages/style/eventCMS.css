@@ -190,7 +190,7 @@
 }
 .cms-table-header {
     border-bottom: solid 4px #1a1a1a;
-    min-height: 40px;
+    min-height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -254,7 +254,7 @@
 }
 .cms-table-object-container {
     display: flex;
-    min-height: 40px;
+    min-height: 50px;
     width: 100%;
     justify-content: center;
     user-select: none;
@@ -756,6 +756,67 @@
     transition: 0.2s ease-out;
     user-select: none;
 }
+.cms-headpanel-posadd-but-container:active {
+    background-color: #464646;
+    transition: 0.2s ease-out;
+}
+.cms-positionadd-container {
+    background-color: #d9d9d9;
+    width: 400px;
+    height: 280px;
+    border-radius: 10px;
+    font-family: 'OpenSans_light';
+    padding: 20px;
+    box-sizing: border-box;
+    padding-left: 25px;
+    padding-right: 25px;
+    display: flex;
+    flex-direction: column;
+}
+.cms-positionadd-container>h2 {
+    font-weight: lighter;
+    margin: 0px;
+    font-size: 15pt;
+}
+.cms-positionadd-input {
+    background-color: #D9D9D9;
+    border: solid 2px #1a1a1a;
+    border-radius: 5px;
+    padding-left: 20px;
+    outline: none;
+    height: 30px;
+    font-size: 13pt;
+    font-family: 'OpenSans_light';
+    margin-right: 10px;
+}
+.cms-positionadd-container>div>h3 {
+    margin: 0px;
+    font-weight: lighter;
+}
+.cms-positionadd-alert {
+    font-size: 10pt;
+    margin-top: 5px;
+}
+.cms-positionadd-but-confirm-wrapper {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+.cms-positionadd-but-confirm-wrapper>button {
+    height: 30px;
+    width: 150px;
+    font-family: 'OpenSans_light';
+    font-size: 12pt;
+    border-radius: 3px;
+    border: none;
+    outline: none;
+    background-color: #d9d9d9;
+    transition: 0.2s ease-out;
+}
+.cms-positionadd-but-confirm-wrapper>button:active {
+    background-color: #afafaf;
+}
 
 
 
@@ -771,6 +832,10 @@
 
 
 @media (orientation: portrait) or (max-width: 790px){
+    .cms-positionadd-container {
+        width: 350px;
+        height: 280px;
+    }
     .cms-table-object-info-position-container {
         min-height: 80px;
         padding-bottom: 20px;

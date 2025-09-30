@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
+
 import { ReactComponent as PersonAlertIcon } from '../assets/icons/person-circle-exclamation-solid-full.svg'
 import { ReactComponent as CalendarIcon } from '../assets/icons/calendar-days-solid-full.svg'
+
 
 import { getUser } from '../module/getUser.ts';
 import { Event as EventClass } from '../components/class/eventClass.ts'
@@ -12,15 +14,20 @@ import { errorLogger } from '../module/errorLogger.ts';
 import { request } from '../module/serverRequest.ts';
 import { downloadApi } from '../module/axiosConfig.ts';
 
-import { Volunteers } from '../components/eventCMS/volunteers.tsx';
+
 import { ExportModal } from '../components/eventCMS/exportModal.tsx';
-import { QRModal } from '../components/eventCMS/qrModal.tsx';
-import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
 import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
-import { ContextMenu } from '../components/eventCMS/contextMenu.tsx';
-import { Calendar } from '../components/eventCMS/calendar.tsx';
-import { PositionsHeader } from '../components/eventCMS/positionsHeader.tsx';
+import { PositionAddModal } from '../components/eventCMS/positionAddModal.tsx';
+import { QRModal } from '../components/eventCMS/qrModal.tsx';
+
+import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { Positions } from '../components/eventCMS/positions.tsx';
+import { Calendar } from '../components/eventCMS/calendar.tsx';
+import { ContextMenu } from '../components/eventCMS/contextMenu.tsx';
+
+import { PositionsHeader } from '../components/eventCMS/positionsHeader.tsx';
+import { VolunteersHeader } from '../components/eventCMS/volunteersHeader.tsx';
+
 
 import * as Types from '../../module/types/types.ts'
 
@@ -35,40 +42,48 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     // UI
 
+    // Общие сведения выбранных меню
     const [selectedMenu, setSelectedMenu] = useState(0)
     const [shiftMenu, setShiftMenu] = useState(0)
     const [currentDay, setCurrentDay] = useState(0)
 
+
+    // Модальные окна таблицы волонтеров
     const [qrMenu, setQrMenu] = useState<boolean>(false)
     const [exportMenu, setExportMenu] = useState<boolean>(false)
     const [profileMenu, setProfileMenu] = useState<boolean>(false)
 
-    const [calendar, setCalendar] = useState<boolean>(false)
+    // Модальные окна таблицы позиций
+    const [positionAddMenu, setPositionAddMenu] = useState<boolean>(false)
 
-    const [contextMenuVisible, setContextMenuVisible] = useState(false)
+    // Состояние календаря и контекстного меню
+    const [calendar, setCalendar] = useState<boolean>(false)
+    const [contextMenuVisible, setContextMenuVisible] = useState<boolean>(false)
 
 
 
     // UX
 
-    const [days, setDays] = useState<string[]>([])
+    const [days, setDays] = useState<string[]>([])  // Общий массив дней
 
+    // Сведения о пользователе и событии
     const [user, setUser] = useState<Types.Account | null>(null)
     const [event, setEvent] = useState<EventClass | null>(null)
     const [userRole,setUserRole] = useState<Types.eventPermission | null>(null)
+    const [firstCRDDay, setFirstCRDDay] = useState(0)   // Первый доступный день для координатора
 
-    const [firstCRDDay, setFirstCRDDay] = useState(0)
+    const [exportFor, setExportFor] = useState(0) // Выбор варианта экспорта (0-для координаторов, 1-для организаторов)
 
-    const [exportFor, setExportFor] = useState(0)
+    const [qrResult, setQrResult] = useState<string | null>(null) // Текст QR кода
 
-    const [qrResult, setQrResult] = useState<string | null>(null)
-
+    // Списки таблиц
     const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
     const [positions, setPositions] = useState<Position[]>([])
 
 
-    const [_dayLoaded, _setDayLoaded] = useState(false)
-    const [_gotDays, _setGotDays] = useState(false)
+    // Флаги
+    const [_dayLoaded, _setDayLoaded] = useState(false)  // Первый доступный день для координатора загружен
+    const [_gotDays, _setGotDays] = useState(false)     // Все дни получены 
 
 
 
@@ -200,7 +215,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
-    // Открытие модального окна
+    // Открытие контекстно меню
     function handleContextMenu <T extends Types.contextMenuType = Types.VolunteerData & Types.moreVolsData >(loadData: T, e:any)  {
         if(contextMenuVisible) return setContextMenuVisible(false)
 
@@ -226,6 +241,18 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             })
         }
     }
+
+
+    const [contextMenuData, setContextMenuData] = useState<Types.contextMenuData>({
+        visit: false,
+        late: false,
+        isCRD: false,
+        warn: false,
+        bl: false,
+        userId: null,
+        e: null,
+        type: 'volunteer'
+    })
 
 
 
@@ -272,6 +299,10 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         }
     }
 
+
+
+
+    // Скачивание удостоверения
     const handleDownloadIdCard = async(id: number) => {
         const session = Cookies.get("session") as string
 
@@ -346,20 +377,18 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         }
     }, [qrResult])
 
-    const [contextMenuData, setContextMenuData] = useState<Types.contextMenuData>({
-        visit: false,
-        late: false,
-        isCRD: false,
-        warn: false,
-        bl: false,
-        userId: null,
-        e: null,
-        type: 'volunteer'
-    })
-
 
 
     return (<>
+        <PositionAddModal 
+            positionAddMenu={positionAddMenu}
+            setPositionAddMenu={setPositionAddMenu}
+            positions={positions}
+            setPositions={setPositions}
+            eventId={event?.data.id as number}
+            day={days[currentDay]}
+            setErrorMessage={setErrorMessage}
+        />
         <ContextMenu 
             menuVisible={contextMenuVisible} 
             contextMenuData={contextMenuData}
@@ -457,7 +486,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     />
                     ) : selectedMenu === 1 ? (
                         <PositionsHeader
-                        
+                            setPositionAddMenu={setPositionAddMenu}
                         />
                     ) : null}
                 </div>
