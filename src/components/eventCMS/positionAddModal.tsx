@@ -86,7 +86,7 @@ export const PositionAddModal = ({ setPositionAddMenu, positionAddMenu, position
 
     return (
         <div className="profile-qrmodal-wrapper" style={{ display: positionAddMenu ? 'flex' : 'none' }} onClick={() => setPositionAddMenu(false)}>
-            <div className="cms-positionadd-container" onClick={(e) => e.stopPropagation()}>
+            <div className="cms-positionadd-container" onClick={(e) => e.stopPropagation()} style={{ height: conflict ? '280px' : '225px' }}>
                 <h2>Добавить позицию</h2>
                 <input 
                     type="text" 
