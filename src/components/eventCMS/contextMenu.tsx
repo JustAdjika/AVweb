@@ -135,6 +135,7 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
 
         handleWarn: (e: any) => {
             if(!volunteerClass) return
+            if(!confirm('Вы уверены, что хотите применить меры?')) return
 
             e.preventDefault()
             e.stopPropagation()
@@ -275,7 +276,7 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
         >
             {
                 contextMenuConfig?.options[menuType].map((option) => (
-                    <li className='cms-contextmenu-item-container' onClick={ (e) => option.function(e) }>
+                    <li className='cms-contextmenu-item-container' onClick={ (e) => option.function(e) } style={{ color: option.color }}>
                         <div className='cms-contextmenu-item-icon-container'>
                             <option.icon width={20} height={20} fill={option.color}/>
                         </div>
