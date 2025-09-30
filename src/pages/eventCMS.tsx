@@ -379,6 +379,22 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
+
+
+    // Отслеживание скролла
+    
+    useEffect(() => {
+        const handleScroll = () => {
+            setContextMenuVisible(false)
+        }        
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [])
+
+
+
     return (<>
         <PositionAddModal 
             positionAddMenu={positionAddMenu}
@@ -505,6 +521,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     volunteers={volunteers}
                     setVolunteers={setVolunteers}
                     handleContextMenu={handleContextMenu}
+                    setMenuVisible={setContextMenuVisible}
                 />
             ) : selectedMenu === 1 ? (
                 <Positions 
@@ -515,6 +532,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     currentDay={days[currentDay]}
                     setErrorMessage={setErrorMessage}
                     event={event}
+                    setMenuVisible={setContextMenuVisible}
                 />
             ) : null }
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { Event as EventClass } from '../class/eventClass.ts';
 
@@ -17,13 +17,16 @@ type Props = {
     volunteers: (Types.VolunteerData & Types.moreVolsData)[],
     setVolunteers: (value: (Types.VolunteerData & Types.moreVolsData)[]) => any,
     handleContextMenu: <T extends Types.contextMenuType>(value: T, e:any) => void,
+    setMenuVisible: (state: boolean) => any
 }
 
-export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers, handleContextMenu }: Props) => {
+export const Volunteers = ({ shiftMenu, setMenuVisible, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers, handleContextMenu }: Props) => {
 
     const [focusVolunteer,setFocusVolunteer] = useState<number | null>(null)
 
     const [_volGot, _setVolGot] = useState(false)
+
+    const scrollRef = useRef<HTMLDivElement | null>(null)
     
 
     // Получение списка волонтёров
@@ -62,6 +65,19 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
     }, [shiftMenu])
 
 
+
+    // Отслеживание скролла
+    useEffect(() => {
+        const handleScroll = () => {
+            setMenuVisible(false)
+        }        
+
+        scrollRef?.current?.addEventListener('scroll', handleScroll);
+
+        return () => scrollRef?.current?.removeEventListener('scroll', handleScroll);
+    }, [])
+
+
     return (
         <div className='cms-table-container'>
             <div className='cms-table-header'>
@@ -74,7 +90,7 @@ export const Volunteers = ({ shiftMenu, currentDay, event, days, setErrorMessage
                     <div className='cms-table-cell f'>Опозд</div>
                 </div>
             </div>
-            <div className='cms-table-main'>
+            <div className='cms-table-main' ref={scrollRef}>
                 {volunteers.filter(item => item.shift === selectedShift || item.shift === 'both').map((item, i) => item.id !== focusVolunteer ? (
                     <div 
                         className={`cms-table-object-container ${ item.blacklist ? 'bl' : item.warning ? 'warn' : item.role.toLowerCase()}`} 

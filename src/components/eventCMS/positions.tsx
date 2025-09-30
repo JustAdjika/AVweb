@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { Event as EventClass } from '../class/eventClass.ts';
 import { Position } from '../class/positionClass.ts';
@@ -18,13 +18,16 @@ type Props = {
     setErrorMessage: (msg: string | null) => void,
     event: EventClass | null,
     currentDay: string,
+    setMenuVisible: (state: boolean) => any
 }
 
-export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoaded, event, currentDay, setErrorMessage }: Props) => {
+export const Positions = ({ handleContextMenu, setMenuVisible, positions, setPositions, _dayLoaded, event, currentDay, setErrorMessage }: Props) => {
 
     const [focusPosition, setFocusPosition] = useState<number | null>(null)
 
     const [_volGot, _setVolGot] = useState(false)
+
+    const scrollRef = useRef<HTMLDivElement | null>(null)
     
 
     // Получение списка волонтёров
@@ -37,6 +40,19 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                 if(container) setPositions(container)
             })
     }, [event, _dayLoaded])
+
+
+
+    // Отслеживание скролла
+    useEffect(() => {
+        const handleScroll = () => {
+            setMenuVisible(false)
+        }        
+
+        scrollRef?.current?.addEventListener('scroll', handleScroll);
+
+        return () => scrollRef?.current?.removeEventListener('scroll', handleScroll);
+    }, [])
 
 
 
@@ -67,7 +83,7 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                     <div className='cms-table-cell dpos'>Назначенный</div>
                 </div>
             </div>
-            <div className='cms-table-main'>
+            <div className='cms-table-main' ref={scrollRef}>
                 {positions.map((item, i) => item.data.id !== focusPosition ? (
                     <div 
                         className={`cms-table-object-container`} 
