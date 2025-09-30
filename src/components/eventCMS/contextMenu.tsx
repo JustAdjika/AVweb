@@ -215,13 +215,14 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
             const screenH = window.innerHeight;
             const menuW = menuRef.current.offsetWidth;
             const menuH = menuRef.current.offsetHeight;
+            const scrollY = window.scrollY;
 
             let newX = clickX;
             let newY = clickY;
 
 
             if (clickX + menuW > screenW) newX = clickX - menuW;
-            if (clickY + menuH > screenH) newY = clickY - menuH;
+            if (clickY - scrollY + menuH > screenH) newY = clickY - menuH;
 
             setPosition({ x: newX, y: newY });
             setMenuShow(true)
