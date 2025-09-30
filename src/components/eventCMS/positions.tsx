@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import { Event as EventClass } from '../class/eventClass.ts';
 import { Position } from '../class/positionClass.ts';
 
+import { ReactComponent as PersonAlertIcon } from '../../assets/icons/person-circle-exclamation-solid-full.svg'
+
 import * as Types from '../../../module/types/types.ts'
 
 import '../../pages/style/eventCMS.css'
-import { errorLogger } from '../../module/errorLogger.ts';
-import { ReactComponent as PersonAlertIcon } from '../../assets/icons/person-circle-exclamation-solid-full.svg'
+
 
 type Props = {
     handleContextMenu: <T extends Types.contextMenuType>(loadData: T, e:any) => void,
@@ -16,7 +17,7 @@ type Props = {
     _dayLoaded: boolean,
     setErrorMessage: (msg: string | null) => void,
     event: EventClass | null,
-    currentDay: string
+    currentDay: string,
 }
 
 export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoaded, event, currentDay, setErrorMessage }: Props) => {
@@ -39,6 +40,23 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
 
 
 
+    
+
+
+
+    const alertStyle = {
+        backgroundColor: '#C21706',
+        height: '25px',
+        width: '50px',
+        color: '#D9D9D9',
+        borderRadius: '5px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
+
+
+
     return (
         <div className='cms-table-container'>
             <div className='cms-table-header'>
@@ -58,12 +76,14 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                     >
                         <div className='cms-table-cell apos'>
                             <div>{ i+1 }</div>
-                            <PersonAlertIcon width={25} height={25} fill='#C21706'/>
+                            <PersonAlertIcon width={25} height={25} fill='#C21706' style={{ display: !item.data.volunteerId ? 'flex' : 'none'}}/>
                         </div>
                         <div className='cms-table-cell bpos'>{ `${item.data.name}-${item.data.NameNumber}` }</div>
                         <div className='cms-table-cell-more-wrapper'>
                             <div className='cms-table-cell cpos'>{ item.data.publicId }</div>
-                            <div className='cms-table-cell dpos'>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                            <div className='cms-table-cell dpos'>
+                                <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                            </div>
                         </div>
                     </div>
                 ) : (
@@ -75,12 +95,14 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                         >
                             <div className='cms-table-cell apos'>
                                 <div>{ i+1 }</div>
-                                <PersonAlertIcon width={25} height={25} fill='#C21706' />
+                                <PersonAlertIcon width={25} height={25} fill='#C21706' style={{ display: !item.data.volunteerId ? 'flex' : 'none'}} />
                             </div>
                             <div className='cms-table-cell bpos'>{ `${item.data.name}-${item.data.NameNumber}` }</div>
                             <div className='cms-table-cell-more-wrapper'>
                                 <div className='cms-table-cell cpos'>{ item.data.publicId }</div>
-                                <div className='cms-table-cell dpos'>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                                <div className='cms-table-cell dpos'>
+                                    <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{ item.data.volunteer?.account.name ?? 'Нет' }</div>
+                                </div>
                             </div>
                         </div>
                         <div 
@@ -94,8 +116,8 @@ export const Positions = ({ handleContextMenu, positions, setPositions, _dayLoad
                                     <div>{item.data.publicId}</div>
                                 </div>
                                 <div className='cms-table-object-info-item-wrapper'>
-                                    <span style={{ marginRight: '15px' }}>Назначенный</span>
-                                    <div>{item.data.volunteer?.account.name ?? 'Мирас Серкебаев Ермекович'}</div>
+                                    <span>Назначенный</span>
+                                    <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{item.data.volunteer?.account.name ?? 'Нет'}</div>
                                 </div>
                             </div>
                         </div>
