@@ -75,6 +75,15 @@ export const Signup = ({ setErrorMessage }: Props) => {
         }
     }
 
+    const handleBlur = (e: any, option: 'day' | 'month' | 'year') => {
+        const str = String(e.target.value).replace(/\D/g, "")
+        switch(option) {
+            case 'day': setDay(str.padStart(2, "0")); break;
+            case 'month': setMonth(str.padStart(2, "0")); break;
+            case 'year': setYear(str.padStart(2, "0")); break;
+        }
+    }
+
 
     // UX
     
@@ -146,6 +155,7 @@ export const Signup = ({ setErrorMessage }: Props) => {
                                 type="text" 
                                 value={day} 
                                 onChange={handleDayChange} 
+                                onBlur={(e) => handleBlur(e, 'day')}
                                 placeholder='ДД' 
                                 maxLength={2} 
                                 ref={dayRef}
@@ -156,6 +166,7 @@ export const Signup = ({ setErrorMessage }: Props) => {
                                 type="text" 
                                 value={month} 
                                 onChange={handleMonthChange} 
+                                onBlur={(e) => handleBlur(e, 'month')}
                                 placeholder='ММ' 
                                 maxLength={2} 
                                 ref={monthRef}
@@ -166,6 +177,7 @@ export const Signup = ({ setErrorMessage }: Props) => {
                                 type="text" 
                                 value={year} 
                                 onChange={handleYearChange} 
+                                onBlur={(e) => handleBlur(e, 'year')}
                                 placeholder='ГГ' 
                                 maxLength={2} 
                                 ref={yearRef}
