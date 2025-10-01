@@ -136,6 +136,10 @@ export const Positions = ({ handleContextMenu, setMenuVisible, positions, setPos
                                     <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{item.data.volunteer?.account.name ?? 'Нет'}</div>
                                 </div>
                             </div>
+                            <div className='cms-table-object-info-item-location-wrapper'>
+                                <span style={{ marginTop: '10px' }}>Локация</span>
+                                <div className='cms-table-object-info-item-location-value'>{item.actualData.location ?? ''}</div>
+                            </div>
                         </div>
                     </>
                 ))}
