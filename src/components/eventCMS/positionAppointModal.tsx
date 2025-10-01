@@ -39,7 +39,15 @@ export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, 
             .then(res => {
                 if(res.status === 200) { 
                     const container = res.container as publicUserData[]
-                    const filteredItems = container.filter(item => volunteers.some(vol => vol.id === item.id))
+                    
+
+                    const filteredItems = container.filter(item => 
+                        volunteers.some(vol => 
+                            vol.account.id === item.id && 
+                            vol.day === currentPosition.data.day && 
+                            vol.eventId === currentPosition.data.eventId
+                        )
+                    )
 
 
                     setGotItems(filteredItems)
@@ -55,12 +63,21 @@ export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, 
     }, [currentPosition])
 
     const handleSearch = () => {
+        if(!currentPosition) return
+
         setLoader(true)
         request({ method: 'GET', route: '/forms/profile/search', loadQuery: { info: searchInfo } })
             .then(res => {
                 if(res.status === 200) { 
                     const container = res.container as publicUserData[]
-                    const filteredItems = container.filter(item => container.some(vol => vol.id === item.id))
+
+                    const filteredItems = container.filter(item => 
+                        volunteers.some(vol => 
+                            vol.account.id === item.id && 
+                            vol.day === currentPosition.data.day && 
+                            vol.eventId === currentPosition.data.eventId
+                        )
+                    )
 
 
                     setGotItems(filteredItems)
@@ -76,8 +93,21 @@ export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, 
     }
 
 
-    const handleAppoint = () => {
-        
+    const handleAppoint = async (item:  publicUserData) => {
+        if(!currentPosition) return
+        setPositionAppointMenu(false);
+
+        const currentVolunteer = volunteers.filter(vol => vol.account.id === item.id )
+
+        const currentVolunteerClass = await Volunteer.create(setErrorMessage, currentVolunteer[0])
+
+        if(!currentVolunteerClass) return
+            
+        currentPosition.setVolunteer(currentVolunteerClass)
+            .catch(err => {
+                const response = err?.response?.data
+                errorLogger(setErrorMessage, { status: response?.status ?? 500, message: response?.message ?? 'Непредвиденная ошибка' })
+            })
     }
 
     return (
@@ -100,7 +130,7 @@ export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, 
                 <div className='cms-posappoint-items-container'>
                     { loader ? <Loader style={{ marginTop: '50px' }} />
                     : gotItems.map(item => (
-                        <div className='cms-posappoint-item-container' onClick={handleAppoint}>
+                        <div className='cms-posappoint-item-container' onClick={() => handleAppoint(item)}>
                             <span className='cms-posappoint-item-name'>{ item.name }</span>
                             <span className='cms-posappoint-item-iin'>({ item.iin })</span>
                         </div>

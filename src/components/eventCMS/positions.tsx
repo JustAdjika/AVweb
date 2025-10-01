@@ -133,7 +133,7 @@ export const Positions = ({ handleContextMenu, setMenuVisible, positions, setPos
                                 </div>
                                 <div className='cms-table-object-info-item-wrapper'>
                                     <span>Назначенный</span>
-                                    <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{item.data.volunteer?.account.name ?? 'Нет'}</div>
+                                    <div style={!item.data.volunteer?.account.name ? alertStyle : {}}>{item.actualData.volunteer?.account.name ?? 'Нет'}</div>
                                 </div>
                             </div>
                             <div className='cms-table-object-info-item-location-wrapper'>
