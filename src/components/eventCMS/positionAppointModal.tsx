@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 
 import { Position } from '../class/positionClass';
 import { Volunteer } from '../class/volunteerClass.ts';

@@ -75,7 +75,7 @@ export class menuConfig {
                     icon: MapIcon,
                     color: '#333',
                     name: 'Показать на карте',
-                    function: (e:any) => {}
+                    function: (e:any) => {} // не работает
                 },
                 {
                     icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,

@@ -20,7 +20,7 @@ type Props = {
     setMenuVisible: (state: boolean) => any
 }
 
-export const Volunteers = ({ shiftMenu, setMenuVisible, currentDay, event, days, setErrorMessage, errorLogger, _dayLoaded, setVolunteers, volunteers, handleContextMenu }: Props) => {
+export const Volunteers = ({ shiftMenu, setMenuVisible, volunteers, handleContextMenu }: Props) => {
 
     const [focusVolunteer,setFocusVolunteer] = useState<number | null>(null)
 
