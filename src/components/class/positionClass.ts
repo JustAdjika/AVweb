@@ -170,4 +170,6 @@ export class Position {
             return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
         }
     }
+
+    get actualData() { return this.data } 
 }
