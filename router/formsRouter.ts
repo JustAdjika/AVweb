@@ -74,12 +74,14 @@ router.get('/profile/search', async(req,res) => {
 
         interface publicDataPerson {
             name: string,
-            iin: string
+            iin: string,
+            id: number
         }
 
         const publicData: publicDataPerson[] = foundAccountModels.map((person: Types.Account) => ({
             name: person.name,
-            iin: person.iin
+            iin: person.iin,
+            id: person.id as number
         }));
         
 
