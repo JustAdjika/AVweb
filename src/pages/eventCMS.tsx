@@ -19,6 +19,7 @@ import { ExportModal } from '../components/eventCMS/exportModal.tsx';
 import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
 import { PositionAddModal } from '../components/eventCMS/positionAddModal.tsx';
 import { QRModal } from '../components/eventCMS/qrModal.tsx';
+import { PositionLocationUpdateModal } from '../components/eventCMS/positionLocationUpdateModal.tsx';
 
 import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { Positions } from '../components/eventCMS/positions.tsx';
@@ -55,10 +56,38 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     // Модальные окна таблицы позиций
     const [positionAddMenu, setPositionAddMenu] = useState<boolean>(false)
+    const [positionLocationMenu, setPositionLocationMenu] = useState<boolean>(false)
 
     // Состояние календаря и контекстного меню
     const [calendar, setCalendar] = useState<boolean>(false)
     const [contextMenuVisible, setContextMenuVisible] = useState<boolean>(false)
+
+
+
+    // Отслеживание скролла
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setContextMenuVisible(false)
+        }        
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [])
+
+
+
+    // Сохранение состояния меню в localStorage
+    useEffect(() => {
+        const cmsMenuSetup = {
+            selectedMenu,
+            shiftMenu,
+            currentDay
+        }
+
+        localStorage.setItem("cmsMenuSetup", JSON.stringify(cmsMenuSetup))
+    }, [selectedMenu, shiftMenu, currentDay])
 
 
 
@@ -80,6 +109,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
     const [positions, setPositions] = useState<Position[]>([])
 
+    const [selectedPosition, setSelectedPosition] = useState<Position | null>(null) // Выбранная позиция для смены локации
 
     // Флаги
     const [_dayLoaded, _setDayLoaded] = useState(false)  // Первый доступный день для координатора загружен
@@ -310,6 +340,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     // Скачивание удостоверения
+    
     const handleDownloadIdCard = async(id: number) => {
         const session = Cookies.get("session") as string
 
@@ -388,34 +419,17 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
-    // Отслеживание скролла
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setContextMenuVisible(false)
-        }        
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [])
-
-
-
-    // Сохранение состояния меню в localStorage
-    useEffect(() => {
-        const cmsMenuSetup = {
-            selectedMenu,
-            shiftMenu,
-            currentDay
-        }
-
-        localStorage.setItem("cmsMenuSetup", JSON.stringify(cmsMenuSetup))
-    }, [selectedMenu, shiftMenu, currentDay])
 
 
 
     return (<>
+        <PositionLocationUpdateModal
+            positionLocationMenu={positionLocationMenu}
+            setPositionLocationMenu={setPositionLocationMenu}
+            currentPosition={selectedPosition as Position}
+            setErrorMessage={setErrorMessage}
+        />
         <PositionAddModal 
             positionAddMenu={positionAddMenu}
             setPositionAddMenu={setPositionAddMenu}
@@ -437,6 +451,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setVolunteers={setVolunteers}
             setErrorMessage={setErrorMessage}
             userRole={userRole}
+            setSelectedPosition={setSelectedPosition}
+            setPositionLocationMenu={setPositionLocationMenu}
         />
         <ProfileModal 
             profileMenu={profileMenu}

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 
 import { Volunteer } from '../class/volunteerClass.ts';
+import { Position } from '../class/positionClass.ts';
+
 import { errorLogger } from '../../module/errorLogger.ts';
 import { menuConfig } from '../../contextMenu.config.ts';
 
@@ -17,19 +19,24 @@ type Props = {
     volunteers: (Types.VolunteerData & Types.moreVolsData)[],
     setErrorMessage: (msg: string | null) => void,
     setVolunteers: any,
-    userRole: Types.eventPermission | null
+    userRole: Types.eventPermission | null,
+    positions: Position[],
+    setPositions: React.Dispatch<React.SetStateAction<Position[]>>,
+    setPositionLocationMenu: (state: boolean) => any,
+    setSelectedPosition: (value: Position) => any
 }
 
 
 
 
 
-export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
+export const ContextMenu = ({ setSelectedPosition, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers, positions, setPositions }: Props) => {
 
     const menuRef = useRef<HTMLUListElement>(null)
     const [position, setPosition] = useState({ x: 0, y: 0 })
 
     const [volunteerClass, setVolunteerClass] = useState<Volunteer | null>(null)
+    const [currentPosition,setCurrentPosition] = useState<Position | null>(null)
 
     const [menuType, setMenuType] = useState<contextMenuTypes.menuType>('target_yourself')
 
@@ -189,6 +196,50 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
                     })
             }, 400)
         },
+
+
+
+
+        // Кнопка "Удалить позицию"
+
+        handlePositionDelete: (e: any) => {
+            if(!currentPosition) return
+
+            e.preventDefault()
+            e.stopPropagation()
+            setTimeout(() => {
+                setMenuVisible(false);
+            
+                currentPosition.delete()
+                    .then(res => {
+                        if(res?.status === 200) {
+                            setPositions((prev: Position[]) => prev.filter(pos => pos.data.id !== currentPosition.data.id))
+                        }
+                    })
+                    .catch(err => {
+                        const response = err?.response?.data
+                        errorLogger(setErrorMessage, { status: response?.status ?? 500, message: response?.message ?? 'Непредвиденная ошибка' })
+                    })
+            }, 400)
+        },
+
+
+
+
+        // Кнопка "Сменить локацию"
+
+        handleChangeLocation: (e: any) => {
+            if(!currentPosition) return
+
+            e.preventDefault()
+            e.stopPropagation()
+            setTimeout(() => {
+                setMenuVisible(false);
+            
+                setSelectedPosition(currentPosition)
+                setPositionLocationMenu(true)
+            }, 400)
+        },
     }
 
     const contextMenuConfig = new menuConfig(menuFunctions, contextMenuData)
@@ -251,11 +302,26 @@ export const ContextMenu = ({ userRole, menuVisible, setMenuVisible, contextMenu
     useEffect(() => {
         if(!contextMenuData.e) return
 
+        if(contextMenuData.type !== 'volunteer') return
+
         const filteredVolunteer = volunteers.filter(vol => vol.userId === contextMenuData.userId)
         Volunteer.create(setErrorMessage, filteredVolunteer[0])
             .then(item => {
                 if(item) setVolunteerClass(item)
             })
+    }, [contextMenuData])
+
+
+
+
+    // Получение текущей выбранной позиции
+
+    useEffect(() => {
+        if(!contextMenuData.e) return
+
+        if(contextMenuData.type !== 'position') return
+
+        setCurrentPosition(contextMenuData.positionClass ?? null)
     }, [contextMenuData])
 
 

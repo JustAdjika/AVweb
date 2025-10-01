@@ -42,6 +42,14 @@ export class menuConfig {
         return ({
             position: [
                 {
+                    icon: UserIcon,
+                    color: '#333',
+                    name: 'Профиль',
+                    function: this.contextMenuData?.positionClass?.data.volunteerId ?
+                        (e:any) => this.functions.handleProfile(e)
+                        : () => {}
+                },
+                {
                     icon: MapIcon,
                     color: '#333',
                     name: 'Показать на карте',
@@ -52,16 +60,18 @@ export class menuConfig {
                     color: '#333',
                     name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
                     function: (e:any) => {} // Не работает
-                },
-                {
-                    icon: NoteIcon,
-                    color: '#333',
-                    name: 'Заметка локации',
-                    function: (e:any) => {}
                 },
             ],
             position_hcrd: [
                 {
+                    icon: UserIcon,
+                    color: '#333',
+                    name: 'Профиль',
+                    function: this.contextMenuData?.positionClass?.data.volunteerId ?
+                        (e:any) => this.functions.handleProfile(e)
+                        : () => {}
+                },
+                {
                     icon: MapIcon,
                     color: '#333',
                     name: 'Показать на карте',
@@ -77,13 +87,13 @@ export class menuConfig {
                     icon: NoteIcon,
                     color: '#333',
                     name: 'Заметка локации',
-                    function: (e:any) => {}
+                    function: (e:any) => this.functions.handleChangeLocation(e)
                 },
                 {
                     icon: TrashIcon,
                     color: '#C0392B',
                     name: 'Удалить позицию',
-                    function: (e:any) => {} // Не работает
+                    function: (e:any) => this.functions.handlePositionDelete(e) // Не работает
                 },
             ],
             target_yourself: [
