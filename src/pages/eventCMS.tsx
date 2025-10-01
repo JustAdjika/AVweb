@@ -43,9 +43,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     // UI
 
     // Общие сведения выбранных меню
-    const [selectedMenu, setSelectedMenu] = useState(0)
-    const [shiftMenu, setShiftMenu] = useState(0)
-    const [currentDay, setCurrentDay] = useState(0)
+    const [selectedMenu, setSelectedMenu] = useState( JSON.parse(localStorage.getItem("cmsMenuSetup") ?? 'null').selectedMenu ?? 0 )
+    const [shiftMenu, setShiftMenu] = useState( JSON.parse(localStorage.getItem("cmsMenuSetup") ?? 'null').shiftMenu ?? 0 )
+    const [currentDay, setCurrentDay] = useState( JSON.parse(localStorage.getItem("cmsMenuSetup") ?? 'null').currentDay ?? 0 )
 
 
     // Модальные окна таблицы волонтеров
@@ -84,6 +84,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     // Флаги
     const [_dayLoaded, _setDayLoaded] = useState(false)  // Первый доступный день для координатора загружен
     const [_gotDays, _setGotDays] = useState(false)     // Все дни получены 
+    const [_dayDenied, _setDayDenied] = useState(false)
 
 
 
@@ -181,6 +182,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
                         return container.result;
                     }
+
+                    if (eventDays[currentDay] === day) _setDayDenied(true)
+
                     return false;
                 })
             );
@@ -201,7 +205,9 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     useEffect(() => {
         if(firstCRDDay === null || !_gotDays) return
-        setCurrentDay(firstCRDDay)
+
+        if(_dayDenied) setCurrentDay(firstCRDDay)
+        
         _setDayLoaded(true)
     }, [firstCRDDay, _gotDays])
 
@@ -225,6 +231,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         if(isPosition(loadData)) {
             setContextMenuData({
                 positionClass: loadData,
+                userId: loadData.data.volunteer?.account.id ?? null,
                 e: contextMenuVisible ? null : e,
                 type: 'position'
             })
@@ -382,7 +389,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     // Отслеживание скролла
-    
+
     useEffect(() => {
         const handleScroll = () => {
             setContextMenuVisible(false)
@@ -392,6 +399,19 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
         return () => window.removeEventListener('scroll', handleScroll);
     }, [])
+
+
+
+    // Сохранение состояния меню в localStorage
+    useEffect(() => {
+        const cmsMenuSetup = {
+            selectedMenu,
+            shiftMenu,
+            currentDay
+        }
+
+        localStorage.setItem("cmsMenuSetup", JSON.stringify(cmsMenuSetup))
+    }, [selectedMenu, shiftMenu, currentDay])
 
 
 
@@ -412,6 +432,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setProfileMenu={setProfileMenu}
             setTargetUser={setTargetUser}
             volunteers={volunteers}
+            positions={positions}
+            setPositions={setPositions}
             setVolunteers={setVolunteers}
             setErrorMessage={setErrorMessage}
             userRole={userRole}
