@@ -850,6 +850,62 @@
     margin-top: 10px;
     margin-left: 20px;
 }
+.cms-posappoint-input {
+    height: 25px;
+    width: 220px;
+    border-radius: 5px;
+    border: solid 2px #1a1a1a;
+    outline: none;
+    background-color: #D9D9D9;
+    font-family: 'OpenSans_light';
+    padding-left: 20px;
+}
+.cms-posappoint-but-search {
+    height: 30px;
+    border: none;
+    outline: none;
+    background-color: rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-right: 10px;
+    border-radius: 5px;
+    transition: 0.2s ease-out;
+}
+.cms-posappoint-but-search:active {
+    background-color: #cacaca;
+}
+.cms-posappoint-items-container {
+    width: 100%;
+    height: 160px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+}
+.cms-posappoint-item-container {
+    display: flex;
+    background-color: #C0C0C0;
+    width: 100%;
+    height: 60px;
+    margin-bottom: 10px;
+    font-family: 'OpenSans_light';
+    border-radius: 5px;
+    padding: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    flex-direction: column;
+}
+.cms-posappoint-item-name {
+    font-size: 13pt;
+}
+.cms-posappoint-item-iin {
+    font-size: 11pt;
+    color: #666666;
+}
 
 
 

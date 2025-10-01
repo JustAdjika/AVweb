@@ -20,6 +20,7 @@ import { ProfileModal } from '../components/eventCMS/profileModal.tsx';
 import { PositionAddModal } from '../components/eventCMS/positionAddModal.tsx';
 import { QRModal } from '../components/eventCMS/qrModal.tsx';
 import { PositionLocationUpdateModal } from '../components/eventCMS/positionLocationUpdateModal.tsx';
+import { PositionAppointModal } from '../components/eventCMS/positionAppointModal.tsx';
 
 import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { Positions } from '../components/eventCMS/positions.tsx';
@@ -57,6 +58,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     // Модальные окна таблицы позиций
     const [positionAddMenu, setPositionAddMenu] = useState<boolean>(false)
     const [positionLocationMenu, setPositionLocationMenu] = useState<boolean>(false)
+    const [positionAppointMenu, setPositionAppointMenu] = useState<boolean>(false)
 
     // Состояние календаря и контекстного меню
     const [calendar, setCalendar] = useState<boolean>(false)
@@ -424,6 +426,13 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     return (<>
+        <PositionAppointModal 
+            setPositionAppointMenu={setPositionAppointMenu}
+            positionAppointMenu={positionAppointMenu}
+            volunteers={volunteers}
+            setErrorMessage={setErrorMessage}
+            currentPosition={selectedPosition}
+            />
         <PositionLocationUpdateModal
             positionLocationMenu={positionLocationMenu}
             setPositionLocationMenu={setPositionLocationMenu}
@@ -453,6 +462,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             userRole={userRole}
             setSelectedPosition={setSelectedPosition}
             setPositionLocationMenu={setPositionLocationMenu}
+            setPositionAppointMenu={setPositionAppointMenu}
         />
         <ProfileModal 
             profileMenu={profileMenu}

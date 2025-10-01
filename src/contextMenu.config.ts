@@ -53,13 +53,13 @@ export class menuConfig {
                     icon: MapIcon,
                     color: '#333',
                     name: 'Показать на карте',
-                    function: (e:any) => {}
+                    function: () => {} // Не работает
                 },
                 {
                     icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
                     color: '#333',
                     name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
-                    function: (e:any) => {} // Не работает
+                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? (e: any) => this.functions.handleAppoint(e) : () => {}
                 },
             ],
             position_hcrd: [
@@ -81,7 +81,7 @@ export class menuConfig {
                     icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
                     color: '#333',
                     name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
-                    function: (e:any) => {} // Не работает
+                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? (e: any) => this.functions.handleAppoint(e) : () => {}
                 },
                 {
                     icon: NoteIcon,
@@ -93,7 +93,7 @@ export class menuConfig {
                     icon: TrashIcon,
                     color: '#C0392B',
                     name: 'Удалить позицию',
-                    function: (e:any) => this.functions.handlePositionDelete(e) // Не работает
+                    function: (e:any) => this.functions.handlePositionDelete(e)
                 },
             ],
             target_yourself: [
@@ -110,19 +110,19 @@ export class menuConfig {
                     function: (e:any) => this.functions.handleProfile(e) // Не работает
                 },
             ],
-                    target_coordinator: [
-            {
-                icon: UserIcon,
-                color: '#333',
-                name: 'Профиль',
-                function: (e:any) => this.functions.handleProfile(e)
-            },
-            {
-                icon: LocationIcon,
-                color: '#333',
-                name: 'Назначить позицию',
-                function: (e:any) => this.functions.handleProfile(e) // Не работает
-            },
+            target_coordinator: [
+                {
+                    icon: UserIcon,
+                    color: '#333',
+                    name: 'Профиль',
+                    function: (e:any) => this.functions.handleProfile(e)
+                },
+                {
+                    icon: LocationIcon,
+                    color: '#333',
+                    name: 'Назначить позицию',
+                    function: (e:any) => this.functions.handleProfile(e) // Не работает
+                },
             ],
             target_classic: [
                 {

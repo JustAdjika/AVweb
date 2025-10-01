@@ -23,14 +23,15 @@ type Props = {
     positions: Position[],
     setPositions: React.Dispatch<React.SetStateAction<Position[]>>,
     setPositionLocationMenu: (state: boolean) => any,
-    setSelectedPosition: (value: Position) => any
+    setSelectedPosition: (value: Position) => any,
+    setPositionAppointMenu: (state: boolean) => any
 }
 
 
 
 
 
-export const ContextMenu = ({ setSelectedPosition, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers, positions, setPositions }: Props) => {
+export const ContextMenu = ({ setSelectedPosition, setPositionAppointMenu, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
 
     const menuRef = useRef<HTMLUListElement>(null)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -200,9 +201,9 @@ export const ContextMenu = ({ setSelectedPosition, setPositionLocationMenu, user
 
 
 
-        // Кнопка "Удалить позицию"
+        // Кнопка "Назначить волонтера"
 
-        handlePositionDelete: (e: any) => {
+        handleAppoint: (e: any) => {
             if(!currentPosition) return
 
             e.preventDefault()
@@ -210,16 +211,9 @@ export const ContextMenu = ({ setSelectedPosition, setPositionLocationMenu, user
             setTimeout(() => {
                 setMenuVisible(false);
             
-                currentPosition.delete()
-                    .then(res => {
-                        if(res?.status === 200) {
-                            setPositions((prev: Position[]) => prev.filter(pos => pos.data.id !== currentPosition.data.id))
-                        }
-                    })
-                    .catch(err => {
-                        const response = err?.response?.data
-                        errorLogger(setErrorMessage, { status: response?.status ?? 500, message: response?.message ?? 'Непредвиденная ошибка' })
-                    })
+
+                setSelectedPosition(currentPosition)
+                setPositionAppointMenu(true)
             }, 400)
         },
 
