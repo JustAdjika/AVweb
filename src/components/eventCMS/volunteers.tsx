@@ -24,31 +24,8 @@ export const Volunteers = ({ shiftMenu, setMenuVisible, currentDay, event, days,
 
     const [focusVolunteer,setFocusVolunteer] = useState<number | null>(null)
 
-    const [_volGot, _setVolGot] = useState(false)
-
     const scrollRef = useRef<HTMLDivElement | null>(null)
     
-
-    // Получение списка волонтёров
-
-    useEffect(() => {
-        if(_volGot || !event || !_dayLoaded) return 
-
-        event.getVolunteers(setErrorMessage, days[currentDay])
-            .then(res => { 
-                if(res?.status === 200) {
-                    const container = res.container as (Types.VolunteerData & Types.moreVolsData)[]
-
-                    setVolunteers(container)
-                    _setVolGot(true)
-                } else {
-                    errorLogger(setErrorMessage, res)
-                }
-            })
-            .catch(err => {
-                errorLogger(setErrorMessage, { status: 500, message: `Непредвиденная ошибка: ${err}` })
-            })
-    }, [event, _dayLoaded])
 
 
 

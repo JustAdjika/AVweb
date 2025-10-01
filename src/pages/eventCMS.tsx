@@ -117,6 +117,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [_dayLoaded, _setDayLoaded] = useState(false)  // Первый доступный день для координатора загружен
     const [_gotDays, _setGotDays] = useState(false)     // Все дни получены 
     const [_dayDenied, _setDayDenied] = useState(false)
+    const [_volGot, _setVolGot] = useState(false)
 
 
 
@@ -416,6 +417,34 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             errorLogger(setErrorMessage, { status: response.status ?? 500, message: response.message ?? 'Непредвиденная ошибка' })
         }
     }, [qrResult])
+
+
+
+    // Получение волонтеров
+
+    useEffect(() => {
+        if(_volGot || !event || !_dayLoaded) return 
+
+        event.getVolunteers(setErrorMessage, days[currentDay])
+            .then(res => { 
+                if(res?.status === 200) {
+                    const container = res.container as (Types.VolunteerData & Types.moreVolsData)[]
+
+                    setVolunteers(container)
+                    _setVolGot(true)
+                } else {
+                    errorLogger(setErrorMessage, res ?? { status: 500, message: 'Непредвиденная ошибка' })
+                }
+            })
+            .catch(err => {
+                errorLogger(setErrorMessage, { status: 500, message: `Непредвиденная ошибка: ${err}` })
+            })
+    }, [event, _dayLoaded, _volGot])
+
+
+    useEffect(() => {
+        _setVolGot(false)
+    }, [currentDay])
 
 
 
