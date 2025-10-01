@@ -51,6 +51,8 @@ export const PositionAddModal = ({ setPositionAddMenu, positionAddMenu, position
     }
 
     const handleConfirm = async() => {
+        if(name.trim().length==0) return
+
         try {
             const session = Cookies.get("session")
 
