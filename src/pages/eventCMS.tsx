@@ -458,7 +458,6 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
     useEffect(() => {
         setPositionsData(positions.map(pos => pos.actualData))
-        console.log(positionsData)
     }, [positions])
 
 
