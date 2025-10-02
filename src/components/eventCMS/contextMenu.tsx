@@ -24,14 +24,15 @@ type Props = {
     setPositions: React.Dispatch<React.SetStateAction<Position[]>>,
     setPositionLocationMenu: (state: boolean) => any,
     setSelectedPosition: (value: Position) => any,
-    setPositionAppointMenu: (state: boolean) => any
+    setPositionAppointMenu: (state: boolean) => any,
+    setPositionsData: React.Dispatch<React.SetStateAction<Types.PositionData[]>>
 }
 
 
 
 
 
-export const ContextMenu = ({ setSelectedPosition, setPositionAppointMenu, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
+export const ContextMenu = ({ setSelectedPosition, setPositionsData, setPositionAppointMenu, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
 
     const menuRef = useRef<HTMLUListElement>(null)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -190,6 +191,36 @@ export const ContextMenu = ({ setSelectedPosition, setPositionAppointMenu, setPo
                                 )
                             )
                         }
+                    })
+                    .catch(err => {
+                        const response = err?.response?.data
+                        errorLogger(setErrorMessage, { status: response?.status ?? 500, message: response?.message ?? 'Непредвиденная ошибка' })
+                    })
+            }, 400)
+        },
+
+
+
+
+
+        // Кнопка "Снять волонтера"
+
+        handlePositionClear: (e: any) => {
+            if(!currentPosition) return
+
+            e.preventDefault()
+            e.stopPropagation()
+            setTimeout(() => {
+                setMenuVisible(false);
+            
+                currentPosition.clearVolunteer()
+                    .then(() => {
+                        setPositionsData((prev: (Types.PositionData)[]) => 
+                            prev.map((item) => 
+                                item.id !== currentPosition.actualData.id ? 
+                                    item :
+                                    { ...item, volunteer: null, volunteerId: null } as Types.PositionData
+                        ) )
                     })
                     .catch(err => {
                         const response = err?.response?.data

@@ -59,7 +59,9 @@ export class menuConfig {
                     icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
                     color: '#333',
                     name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
-                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? (e: any) => this.functions.handleAppoint(e) : () => {}
+                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? 
+                        (e: any) => this.functions.handleAppoint(e) : 
+                        (e:any) => this.functions.handlePositionClear(e)
                 },
             ],
             position_hcrd: [
@@ -81,7 +83,9 @@ export class menuConfig {
                     icon: !this.contextMenuData?.positionClass?.data.volunteerId ? PersonPlusIcon : PersonMinusIcon,
                     color: '#333',
                     name: !this.contextMenuData?.positionClass?.data.volunteerId ? 'Назначить' : 'Снять с позиции',
-                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? (e: any) => this.functions.handleAppoint(e) : () => {}
+                    function: !this.contextMenuData?.positionClass?.data.volunteerId ? 
+                        (e: any) => this.functions.handleAppoint(e) :
+                        (e:any) => this.functions.handlePositionClear(e)
                 },
                 {
                     icon: NoteIcon,
