@@ -17,7 +17,8 @@ type Props = {
     positionAppointMenu: boolean,
     volunteers: (Types.VolunteerData & Types.moreVolsData)[],
     setErrorMessage: (msg: string | null) => void,
-    currentPosition: Position | null
+    currentPosition: Position | null,
+    setPositionsData: React.Dispatch<React.SetStateAction<Types.PositionData[]>>
 }
 
 type publicUserData = {
@@ -26,7 +27,7 @@ type publicUserData = {
     id: number
 }
 
-export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, positionAppointMenu, volunteers, setErrorMessage }: Props) => {
+export const PositionAppointModal = ({ setPositionAppointMenu, setPositionsData, currentPosition, positionAppointMenu, volunteers, setErrorMessage }: Props) => {
     const [searchInfo, setSearchInfo] = useState("")
     const [gotItems, setGotItems] = useState<publicUserData[]>([])
     const [loader, setLoader] = useState<boolean>(true)
@@ -103,6 +104,14 @@ export const PositionAppointModal = ({ setPositionAppointMenu, currentPosition, 
         if(!currentVolunteerClass) return
             
         currentPosition.setVolunteer(currentVolunteerClass)
+            .then(() => {
+                setPositionsData((prev: (Types.PositionData)[]) => 
+                    prev.map((item) => 
+                        item.id !== currentPosition.actualData.id ? 
+                            item :
+                            { ...item, volunteer: currentVolunteerClass.data, volunteerId: currentVolunteerClass.data.id } as Types.PositionData
+                ) )
+            })
             .catch(err => {
                 const response = err?.response?.data
                 errorLogger(setErrorMessage, { status: response?.status ?? 500, message: response?.message ?? 'Непредвиденная ошибка' })

@@ -448,6 +448,21 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
+    // костыль хранящий массив объектов с данными классов позиций
+    // Чтобы динамически обрабатывать и ререндерить состояния в таблице, нужно передавать данные на прямую,
+    // иначе при изменении данных в классе не вызывается ререндер
+
+    const [positionsData, setPositionsData] = useState<Types.PositionData[]>([])  
+
+    // Обновление костыля для хранения данных
+
+    useEffect(() => {
+        setPositionsData(positions.map(pos => pos.actualData))
+        console.log(positionsData)
+    }, [positions])
+
+
+
 
 
 
@@ -461,7 +476,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             volunteers={volunteers}
             setErrorMessage={setErrorMessage}
             currentPosition={selectedPosition}
-            />
+            setPositionsData={setPositionsData}
+        />
         <PositionLocationUpdateModal
             positionLocationMenu={positionLocationMenu}
             setPositionLocationMenu={setPositionLocationMenu}
@@ -492,6 +508,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setSelectedPosition={setSelectedPosition}
             setPositionLocationMenu={setPositionLocationMenu}
             setPositionAppointMenu={setPositionAppointMenu}
+            setPositionsData={setPositionsData}
         />
         <ProfileModal 
             profileMenu={profileMenu}
@@ -610,6 +627,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
                     setErrorMessage={setErrorMessage}
                     event={event}
                     setMenuVisible={setContextMenuVisible}
+                    positionsData={positionsData}
                 />
             ) : null }
         </div>
