@@ -208,6 +208,9 @@ export class Position {
         const foundVolModel: Types.Volunteer = await foundVol.get({ plain: true })
         if(foundVolModel.day !== this.day) throw new Error('Module positionClass.ts error: Impossible to use setVolunteer(), volunteer day incorrect')
 
+        const foundPositionConflict = await POSITIONS_TAB.findOne({ where: { volunteerId: volId } })
+        if(foundPositionConflict) await foundPositionConflict.update({ volunteerId: null })
+
         this.volunteerId = volId
         await foundPosition.update({ volunteerId: volId })
     }
