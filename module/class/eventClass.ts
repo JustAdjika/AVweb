@@ -343,31 +343,30 @@ export class Event {
 
 
         
-        
-        // Поиск названия и id позиции волонтёра
-        
-        const foundPosition = await Associations.POSITIONS_TAB.findOne({
-            where: {
-                volunteerId: this.id
+
+
+        const formattedData = await Promise.all(foundVolsModel.map(async(vol) => {
+            let equip: 'GET' | 'RETURN' | null = null
+
+            const foundPosition = await Associations.POSITIONS_TAB.findOne({
+                where: {
+                    volunteerId: vol.id
+                }
+            })
+
+            let posId = null
+            let posName = null
+
+            if(foundPosition) {
+                const foundPositionModel: Types.Position = await foundPosition.get({plain: true})
+
+                posId = foundPositionModel.id as number
+                posName = `${foundPositionModel.name}-${foundPositionModel.NameNumber}` as string
             }
-        })
 
-        let posId = null
-        let posName = null
-
-        if(foundPosition) {
-            const foundPositionModel: Types.Position = await foundPosition.get({plain: true})
-
-            posId = foundPositionModel.id
-            posName = `${foundPositionModel.name}-${foundPositionModel.NameNumber}`
-        }
-
-        const formattedData = foundVolsModel.map(vol => {
             if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'CRD')) {
-                let equip: 'GET' | 'RETURN' | null = null
-                
                 if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
-                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'                
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'  
                 
                 return {
                     ...vol,
@@ -378,10 +377,8 @@ export class Event {
                     posName
                 }
             } else if(foundEventPermsModel.some(perms => perms.userId === vol.account.id && perms.permission === 'HCRD')) {
-                let equip: 'GET' | 'RETURN' | null = null
-                
                 if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
-                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'          
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'  
                 
                 return {
                     ...vol,
@@ -392,10 +389,8 @@ export class Event {
                     posName
                 }
             } else {
-                let equip: 'GET' | 'RETURN' | null = null
-                
                 if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'GET')) equip = 'GET'
-                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'          
+                else if(foundEquipmentsModel.some(equip => equip.userId === vol.account.id && equip.status === 'RETURN')) equip = 'RETURN'  
 
                 return {
                     ...vol,
@@ -406,15 +401,14 @@ export class Event {
                     posName
                 }
             }
-        })
-
+        }))
 
         return formattedData as (Types.VolunteerData & { 
             role: 'HCRD' | 'CRD' | 'VOL', 
             equip: 'GET' | 'RETURN' | null,
             blacklist: boolean,
-            posId: number,
-            posName: string
+            posId: number | null,
+            posName: string | null
         })[];
     }
 
