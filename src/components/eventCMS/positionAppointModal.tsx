@@ -103,7 +103,7 @@ export const PositionAppointModal = ({ setPositionAppointMenu, setPositionsData,
 
         if(!currentVolunteerClass) return
             
-        currentPosition.setVolunteer(currentVolunteerClass)
+        currentPosition.setVolunteer(currentVolunteerClass, setPositionsData)
             .then(() => {
                 setPositionsData((prev: (Types.PositionData)[]) => 
                     prev.map((item) => 

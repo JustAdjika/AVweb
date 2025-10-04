@@ -125,7 +125,7 @@ export class menuConfig {
                     icon: LocationIcon,
                     color: '#333',
                     name: 'Назначить позицию',
-                    function: (e:any) => this.functions.handleProfile(e) // Не работает
+                    function: (e:any) => this.functions.handleSetPosition(e)
                 },
             ],
             target_classic: [
@@ -151,7 +151,7 @@ export class menuConfig {
                     icon: LocationIcon,
                     color: '#333',
                     name: 'Назначить позицию',
-                    function: (e:any) => this.functions.handleProfile(e) // Не работает
+                    function: (e:any) => this.functions.handleSetPosition(e)
                 },
                 {
                     icon: !this.contextMenuData?.warn ? WarnIcon : BanIcon,
@@ -189,7 +189,7 @@ export class menuConfig {
                     icon: LocationIcon,
                     color: '#333',
                     name: 'Назначить позицию',
-                    function: (e:any) => this.functions.handleProfile(e) // Не работает
+                    function: (e:any) => this.functions.handleSetPosition(e)
                 },
                 {
                     icon: !this.contextMenuData?.warn ? WarnIcon : BanIcon,
@@ -221,7 +221,7 @@ export class menuConfig {
                     icon: LocationIcon,
                     color: '#333',
                     name: 'Назначить позицию',
-                    function: (e:any) => this.functions.handleProfile(e) // Не работает
+                    function: (e:any) => this.functions.handleSetPosition(e)
                 },
             ]
         })

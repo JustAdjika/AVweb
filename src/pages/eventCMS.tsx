@@ -21,6 +21,7 @@ import { PositionAddModal } from '../components/eventCMS/positionAddModal.tsx';
 import { QRModal } from '../components/eventCMS/qrModal.tsx';
 import { PositionLocationUpdateModal } from '../components/eventCMS/positionLocationUpdateModal.tsx';
 import { PositionAppointModal } from '../components/eventCMS/positionAppointModal.tsx';
+import { PositionSetModal } from '../components/eventCMS/positionSetModal.tsx';
 
 import { Volunteers } from '../components/eventCMS/volunteers.tsx';
 import { Positions } from '../components/eventCMS/positions.tsx';
@@ -54,6 +55,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [qrMenu, setQrMenu] = useState<boolean>(false)
     const [exportMenu, setExportMenu] = useState<boolean>(false)
     const [profileMenu, setProfileMenu] = useState<boolean>(false)
+    const [positionSetMenu, setPositionSetMenu] = useState<boolean>(false)
 
     // Модальные окна таблицы позиций
     const [positionAddMenu, setPositionAddMenu] = useState<boolean>(false)
@@ -106,6 +108,8 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
     const [exportFor, setExportFor] = useState(0) // Выбор варианта экспорта (0-для координаторов, 1-для организаторов)
 
     const [qrResult, setQrResult] = useState<string | null>(null) // Текст QR кода
+
+    const [freePos, setFreePos] = useState<boolean>(false)
 
     // Списки таблиц
     const [volunteers, setVolunteers] = useState<(Types.VolunteerData & Types.moreVolsData)[]>([])
@@ -291,7 +295,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         bl: false,
         userId: null,
         e: null,
-        type: 'volunteer'
+        type: JSON.parse(localStorage.getItem("cmsMenuSetup") ?? 'null')?.selectedMenu === 0 ? 'volunteer' : 'position'
     })
 
 
@@ -448,6 +452,25 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
 
+
+
+
+    // Получение списка позиций
+
+    useEffect(() => {
+        if(_volGot || !event || !_dayLoaded) return 
+
+        Position.create(setErrorMessage, event.data.id as number, days[currentDay])
+            .then(container => {
+                if(container) setPositions(container)
+            })
+    }, [event, _dayLoaded])
+
+
+
+
+
+
     // костыль хранящий массив объектов с данными классов позиций
     // Чтобы динамически обрабатывать и ререндерить состояния в таблице, нужно передавать данные на прямую,
     // иначе при изменении данных в классе не вызывается ререндер
@@ -460,6 +483,21 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
         setPositionsData(positions.map(pos => pos.actualData))
     }, [positions])
 
+    useEffect(() => {
+        positions.map((pos, key) => pos.update = positionsData[key])
+    }, [positionsData])
+
+
+
+
+    // Смена уведомления о свободной позиции
+
+    useEffect(() => {
+        setFreePos(positionsData.some(pos => pos.volunteerId === null))
+    }, [positionsData, positions])
+
+
+
 
 
 
@@ -469,6 +507,17 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
 
 
     return (<>
+        <PositionSetModal 
+            setPositionSetMenu={setPositionSetMenu}
+            positionSetMenu={positionSetMenu}
+            volunteers={volunteers}
+            setVolunteers={setVolunteers}
+            setErrorMessage={setErrorMessage}
+            targetUser={targetUser}
+            positions={positions}
+            positionsData={positionsData}
+            setPositionsData={setPositionsData}
+        />
         <PositionAppointModal 
             setPositionAppointMenu={setPositionAppointMenu}
             positionAppointMenu={positionAppointMenu}
@@ -508,6 +557,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             setPositionLocationMenu={setPositionLocationMenu}
             setPositionAppointMenu={setPositionAppointMenu}
             setPositionsData={setPositionsData}
+            setPositionSetMenu={setPositionSetMenu}
         />
         <ProfileModal 
             profileMenu={profileMenu}
@@ -532,7 +582,7 @@ export const EventCMS = ({ setErrorMessage }: Props) => {
             <div className='cms-header-container'>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <h1>База данных волонтёров</h1>
-                    <PersonAlertIcon className='cms-header-alert-icon' />
+                    <PersonAlertIcon className='cms-header-alert-icon' style={{ display: !freePos ? 'none' : 'flex' }} />
                 </div>
                 <span className='cms-header-role' style={{ color: userRole === 'HCRD' ? '#AF1313' : '#2F0774'}}>
                     { userRole === 'HCRD' ? 'Гл. Координатор' : 'Координатор' }

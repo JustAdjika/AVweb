@@ -75,6 +75,32 @@ export class Volunteer {
         }
     }
 
+    async staffRoomChange() {
+        try {
+            const session: string | undefined = Cookies.get("session")
+
+            if(!session) throw errorLogger(this.setErrorMessage, { status: 400, message: 'Сессия отсутствует' })
+
+            const parsedSession: Types.Session = JSON.parse(session)
+
+            const res = await request({method: 'PATCH', route: `/event/volunteer/staffRoom/change/${this.data.id}`, loadData: {
+                sessionId: parsedSession.id,
+                sessionKey: parsedSession.key,
+                eventPerms: {
+                    eventId: this.data.eventId,
+                    day: this.data.day
+                }
+            }})
+
+            if(res.status === 200) this.data.inStaffRoom = !this.data.inStaffRoom
+        
+            return res as Types.Response
+        }catch (err: any) {
+            const res = err.response.data as Types.Response
+            return errorLogger(this.setErrorMessage, { status: res?.status ?? 500, message: res?.message ?? 'Unexpected error' })
+        }
+    }
+
     async warnChange() {
         try {
             const session: string | undefined = Cookies.get("session")

@@ -25,14 +25,15 @@ type Props = {
     setPositionLocationMenu: (state: boolean) => any,
     setSelectedPosition: (value: Position) => any,
     setPositionAppointMenu: (state: boolean) => any,
-    setPositionsData: React.Dispatch<React.SetStateAction<Types.PositionData[]>>
+    setPositionsData: React.Dispatch<React.SetStateAction<Types.PositionData[]>>,
+    setPositionSetMenu: (state: boolean) => any
 }
 
 
 
 
 
-export const ContextMenu = ({ setSelectedPosition, setPositionsData, setPositionAppointMenu, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
+export const ContextMenu = ({ setSelectedPosition, setPositionSetMenu, setPositionsData, setPositionAppointMenu, setPositionLocationMenu, userRole, menuVisible, setMenuVisible, contextMenuData, setProfileMenu, setTargetUser, volunteers, setErrorMessage, setVolunteers }: Props) => {
 
     const menuRef = useRef<HTMLUListElement>(null)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -263,6 +264,22 @@ export const ContextMenu = ({ setSelectedPosition, setPositionsData, setPosition
             
                 setSelectedPosition(currentPosition)
                 setPositionLocationMenu(true)
+            }, 400)
+        },
+
+
+        // Кнопка "Назначить позицию"
+
+        handleSetPosition: (e: any) => {
+            if(!contextMenuData.userId) return
+
+            e.preventDefault()
+            e.stopPropagation()
+            setTimeout(() => {
+                setMenuVisible(false);
+            
+                setPositionSetMenu(true)
+                setTargetUser(contextMenuData.userId as number)
             }, 400)
         },
     }

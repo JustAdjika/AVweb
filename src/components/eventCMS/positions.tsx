@@ -22,7 +22,7 @@ type Props = {
     positionsData: Types.PositionData[]
 }
 
-export const Positions = ({ positionsData, handleContextMenu, setMenuVisible, positions, setPositions, _dayLoaded, event, currentDay, setErrorMessage }: Props) => {
+export const Positions = ({ positionsData, handleContextMenu, setMenuVisible, positions }: Props) => {
 
     const [focusPosition, setFocusPosition] = useState<number | null>(null)
 
@@ -31,16 +31,7 @@ export const Positions = ({ positionsData, handleContextMenu, setMenuVisible, po
     const scrollRef = useRef<HTMLDivElement | null>(null)
     
 
-    // Получение списка волонтёров
 
-    useEffect(() => {
-        if(_volGot || !event || !_dayLoaded) return 
-
-        Position.create(setErrorMessage, event.data.id as number, currentDay)
-            .then(container => {
-                if(container) setPositions(container)
-            })
-    }, [event, _dayLoaded])
 
 
 

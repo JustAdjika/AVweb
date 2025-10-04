@@ -48,7 +48,7 @@ export class Position {
 
     }
 
-    async setVolunteer(volunteerClass: Volunteer) {
+    async setVolunteer(volunteerClass: Volunteer, setPositionsData: React.Dispatch<React.SetStateAction<Types.PositionData[]>>) {
         try {
             if(this._destroyed) return errorLogger(this.setErrorMessage, { status: 410, message: 'Позиция удалена' })
 
@@ -68,6 +68,8 @@ export class Position {
             }})
 
             if(res.status === 200) {
+                setPositionsData(prev => prev.map(pos => pos.volunteerId === volunteerClass.data.id ? { ...pos, volunteer: null, volunteerId: null } : pos))
+
                 this.data.volunteerId = volunteerClass.data.id as number
                 this.data.volunteer = { ...volunteerClass.data, account: { id: volunteerClass.data.account.id, name: volunteerClass.data.account.name } }
             }
@@ -172,4 +174,6 @@ export class Position {
     }
 
     get actualData() { return this.data } 
+
+    set update(update: Types.PositionData) { this.data = update }
 }
